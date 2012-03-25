@@ -40,5 +40,11 @@ int main(int argc, char** args) {
       cout << "(" << q << "," << a << ") -> " << dfa.T[q][a] << endl;
   }
   dfa.minimize();
+  cout << "start: " << dfa.start << endl;
+  cout << "final: " << show(dfa.final) << endl;
+  for (unsigned int q = 0; q < dfa.stateCount; q++) {
+    for (unsigned int a = 0; a < dfa.symbolCount; a++)
+      cout << "(" << q << "," << a << ") -> " << dfa.T[q][a] << endl;
+  }
   return 0;
 }
