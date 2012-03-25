@@ -1,0 +1,23 @@
+#ifndef _REGEX_H_
+#define _REGEX_H_
+
+#include <ostream>
+using std::ostream;
+#include <vector>
+using std::vector;
+#include <functional>
+using std::function;
+
+template<class T>
+ostream& showVector(const vector<T>& v, ostream& os);
+
+template<class T>
+function<ostream&(ostream&)> show(const vector<T>& v);
+
+template<class T>
+ostream& operator<<(ostream&, const function<T>&);
+
+template<>
+ostream& showVector<bool>(const vector<bool>& v, ostream& os);
+
+#endif

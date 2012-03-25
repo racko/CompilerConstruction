@@ -52,7 +52,7 @@ struct NFA {
   unsigned int symbolCount, stateCount, start;
   vector<bool> final;
   vector<vector<vector<bool>>> table;
-  NFA(unsigned int _symbolCount, unsigned int _stateCount, int _eps, unsigned int _start, vector<bool>&& _final) : start(_start), final(std::forward<vector<bool>>(_final)) {};
+  NFA(unsigned int _symbolCount, unsigned int _stateCount, int _eps, unsigned int _start, vector<bool>&& _final) : eps(_eps), symbolCount(_symbolCount), stateCount(_stateCount), start(_start), final(std::forward<vector<bool>>(_final)) {};
   void getClosure(vector<bool>& s) const;
 };
 
