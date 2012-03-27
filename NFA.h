@@ -49,17 +49,22 @@ using std::vector;
 
 
 struct node {
-  unordered_map<char,vector<node*>> ns;
+  bool deleted;
+  unordered_map<unsigned int,vector<unsigned int>> ns;
 };
 
 struct nfaBuilder {
-  node *start, *end;
+  unsigned int start, end;
   vector<node> ns;
+  vector<char> idToSymbol;
+  unordered_map<char, unsigned int> symbolToId;
   nfaBuilder() {
     ns.emplace_back();
-    start = &ns.back();
+    start = 0;
     ns.emplace_back();
-    end = &ns.back();
+    end = 1;
+    idToSymbol.push_back(0);
+    symbolToId[0] = 0;
   }
 };
 

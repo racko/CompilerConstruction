@@ -14,6 +14,7 @@ using std::pair;
 using std::make_pair;
 using std::cout;
 using std::cin;
+using std::cerr;
 using std::endl;
 
 struct setRef {
@@ -33,10 +34,17 @@ struct setRefHash {
   }
 };
 
-DFA::DFA(const NFA& nfa) : symbolCount(nfa.symbolCount) {
+DFA::DFA(const NFA& nfa) : symbolCount(nfa.symbolCount - 1) {
   cout << "DFA constructor" << endl;
   cout << "stateCount = " << nfa.stateCount << endl;
   cout << "symbolCount = " << symbolCount << endl;
+  vector<unsigned int> symbolMap(nfa.symbolCount);
+  unsigned int nonEpsSymbol = 0;
+  for (unsigned int i = 0; i < nfa.symbolCount; i++)
+    if (i != nfa.eps) {
+      symbolMap[i] = nonEpsSymbol;
+      nonEpsSymbol++;
+    }
   unsigned int n = nfa.stateCount;
   unsigned int id = 0;
   vector<unsigned int> stack;
@@ -44,7 +52,8 @@ DFA::DFA(const NFA& nfa) : symbolCount(nfa.symbolCount) {
   unordered_map<setRef,unsigned int,setRefHash> stateToId;
   idToState.emplace_back(n);
   vector<bool>& S = idToState.back();
-  cout << nfa.start << endl;
+  cout << "nfa.start: " << nfa.start << endl;
+  cout << "nfa.final" << show(nfa.final) << endl;
   S[nfa.start] = true;
   cout << "s0: " << show(S) << endl;
   nfa.getClosure(S);
@@ -63,46 +72,48 @@ DFA::DFA(const NFA& nfa) : symbolCount(nfa.symbolCount) {
     if (T.size() < q + 1)
       T.resize(q + 1, vector<unsigned int>(symbolCount));
     for (unsigned int a = 0; a < nfa.symbolCount; a++) {
-      cout << "Constructing delta(" << show(p) << "," << a << ")" << endl;
-      vector<bool> U(nfa.stateCount);
-      for (unsigned int s = 0; s < nfa.stateCount; s++) {
-        if (p[s]) {
-          for (unsigned int i = 0; i < nfa.stateCount; i++)
-            U[i] = U[i] || nfa.table[s][a][i]; // no reference to |= for vector<bool>::reference ...
+      if (a != nfa.eps) {
+        cout << "Constructing delta(" << show(p) << "," << a << ")" << endl;
+        vector<bool> U(nfa.stateCount);
+        for (unsigned int s = 0; s < nfa.stateCount; s++) {
+          if (p[s]) {
+            for (unsigned int i = 0; i < nfa.stateCount; i++)
+              U[i] = U[i] || nfa.table[s][a][i]; // no reference to |= for vector<bool>::reference ...
+          }
         }
-      }
-      cout << "targets: " << show(U) << endl;
-      nfa.getClosure(U);
-      cout << "closure: " << show(U) << endl;
-      cout << "idToState: " << endl;
-      for (auto& i: idToState) {
-        auto it = stateToId.find(i);
-        cout << show(i) << " (";
-        if (it != stateToId.end())
-          cout << show(it->first.s) << ": " << it->second;
-        else
-          cout << "not found";
-        cout << ")" << endl;
-      }
-      cout << "stateToId: " << endl;
-      for (auto& i: stateToId) {
-        vector<bool> localCopy(i.first.s);
-        cout
-          << i.second << ": "
-          << show(localCopy) << endl;
-      }
-      auto it = stateToId.find(U);
-      if (it == stateToId.end()) {
-        idToState.emplace_back(std::move(U));
-        const vector<bool>& UU = idToState.back();
-        stateToId[setRef(UU)] = id;
-        stack.push_back(id);
-        T[q][a] = id;
-        cout << "new state; id = " << id << endl;
-        id++;
-      } else {
-        cout << "seen before; id = " << it->second << endl;
-        T[q][a] = it->second;
+        cout << "targets: " << show(U) << endl;
+        nfa.getClosure(U);
+        cout << "closure: " << show(U) << endl;
+        cout << "idToState: " << endl;
+        for (auto& i: idToState) {
+          auto it = stateToId.find(i);
+          cout << show(i) << " (";
+          if (it != stateToId.end())
+            cout << show(it->first.s) << ": " << it->second;
+          else
+            cout << "not found";
+          cout << ")" << endl;
+        }
+        cout << "stateToId: " << endl;
+        for (auto& i: stateToId) {
+          vector<bool> localCopy(i.first.s);
+          cout
+            << i.second << ": "
+            << show(localCopy) << endl;
+        }
+        auto it = stateToId.find(U);
+        if (it == stateToId.end()) {
+          idToState.emplace_back(std::move(U));
+          const vector<bool>& UU = idToState.back();
+          stateToId[setRef(UU)] = id;
+          stack.push_back(id);
+          T[q][symbolMap[a]] = id;
+          cout << "new state; id = " << id << endl;
+          id++;
+        } else {
+          cout << "seen before; id = " << it->second << endl;
+          T[q][symbolMap[a]] = it->second;
+        }
       }
     }
   }
@@ -127,6 +138,10 @@ void DFA::minimize() {
   for (unsigned int i = 0; i < stateCount; i++)
     if (final[i])
       finalCount++;
+  if (finalCount == 0) {
+    cerr << "Error: final count is zero." << endl;
+    exit(1);
+  }
   unsigned int nonfinalCount = stateCount - finalCount;
 
   cout << "final: " << finalCount << endl;

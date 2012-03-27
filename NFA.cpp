@@ -4,10 +4,11 @@
 using std::cout;
 #include <iomanip>
 using std::endl;
+using std::dec;
 
 
 void NFA::getClosure(vector<bool>& S) const {
-  cout << "getClosure" << endl;
+  cout << "getClosure(" << show(S) << ")" << endl;
   vector<unsigned int> stack;
   for (unsigned int i = 0; i < S.size(); i++)
     if (S[i])
@@ -29,6 +30,24 @@ void NFA::getClosure(vector<bool>& S) const {
   }
 }
 
-NFA::NFA(nfaBuilder&& nfa) : eps(-1), symbolCount(256), stateCount(nfa.ns.size()) {
-  
+NFA::NFA(nfaBuilder&& nfa) : eps(0), symbolCount(nfa.symbolToId.size()), stateCount(nfa.ns.size()), start(nfa.start), final(stateCount), table(stateCount, vector<vector<bool>>(symbolCount, vector<bool>(stateCount, false))) {
+  cout << "constructing NFA from nfaBuilder" << endl;
+  cout << "stateCount: " << stateCount << endl;
+  cout << "start: " << nfa.start << endl;
+  cout << "end: " << nfa.end << endl;
+  cout << "symbolCount: " << symbolCount << endl;
+  cout << "symbols: " << show(nfa.idToSymbol) << endl;
+  final[nfa.end] = true;
+  for (unsigned int p = 0; p < stateCount; p++) {
+    if (!nfa.ns[p].deleted) {
+      for (auto& t : nfa.ns[p].ns) {
+        cout << "d(" << p << "," << nfa.idToSymbol[t.first] << ") = " << show(t.second) << endl;
+        for (auto& q : t.second) {
+          table[p][t.first][q] = true;
+        }
+      }
+    } else {
+      cout << "not considering state " << p << ": deleted" << endl;
+    }
+  }
 }
