@@ -28,3 +28,7 @@ void NFA::getClosure(vector<bool>& S) const {
       }
   }
 }
+
+NFA::NFA(nfaBuilder&& nfa) : eps(-1), symbolCount(256), stateCount(nfa.ns.size()) {
+  
+}

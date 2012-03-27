@@ -1,8 +1,8 @@
 #ifndef _NFA_H_
 #define _NFA_H_
 
-#include <unordered_set>
-using std::unordered_set;
+#include <unordered_map>
+using std::unordered_map;
 #include <vector>
 using std::vector;
 
@@ -47,12 +47,29 @@ using std::vector;
 //  virtual bool isSubsetOf(const bitset& s) const;
 //};
 
+
+struct node {
+  unordered_map<char,vector<node*>> ns;
+};
+
+struct nfaBuilder {
+  node *start, *end;
+  vector<node> ns;
+  nfaBuilder() {
+    ns.emplace_back();
+    start = &ns.back();
+    ns.emplace_back();
+    end = &ns.back();
+  }
+};
+
 struct NFA {
   int eps;
   unsigned int symbolCount, stateCount, start;
   vector<bool> final;
   vector<vector<vector<bool>>> table;
   NFA(unsigned int _symbolCount, unsigned int _stateCount, int _eps, unsigned int _start, vector<bool>&& _final) : eps(_eps), symbolCount(_symbolCount), stateCount(_stateCount), start(_start), final(std::forward<vector<bool>>(_final)) {};
+  NFA(nfaBuilder&& nfa);
   void getClosure(vector<bool>& s) const;
 };
 

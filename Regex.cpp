@@ -2,8 +2,18 @@
 using std::bind;
 #include <tuple>
 using std::pair;
-
-
+#include <istream>
+using std::istream;
+#include <iostream>
+#include <iomanip>
+using std::cerr;
+using std::endl;
+#include <unordered_map>
+using std::unordered_map;
+#include <cstdlib>
+using std::exit;
+#include "NFA.h"
+using std::move;
 
 template <class T>
 ostream& showVector(const vector<T>& v, ostream& s) {
@@ -81,3 +91,187 @@ ostream& showVector(const vector<pair<unsigned int,unsigned int>>& v, ostream& s
 template function<ostream&(ostream&)> show<unsigned int>(const vector<unsigned int>& v);
 template function<ostream&(ostream&)> show<bool>(const vector<bool>& v);
 template function<ostream&(ostream&)> show<pair<unsigned int,unsigned int>>(const vector<pair<unsigned int,unsigned int>>& v);
+
+enum struct NT : unsigned int {
+  E = 0,
+  ER,
+  T,
+  TR,
+  F,
+  FR,
+  G
+};
+
+void match(istream& in, char c) {
+  char d = in.get();
+  if (d != c) {
+    cerr << "expected '" << c << "'" << ", got '" << d << "'" << endl;
+    exit (1);
+  }
+}
+
+pair<node*,node*> lexE(istream& in, nfaBuilder& nfa);
+
+pair<node*,node*> lexG(istream& in, nfaBuilder& nfa) {
+  switch (char c = in.peek()) {
+    case '(':
+      {
+        match(in, '(');
+        pair<node*,node*> nfa1 = lexE(in, nfa);
+        match(in, ')');
+        return nfa1;
+      }
+    case '|':
+    case EOF:
+    case ')':
+    case '*':
+      cerr << "Error: '" << c << "'" << endl;
+      exit(1);
+    default:
+      {
+        match(in, c);
+        pair<node*,node*> out;
+
+        nfa.ns.emplace_back();
+        out.first = &nfa.ns.back();
+
+        nfa.ns.emplace_back();
+        out.second = &nfa.ns.back();
+
+        out.first->ns[c].push_back(out.second);
+        return out;
+      }
+  }
+}
+
+pair<node*,node*> lexFR(istream& in, nfaBuilder& nfa, pair<node*,node*> nfa1) {
+  switch (char c = in.peek()) {
+    case '*':
+      {
+        match(in, '*');
+        pair<node*,node*> out;
+
+        nfa.ns.emplace_back();
+        out.first = &nfa.ns.back();
+
+        nfa.ns.emplace_back();
+        out.second = &nfa.ns.back();
+
+        out.first->ns[-1].push_back(nfa1.first);
+        out.first->ns[-1].push_back(out.second);
+        nfa1.second->ns[-1].push_back(nfa1.first);
+        nfa1.second->ns[-1].push_back(out.second);
+        return out;
+      }
+    default:
+      return nfa1;
+  }
+}
+
+pair<node*,node*> lexF(istream& in, nfaBuilder& nfa) {
+  switch (char c = in.peek()) {
+    case '|':
+    case EOF:
+    case ')':
+    case '*':
+      cerr << "Error: '" << c << "'" << endl;
+      exit(1);
+    default:
+      {
+        pair<node*,node*> nfa1 = lexG(in, nfa);
+        pair<node*,node*> nfa2 = lexFR(in, nfa, nfa1);
+        return nfa2;
+      }
+  }
+}
+
+pair<node*,node*> lexTR(istream& in, nfaBuilder& nfa, pair<node*,node*> nfa1) {
+  switch (char c = in.peek()) {
+    case '|':
+    case EOF:
+    case ')':
+      return nfa1;
+    case '*':
+      cerr << "Error: '" << c << "'" << endl;
+      exit(1);
+    default:
+      {
+        pair<node*,node*> nfa2 = lexF(in, nfa);
+        *nfa1.second = *nfa2.first;
+        pair<node*,node*> nfa3 = lexTR(in, nfa, nfa1);
+        return nfa3;
+      }
+  }
+}
+
+pair<node*,node*> lexT(istream& in, nfaBuilder& nfa) {
+  switch (char c = in.peek()) {
+    case '|':
+    case EOF:
+    case ')':
+    case '*':
+      cerr << "Error: '" << c << "'" << endl;
+      exit(1);
+    default:
+      {
+        pair<node*,node*> nfa1 = lexF(in, nfa);
+        pair<node*,node*> nfa2 = lexTR(in, nfa, nfa1);
+        return nfa2;
+      }
+  }
+}
+
+pair<node*,node*> lexER(istream& in, nfaBuilder& nfa, pair<node*,node*> nfa1) {
+  switch (char c = in.peek()) {
+    case '|':
+      {
+        match(in, '|');
+        pair<node*,node*> nfa2 = lexT(in, nfa);
+
+        pair<node*,node*> nfa3;
+
+        nfa.ns.emplace_back();
+        nfa3.first = &nfa.ns.back();
+
+        nfa.ns.emplace_back();
+        nfa3.second = &nfa.ns.back();
+        
+        nfa3.first->ns[-1].push_back(nfa1.first);
+        nfa3.first->ns[-1].push_back(nfa2.first);
+        nfa1.second->ns[-1].push_back(nfa3.second);
+        nfa2.second->ns[-1].push_back(nfa3.second);
+        
+        pair<node*,node*> nfa4 = lexER(in, nfa, nfa3);
+        return nfa4;
+      }
+    case EOF:
+    case ')':
+      return nfa1;
+    default:
+      cerr << "Error: '" << c << "'" << endl;
+      exit(1);
+  }
+}
+
+pair<node*,node*> lexE(istream& in, nfaBuilder& nfa) {
+  switch (char c = in.peek()) {
+    case '|':
+    case EOF:
+    case ')':
+    case '*':
+      cerr << "Error: '" << c << "'" << endl;
+      exit(1);
+    default:
+      {
+        pair<node*,node*> nfa1 = lexT(in, nfa);
+        pair<node*,node*> nfa2 = lexER(in, nfa, nfa1);
+        return nfa2;
+      }
+  }
+}
+
+NFA lexRegex(istream& in) {
+  nfaBuilder nfa;
+  lexE(in, nfa);
+  return NFA(move(nfa));
+}

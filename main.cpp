@@ -14,7 +14,7 @@ enum struct Symbol : unsigned int {
 };
 
 int main(int argc, char** args) {
-  const unsigned int stateCount = 11, symbolCount = (unsigned int)(Symbol::last) + 1, a = (unsigned int)(Symbol::a), b = (unsigned int)(Symbol::b), eps = (unsigned int)(Symbol::eps);
+  const unsigned int stateCount = 11, symbolCount = (unsigned int)(Symbol::last) + 1, a = (unsigned int)(Symbol::a), b = (unsigned int)(Symbol::b), eps = (unsigned int)(Symbol::eps); // less-than-ideal solution
   vector<bool> final(stateCount, false);
   final[10] = true;
   NFA nfa(symbolCount, stateCount, eps, 0, std::move(final));
