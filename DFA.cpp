@@ -34,7 +34,7 @@ struct setRefHash {
   }
 };
 
-DFA::DFA(const NFA& nfa) : symbolCount(nfa.symbolCount - 1) {
+DFA::DFA(const NFA& nfa) : symbolCount(nfa.symbolCount - 1), symbolToId(128,symbolCount) {
   cout << "DFA constructor" << endl;
   cout << "stateCount = " << nfa.stateCount << endl;
   cout << "symbolCount = " << symbolCount << endl;
@@ -43,8 +43,10 @@ DFA::DFA(const NFA& nfa) : symbolCount(nfa.symbolCount - 1) {
   for (unsigned int i = 0; i < nfa.symbolCount; i++)
     if (i != nfa.eps) {
       symbolMap[i] = nonEpsSymbol;
+      symbolToId[nfa.symbols[i]] = nonEpsSymbol;
       nonEpsSymbol++;
     }
+
   unsigned int n = nfa.stateCount;
   unsigned int id = 0;
   vector<unsigned int> stack;

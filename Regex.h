@@ -2,6 +2,7 @@
 #define _REGEX_H_
 
 #include "NFA.h"
+#include "DFA.h"
 #include <ostream>
 using std::ostream;
 #include <vector>

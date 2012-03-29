@@ -9,6 +9,7 @@ struct DFA {
   unsigned int stateCount, symbolCount, start;
   vector<bool> final;
   vector<vector<unsigned int>> T;
+  vector<unsigned int> symbolToId;
   DFA(const NFA& nfa);
   void minimize();
 };

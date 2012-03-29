@@ -73,7 +73,11 @@ struct NFA {
   unsigned int symbolCount, stateCount, start;
   vector<bool> final;
   vector<vector<vector<bool>>> table;
-  NFA(unsigned int _symbolCount, unsigned int _stateCount, int _eps, unsigned int _start, vector<bool>&& _final) : eps(_eps), symbolCount(_symbolCount), stateCount(_stateCount), start(_start), final(std::forward<vector<bool>>(_final)) {};
+  vector<char> symbols;
+  NFA(unsigned int _symbolCount, unsigned int _stateCount, int _eps, unsigned int _start, vector<bool>&& _final) : eps(_eps), symbolCount(_symbolCount), stateCount(_stateCount), start(_start), final(std::forward<vector<bool>>(_final)), symbols(symbolCount) {
+    for (unsigned int i = 0; i < symbolCount; i++)
+      symbols[i] = i;
+  };
   NFA(nfaBuilder&& nfa);
   void getClosure(vector<bool>& s) const;
 };

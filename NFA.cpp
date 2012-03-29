@@ -30,13 +30,14 @@ void NFA::getClosure(vector<bool>& S) const {
   }
 }
 
-NFA::NFA(nfaBuilder&& nfa) : eps(0), symbolCount(nfa.symbolToId.size()), stateCount(nfa.ns.size()), start(nfa.start), final(stateCount), table(stateCount, vector<vector<bool>>(symbolCount, vector<bool>(stateCount, false))) {
+NFA::NFA(nfaBuilder&& nfa) : eps(0), symbolCount(nfa.symbolToId.size()), stateCount(nfa.ns.size()), start(nfa.start), final(stateCount), table(stateCount, vector<vector<bool>>(symbolCount, vector<bool>(stateCount, false))), symbols(nfa.idToSymbol) {
   cout << "constructing NFA from nfaBuilder" << endl;
   cout << "stateCount: " << stateCount << endl;
   cout << "start: " << nfa.start << endl;
   cout << "end: " << nfa.end << endl;
   cout << "symbolCount: " << symbolCount << endl;
   cout << "symbols: " << show(nfa.idToSymbol) << endl;
+  
   final[nfa.end] = true;
   for (unsigned int p = 0; p < stateCount; p++) {
     if (!nfa.ns[p].deleted) {

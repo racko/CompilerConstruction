@@ -4,6 +4,8 @@
 #include <iostream>
 #include <iomanip>
 using std::cout;
+using std::cin;
+using std::cerr;
 using std::endl;
 #include <sstream>
 using std::stringstream;
@@ -49,9 +51,19 @@ int main(int argc, char** args) {
 //      cout << "(" << q << "," << a << ") -> " << dfa.T[q][a] << endl;
 //  }
   
+  if (argc > 2) {
+    cerr << "too many arguments:" << endl;
+    for (unsigned int i = 1; i < argc; i++)
+      cerr << "'" << args[i] << "'" << endl;
+    return 1;
+  }
+
   stringstream in;
-  in << "(a|b)*abb";
-  NFA nfa1 = lexRegex(in);
+  if (argc == 2) {
+    in << args[1];
+    cin.rdbuf(in.rdbuf());
+  }
+  NFA nfa1 = lexRegex(cin);
   DFA dfa1(nfa1);
   cout << "start: " << dfa1.start << endl;
   cout << "final: " << show(dfa1.final) << endl;
