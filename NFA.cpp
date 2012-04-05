@@ -7,7 +7,7 @@ using std::endl;
 using std::dec;
 
 
-void NFA::getClosure(vector<bool>& S) const {
+void NFA::getClosure(BitSet& S) const {
   cout << "getClosure(" << show(S) << ")" << endl;
   vector<unsigned int> stack;
   for (unsigned int i = 0; i < S.size(); i++)
@@ -19,7 +19,7 @@ void NFA::getClosure(vector<bool>& S) const {
     unsigned int q = stack.back();
     stack.pop_back();
     cout << "considering state " << q << endl;
-    const vector<bool>& T = table[q][eps];
+    const BitSet& T = table[q][eps];
     cout << "delta(" << q << ",eps) = " << show(T) << endl;
     for (unsigned int i = 0; i < T.size(); i++)
       if (T[i] && !S[i]) {
@@ -30,7 +30,7 @@ void NFA::getClosure(vector<bool>& S) const {
   }
 }
 
-NFA::NFA(nfaBuilder&& nfa) : eps(0), symbolCount(nfa.symbolToId.size()), stateCount(nfa.ns.size()), start(nfa.start), final(stateCount), table(stateCount, vector<vector<bool>>(symbolCount, vector<bool>(stateCount, false))), symbols(nfa.idToSymbol) {
+NFA::NFA(nfaBuilder&& nfa) : eps(0), symbolCount(nfa.symbolToId.size()), stateCount(nfa.ns.size()), start(nfa.start), final(stateCount), table(stateCount, vector<BitSet>(symbolCount, BitSet(stateCount, false))), symbols(nfa.idToSymbol) {
   cout << "constructing NFA from nfaBuilder" << endl;
   cout << "stateCount: " << stateCount << endl;
   cout << "start: " << nfa.start << endl;

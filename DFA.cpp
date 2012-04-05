@@ -22,18 +22,18 @@ using std::exception;
 using std::sort;
 
 struct setRef {
-  vector<bool> s;
+  BitSet s;
   
   bool operator==(const setRef& t) const {
     return t.s == s;
   }
 
-  setRef(const vector<bool>& _s) : s(_s) {};
+  setRef(const BitSet& _s) : s(_s) {};
 };
 
 struct setRefHash {
   std::size_t operator()(setRef s) const {
-    hash<vector<bool>> h;
+    hash<BitSet> h;
     return h(s.s);
   }
 };
@@ -54,10 +54,10 @@ DFA::DFA(const NFA& nfa) : symbolCount(nfa.symbolCount - 1), symbolToId(128,symb
   unsigned int n = nfa.stateCount;
   unsigned int id = 0;
   vector<unsigned int> stack;
-  vector<vector<bool>> idToState;
+  vector<BitSet> idToState;
   unordered_map<setRef,unsigned int,setRefHash> stateToId;
   idToState.emplace_back(n);
-  vector<bool>& S = idToState.back();
+  BitSet& S = idToState.back();
   cout << "nfa.start: " << nfa.start << endl;
   cout << "nfa.final" << show(nfa.final) << endl;
   S[nfa.start] = true;
@@ -80,11 +80,11 @@ DFA::DFA(const NFA& nfa) : symbolCount(nfa.symbolCount - 1), symbolToId(128,symb
     for (unsigned int a = 0; a < nfa.symbolCount; a++) {
       if (a != nfa.eps) {
         cout << "Constructing delta(" << show(p) << "," << a << ")" << endl;
-        vector<bool> U(nfa.stateCount);
+        BitSet U(nfa.stateCount);
         for (unsigned int s = 0; s < nfa.stateCount; s++) {
           if (p[s]) {
             for (unsigned int i = 0; i < nfa.stateCount; i++)
-              U[i] = U[i] || nfa.table[s][a][i]; // no reference to |= for vector<bool>::reference ...
+              U[i] = U[i] || nfa.table[s][a][i]; // no reference to |= for BitSet::reference ...
           }
         }
         cout << "targets: " << show(U) << endl;
@@ -102,7 +102,7 @@ DFA::DFA(const NFA& nfa) : symbolCount(nfa.symbolCount - 1), symbolToId(128,symb
         }
         cout << "stateToId: " << endl;
         for (auto& i: stateToId) {
-          vector<bool> localCopy(i.first.s);
+          BitSet localCopy(i.first.s);
           cout
             << i.second << ": "
             << show(localCopy) << endl;
@@ -110,7 +110,7 @@ DFA::DFA(const NFA& nfa) : symbolCount(nfa.symbolCount - 1), symbolToId(128,symb
         auto it = stateToId.find(U);
         if (it == stateToId.end()) {
           idToState.emplace_back(std::move(U));
-          const vector<bool>& UU = idToState.back();
+          const BitSet& UU = idToState.back();
           stateToId[setRef(UU)] = id;
           stack.push_back(id);
           T[q][symbolMap[a]] = id;
@@ -128,7 +128,7 @@ DFA::DFA(const NFA& nfa) : symbolCount(nfa.symbolCount - 1), symbolToId(128,symb
   cout << "checking for terminal states" << endl;
   final.resize(stateCount, 0);
   for (unsigned int q = 0; q < stateCount; q++) {
-    const vector<bool>& U = idToState[q];
+    const BitSet& U = idToState[q];
     cout << "checking " << q << ": " << show(U) << endl;
     for (unsigned int s = 0; s < nfa.stateCount; s++)
       if (U[s] && nfa.final[s] != 0 && final[q] == 0) {
@@ -182,7 +182,7 @@ void DFA::minimize() {
   cout << "p: " << show(p) << endl;
   cout << "pI: " << show(pI) << endl;
   
-  vector<vector<vector<bool>>> tI(symbolCount, vector<vector<bool>>(stateCount, vector<bool>(stateCount, false)));
+  vector<vector<BitSet>> tI(symbolCount, vector<BitSet>(stateCount, BitSet(stateCount, false)));
   
   for (unsigned int i = 0; i < stateCount; i++)
     for (unsigned int a = 0; a < symbolCount; a++)
@@ -204,7 +204,7 @@ void DFA::minimize() {
     cout << "splitter: " << splitter << "(" << t1.first << "-" << t1.second << ")" << endl;
     for (unsigned int a = 0; a < symbolCount; a++) {
       cout << "considering symbol " << a << endl;
-      vector<bool> tmp(stateCount, false);
+      BitSet tmp(stateCount, false);
       for (unsigned int q = t1.first; q <= t1.second; q++) {
         cout << "collecting tI[" << a << "][" << p[q] << "]: " << show(tI[a][p[q]]) << endl;
         for (unsigned int r = 0; r < stateCount; r++) {

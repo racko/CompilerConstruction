@@ -60,6 +60,25 @@ ostream& showVector<bool>(const vector<bool>& v, ostream& s) {
   return s;
 }
 
+ostream& operator<<(ostream& s, const BitSet& v) {
+  unsigned int i = 0;
+
+  while (i < v.size() && !v[i])
+    i++;
+
+  if (i == v.size()) {
+    s << "{}";
+    return s;
+  }
+  s << "{ " << i;
+  for (i++; i < v.size(); i++)
+    if (v[i])
+      s << ", " << i;
+
+  s << " }";
+  return s;
+}
+
 template <>
 ostream& showVector(const vector<pair<unsigned int,unsigned int>>& v, ostream& s) {
   if (v.empty()) {
@@ -80,6 +99,7 @@ ostream& showVector(const vector<pair<unsigned int,unsigned int>>& v, ostream& s
 template function<ostream&(ostream&)> show<unsigned int>(const vector<unsigned int>& v);
 template function<ostream&(ostream&)> show<bool>(const vector<bool>& v);
 template function<ostream&(ostream&)> show<char>(const vector<char>& v);
+template function<ostream&(ostream&)> show<unsigned int, unsigned int>(const pair<unsigned int, unsigned int>& p);
 template function<ostream&(ostream&)> show<pair<unsigned int,unsigned int>>(const vector<pair<unsigned int,unsigned int>>& v);
 
 /*
