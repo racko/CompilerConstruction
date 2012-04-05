@@ -12,6 +12,7 @@ using std::unordered_map;
 #include <cstdlib>
 using std::exit;
 using std::move;
+using std::exception;
 
 template <class T>
 ostream& showVector(const vector<T>& v, ostream& s) {
@@ -111,14 +112,14 @@ pair<unsigned int,unsigned int> lexG(istream& in, nfaBuilder& nfa) {
         match(in, '(');
         pair<unsigned int,unsigned int> nfa1 = lexE(in, nfa);
         match(in, ')');
-        cout << "out: " << show(nfa1) << endl;
+        cout << "lexG out: " << show(nfa1) << endl;
         return nfa1;
       }
     case '|':
     case EOF:
     case ')':
     case '*':
-      cerr << "Error: '" << c << "'" << endl;
+      cerr << "lexG Error: '" << c << "'" << endl;
       exit(1);
     default:
       {
@@ -141,7 +142,7 @@ pair<unsigned int,unsigned int> lexG(istream& in, nfaBuilder& nfa) {
         } else
           id = it->second;
         nfa.ns[out.first].ns[id].push_back(out.second);
-        cout << "out: " << show(out) << endl;
+        cout << "lexG out: " << show(out) << endl;
         return out;
       }
   }
@@ -149,29 +150,17 @@ pair<unsigned int,unsigned int> lexG(istream& in, nfaBuilder& nfa) {
 
 pair<unsigned int,unsigned int> lexFR(istream& in, nfaBuilder& nfa, pair<unsigned int,unsigned int> nfa1) {
   char c = in.peek();
-  cout << "lexFR (peek: '" << c << "')" << endl;
-  cout << "in: " << show(nfa1) << endl;
+  cout << "lexFR(" << show(nfa1) << ") (peek: '" << c << "')" << endl;
   switch (c) {
     case '*':
       {
         match(in, '*');
-        pair<unsigned int,unsigned int> out;
-
-        out.first = nfa.ns.size();
-        nfa.ns.emplace_back();
-
-        out.second = nfa.ns.size();
-        nfa.ns.emplace_back();
-
-        nfa.ns[out.first].ns[0].push_back(nfa1.first);
-        nfa.ns[out.first].ns[0].push_back(out.second);
-        nfa.ns[nfa1.second].ns[0].push_back(nfa1.first);
-        nfa.ns[nfa1.second].ns[0].push_back(out.second);
-        cout << "out: " << show(out) << endl;
+        auto out = nfa.closure(nfa1);
+        cout << "lexFR out: " << show(out) << endl;
         return out;
       }
     default:
-      cout << "out: " << show(nfa1) << endl;
+      cout << "lexFR out: " << show(nfa1) << endl;
       return nfa1;
   }
 }
@@ -184,13 +173,13 @@ pair<unsigned int,unsigned int> lexF(istream& in, nfaBuilder& nfa) {
     case EOF:
     case ')':
     case '*':
-      cerr << "Error: '" << c << "'" << endl;
+      cerr << "lexF Error: '" << c << "'" << endl;
       exit(1);
     default:
       {
         pair<unsigned int,unsigned int> nfa1 = lexG(in, nfa);
         pair<unsigned int,unsigned int> nfa2 = lexFR(in, nfa, nfa1);
-        cout << "out: " << show(nfa2) << endl;
+        cout << "lexF out: " << show(nfa2) << endl;
         return nfa2;
       }
   }
@@ -198,26 +187,23 @@ pair<unsigned int,unsigned int> lexF(istream& in, nfaBuilder& nfa) {
 
 pair<unsigned int,unsigned int> lexTR(istream& in, nfaBuilder& nfa, pair<unsigned int,unsigned int> nfa1) {
   char c = in.peek();
-  cout << "lexTR (peek: '" << c << "')" << endl;
-  cout << "in: " << show(nfa1) << endl;
+  cout << "lexTR(" << show(nfa1) << ") (peek: '" << c << "')" << endl;
   switch (c) {
     case '|':
     case EOF:
     case ')':
-      cout << "out: " << show(nfa1) << endl;
+      cout << "lexTR out: " << show(nfa1) << endl;
       return nfa1;
     case '*':
-      cerr << "Error: '" << c << "'" << endl;
+      cerr << "lexTR Error: '" << c << "'" << endl;
       exit(1);
     default:
       {
         pair<unsigned int,unsigned int> nfa2 = lexF(in, nfa);
-        nfa.ns[nfa1.second] = nfa.ns[nfa2.first]; //TODO: Dangling node
-        nfa.ns[nfa2.first].deleted = true;
-        nfa1.second = nfa2.second;
-        pair<unsigned int,unsigned int> nfa3 = lexTR(in, nfa, nfa1);
-        cout << "out: " << show(nfa3) << endl;
-        return nfa3;
+        auto nfa3 = nfa.cat(nfa1, nfa2);
+        pair<unsigned int,unsigned int> nfa4 = lexTR(in, nfa, nfa3);
+        cout << "lexTR out: " << show(nfa4) << endl;
+        return nfa4;
       }
   }
 }
@@ -230,13 +216,13 @@ pair<unsigned int,unsigned int> lexT(istream& in, nfaBuilder& nfa) {
     case EOF:
     case ')':
     case '*':
-      cerr << "Error: '" << c << "'" << endl;
+      cerr << "lexT Error: '" << c << "'" << endl;
       exit(1);
     default:
       {
         pair<unsigned int,unsigned int> nfa1 = lexF(in, nfa);
         pair<unsigned int,unsigned int> nfa2 = lexTR(in, nfa, nfa1);
-        cout << "out: " << show(nfa2) << endl;
+        cout << "lexT out: " << show(nfa2) << endl;
         return nfa2;
       }
   }
@@ -244,37 +230,25 @@ pair<unsigned int,unsigned int> lexT(istream& in, nfaBuilder& nfa) {
 
 pair<unsigned int,unsigned int> lexER(istream& in, nfaBuilder& nfa, pair<unsigned int,unsigned int> nfa1) {
   char c = in.peek();
-  cout << "lexER (peek: '" << c << "')" << endl;
-  cout << "in: " << show(nfa1) << endl;
+  cout << "lexER(" << show(nfa1) << ") (peek: '" << c << "')" << endl;
   switch (c) {
     case '|':
       {
         match(in, '|');
         pair<unsigned int,unsigned int> nfa2 = lexT(in, nfa);
-
-        pair<unsigned int,unsigned int> nfa3;
-
-        nfa3.first = nfa.ns.size();
-        nfa.ns.emplace_back();
-
-        nfa3.second = nfa.ns.size();
-        nfa.ns.emplace_back();
         
-        nfa.ns[nfa3.first].ns[0].push_back(nfa1.first);
-        nfa.ns[nfa3.first].ns[0].push_back(nfa2.first);
-        nfa.ns[nfa1.second].ns[0].push_back(nfa3.second);
-        nfa.ns[nfa2.second].ns[0].push_back(nfa3.second);
+        auto nfa3 = nfa.alt(nfa1, nfa2);
         
         pair<unsigned int,unsigned int> nfa4 = lexER(in, nfa, nfa3);
-        cout << "out: " << show(nfa4) << endl;
+        cout << "lexER out: " << show(nfa4) << endl;
         return nfa4;
       }
     case EOF:
     case ')':
-      cout << "out: " << show(nfa1) << endl;
+      cout << "lexER out: " << show(nfa1) << endl;
       return nfa1;
     default:
-      cerr << "Error: '" << c << "'" << endl;
+      cerr << "lexER Error: '" << c << "'" << endl;
       exit(1);
   }
 }
@@ -287,25 +261,52 @@ pair<unsigned int,unsigned int> lexE(istream& in, nfaBuilder& nfa) {
     case EOF:
     case ')':
     case '*':
-      cerr << "Error: '" << c << "'" << endl;
+      cerr << "lexE Error: '" << c << "'" << endl;
       exit(1);
     default:
       {
         pair<unsigned int,unsigned int> nfa1 = lexT(in, nfa);
         pair<unsigned int,unsigned int> nfa2 = lexER(in, nfa, nfa1);
-        cout << "out: " << show(nfa2) << endl;
+        cout << "lexE out: " << show(nfa2) << endl;
         return nfa2;
       }
   }
 }
 
-NFA lexRegex(istream& in) {
+nfaBuilder lexRegex(istream& in) {
   cout << "entered lexRegex" << endl;
   nfaBuilder nfa;
   pair<unsigned int,unsigned int> nfa1 = lexE(in, nfa);
-  nfa.ns[nfa.start].ns[0].push_back(nfa1.first);
-  nfa.ns[nfa1.second].ns[0].push_back(nfa.end);
+  nfa.ns[nfa.p.first].ns[0].push_back(nfa1.first);
+  nfa.ns[nfa1.second].ns[0].push_back(nfa.p.second);
   cout << "done with lexRegex" << endl;
-  cout << "out: (" << nfa.start << "," << nfa.end << ")" << endl;
-  return NFA(move(nfa));
+  cout << "out: (" << nfa.p.first << "," << nfa.p.second << ")" << endl;
+  return move(nfa);
 }
+/*
+template<class T>
+T getToken(istream& in, DFA& dfa, function<T(const char*,unsigned int,unsigned int)>& f) {
+  auto s = dfa.start;
+  auto c = in.get();
+  int lastFinal = dfa.final[s] ? s : -1;
+  auto startPos = in.tellg();
+  auto lastPos = startPos;
+  while (c != EOF) {
+    s = dfa.T[s][dfa.symbolToId[c]];
+    c = in.get();
+    
+    if (dfa.final[s]) {
+      lastFinal = s;
+      lastPos = in.tellg();
+    }
+  }
+  
+  if (lastPos != startPos) {
+    in.seekg(startPos);
+    //
+  } else {
+    cerr << "Lexer failure." << endl;
+    throw exception();
+  }
+}
+*/

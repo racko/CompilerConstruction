@@ -11,6 +11,8 @@ using std::vector;
 using std::function;
 #include <istream>
 using std::istream;
+#include <fstream>
+using std::filebuf;
 
 template<class T>
 ostream& showVector(const vector<T>& v, ostream& os);
@@ -23,5 +25,15 @@ ostream& operator<<(ostream&, const function<ostream&(ostream&)>&);
 template<>
 ostream& showVector<bool>(const vector<bool>& v, ostream& os);
 
-NFA lexRegex(istream& in);
+nfaBuilder lexRegex(istream& in);
+
+template<class T>
+struct Lexer {
+  istream& in;
+  virtual T action(const char*, unsigned int, unsigned int) = 0;
+
+  Lexer(istream& _in) : in(_in) {};
+  T getToken() final { return T(); };
+
+};
 #endif

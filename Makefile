@@ -1,9 +1,25 @@
-x.exe: main.o DFA.o NFA.o Regex.o
+OBJS = main.o DFA.o NFA.o Regex.o
+TARGET = x.exe
+
+SRCS = $(OBJS:%.o=%.cpp)
+DDS = $(OBJS:%.o=%.dd)
+
+CPPFLAGS = -g -x c++ -std=gnu++11 -Wall
+
+$(TARGET): $(OBJS)
 	g++ -g $^ -o $@
 
 %.o: %.cpp
-	g++ -g -x c++ -std=gnu++0x -c $<
+	g++ $(CPPFLAGS) -c $<
 
 .PHONY: clean
 clean:
-	-rm *.o x.exe
+	rm -f $(OBJS) $(TARGET)
+
+%.dd: %.cpp
+	rm -f $@ && \
+	g++ -MM $(CPPFLAGS) $< > $@.$$$$ && \
+	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@ && \
+	rm -f $@.$$$$
+
+include $(DDS)

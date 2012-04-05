@@ -1,2 +1,2 @@
 -x c++
--std=gnu++0x
+-std=gnu++11

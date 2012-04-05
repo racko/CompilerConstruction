@@ -5,6 +5,8 @@
 using std::unordered_map;
 #include <vector>
 using std::vector;
+#include <tuple>
+using std::pair;
 
 
 //template <class T>
@@ -54,27 +56,59 @@ struct node {
 };
 
 struct nfaBuilder {
-  unsigned int start, end;
+  pair<unsigned int,unsigned int> p;
   vector<node> ns;
   vector<char> idToSymbol;
   unordered_map<char, unsigned int> symbolToId;
   nfaBuilder() {
-    ns.emplace_back();
-    start = 0;
-    ns.emplace_back();
-    end = 1;
+    p = getPair();
     idToSymbol.push_back(0);
     symbolToId[0] = 0;
+  }
+
+  pair<unsigned int,unsigned int> getPair() {
+    pair<unsigned int,unsigned int> out;
+    out.first = ns.size();
+    ns.emplace_back();
+    out.second = ns.size();
+    ns.emplace_back();
+    return out;
+  }
+
+  pair<unsigned int,unsigned int> alt(pair<unsigned int,unsigned int> nfa1, pair<unsigned int,unsigned int> nfa2) {
+    auto nfa3 = getPair();
+
+    ns[nfa3.first].ns[0].push_back(nfa1.first);
+    ns[nfa3.first].ns[0].push_back(nfa2.first);
+    ns[nfa1.second].ns[0].push_back(nfa3.second);
+    ns[nfa2.second].ns[0].push_back(nfa3.second);
+    return nfa3;
+  }
+
+  pair<unsigned int,unsigned int> closure(pair<unsigned int,unsigned int> nfa1) {
+    auto out = getPair();
+    ns[out.first].ns[0].push_back(nfa1.first);
+    ns[out.first].ns[0].push_back(out.second);
+    ns[nfa1.second].ns[0].push_back(nfa1.first);
+    ns[nfa1.second].ns[0].push_back(out.second);
+    return out;
+  }
+
+  pair<unsigned int,unsigned int> cat(pair<unsigned int,unsigned int> nfa1, pair<unsigned int,unsigned int> nfa2) {
+    ns[nfa1.second] = ns[nfa2.first];
+    ns[nfa2.first].deleted = true;
+    nfa1.second = nfa2.second;
+    return nfa1;
   }
 };
 
 struct NFA {
   int eps;
   unsigned int symbolCount, stateCount, start;
-  vector<bool> final;
+  vector<unsigned int> final;
   vector<vector<vector<bool>>> table;
   vector<char> symbols;
-  NFA(unsigned int _symbolCount, unsigned int _stateCount, int _eps, unsigned int _start, vector<bool>&& _final) : eps(_eps), symbolCount(_symbolCount), stateCount(_stateCount), start(_start), final(std::forward<vector<bool>>(_final)), symbols(symbolCount) {
+  NFA(unsigned int _symbolCount, unsigned int _stateCount, int _eps, unsigned int _start, vector<unsigned int>&& _final) : eps(_eps), symbolCount(_symbolCount), stateCount(_stateCount), start(_start), final(std::forward<vector<unsigned int>>(_final)), symbols(symbolCount) {
     for (unsigned int i = 0; i < symbolCount; i++)
       symbols[i] = i;
   };
