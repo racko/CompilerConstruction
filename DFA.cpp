@@ -7,6 +7,8 @@
 #include <functional>
 #include <iostream>
 #include <iomanip>
+#include <exception>
+#include <algorithm>
 using std::unordered_map;
 using std::reference_wrapper;
 using std::hash;
@@ -16,6 +18,8 @@ using std::cout;
 using std::cin;
 using std::cerr;
 using std::endl;
+using std::exception;
+using std::sort;
 
 struct setRef {
   vector<bool> s;
@@ -122,70 +126,59 @@ DFA::DFA(const NFA& nfa) : symbolCount(nfa.symbolCount - 1), symbolToId(128,symb
   stateCount = id;
   cout << "final state count: " << stateCount << endl;
   cout << "checking for terminal states" << endl;
-  final.resize(stateCount, false);
+  final.resize(stateCount, 0);
   for (unsigned int q = 0; q < stateCount; q++) {
     const vector<bool>& U = idToState[q];
     cout << "checking " << q << ": " << show(U) << endl;
-    for (unsigned int s = 0; s < nfa.stateCount && !final[q]; s++)
-      if (U[s] && nfa.final[s]) {
-        final[q] = true;
-        cout << "nfa.final[" << s << "] => dfa.final[" << q << "]" << endl;
+    for (unsigned int s = 0; s < nfa.stateCount; s++)
+      if (U[s] && nfa.final[s] != 0 && final[q] == 0) {
+        final[q] = nfa.final[s];
+        cout << "dfa.final[" << q << "] = " << "nfa.final[" << s << "] = " << nfa.final[s] << endl;
+      } else if (U[s] && nfa.final[s] != 0) {
+        cout << "dfa.final[" << q << "] is ambiguous. Might also be nfa.final[" << s << "] = " << nfa.final[s] << endl;
       }
   }
 }
 
 void DFA::minimize() {
   cout << "minimize" << endl;
-  unsigned int finalCount = 0;
-  for (unsigned int i = 0; i < stateCount; i++)
-    if (final[i])
-      finalCount++;
-  if (finalCount == 0) {
-    cerr << "Error: final count is zero." << endl;
-    exit(1);
+  
+  vector<vector<unsigned int>> kinds;
+  
+  for (unsigned int i = 0; i < stateCount; i++) {
+    if (kinds.size() <= final[i])
+      kinds.resize(final[i] + 1);
+    kinds[final[i]].push_back(i);
   }
-  unsigned int nonfinalCount = stateCount - finalCount;
-
-  cout << "final: " << finalCount << endl;
-  cout << "non final: " << nonfinalCount << endl;
-
+  
+  cout << "count of kinds: ";
+  for (auto& it: kinds)
+    cout << show(it);
+  cout << endl;
+  
+  sort(kinds.begin(), kinds.end(), [] (const vector<unsigned int>& a, const vector<unsigned int> b) { return a.size() < b.size(); });
+  
   vector<unsigned int> p(stateCount);
   vector<unsigned int> pI(stateCount);
-  vector<pair<unsigned int,unsigned int>> c_i(2);
+  vector<pair<unsigned int,unsigned int>> c_i(kinds.size());
   vector<unsigned int> c(stateCount);
-
-  unsigned int nfPtr, fPtr, fI, nfI;
-  if (finalCount > nonfinalCount) {
-    nfPtr = 0;
-    fPtr = nonfinalCount;
-    c_i[0] = make_pair(0, nonfinalCount - 1);
-    c_i[1] = make_pair(nonfinalCount, stateCount - 1);
-    nfI = 0;
-    fI = 1;
-  } else {
-    fPtr = 0;
-    nfPtr = finalCount;
-    c_i[0] = make_pair(0, finalCount - 1);
-    c_i[1] = make_pair(finalCount, stateCount - 1);
-    fI = 0;
-    nfI = 1;
+  
+  for (unsigned int i = 0, lastState = 0; i < kinds.size(); i++) {
+    unsigned int n = kinds[i].size();
+    c_i[i] = make_pair(lastState, lastState + n - 1);
+    unsigned int kind;
+    if (n > 0)
+      kind = final[kinds[i][0]];
+    for (unsigned int s = 0; s < n; s++) {
+      p[lastState] = kinds[i][s];
+      pI[kinds[i][s]] = lastState;
+      c[lastState] = i;
+      lastState++;
+    }
   }
   
+  cout << "c: " << show(c) << endl;
   cout << "c_i: " << show(c_i) << endl;
-  
-  for (unsigned int i = 0; i < stateCount; i++)
-    if (final[i]) {
-      p[fPtr] = i;
-      pI[i] = fPtr;
-      c[fPtr] = fI;
-      fPtr++;
-    } else {
-      p[nfPtr] = i;
-      pI[i] = nfPtr;
-      c[nfPtr] = nfI;
-      nfPtr++;
-    }
-  
   cout << "p: " << show(p) << endl;
   cout << "pI: " << show(pI) << endl;
   
@@ -198,8 +191,11 @@ void DFA::minimize() {
   for (unsigned int a = 0; a < symbolCount; a++)
     for (unsigned int i = 0; i < stateCount; i++)
       cout << "tI[" << a << "][" << i << "] = " << show(tI[a][i]) << endl;
+
   vector<unsigned int> stack;
-  stack.push_back(0);
+  for (int i = kinds.size() - 2; i >= 0; i--)
+    stack.push_back(i);
+
   while (!stack.empty()) {
     cout << "stack: " << show(stack) << endl;
     auto splitter = stack.back();
@@ -295,19 +291,16 @@ void DFA::minimize() {
   
   auto newStateCount = c_i.size();
   vector<vector<unsigned int>> newT(newStateCount, vector<unsigned int>(symbolCount));
+  vector<unsigned int> newFinal(newStateCount);
   for(unsigned int q = 0; q < newStateCount; q++) {
     auto t1 = c_i[q];
     auto s = t1.first;
     for (unsigned int a = 0; a < symbolCount; a++)
       newT[q][a] = c[pI[T[p[s]][a]]];
+    newFinal[q] = final[p[s]];
   }
   start = c[pI[start]];
-  
-  vector<bool> newFinal(newStateCount, false);
-  for (unsigned int i = 0; i < stateCount; i++)
-    newFinal[c[pI[i]]] = final[i];
   final = newFinal;
-  
   stateCount = newStateCount;
   T = newT;
 }

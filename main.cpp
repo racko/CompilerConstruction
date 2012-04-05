@@ -1,6 +1,7 @@
 #include "Regex.h"
 #include "NFA.h"
 #include "DFA.h"
+#include "nfaBuilder.h"
 #include <iostream>
 #include <iomanip>
 using std::cout;
@@ -9,6 +10,7 @@ using std::cerr;
 using std::endl;
 #include <sstream>
 using std::stringstream;
+using std::move;
 
 enum struct Symbol : unsigned int {
   a = 0,
@@ -51,19 +53,26 @@ int main(int argc, char** args) {
 //      cout << "(" << q << "," << a << ") -> " << dfa.T[q][a] << endl;
 //  }
   
-  if (argc > 2) {
-    cerr << "too many arguments:" << endl;
+  if (argc == 1) {
+    cerr << "too few arguments:" << endl;
     for (unsigned int i = 1; i < argc; i++)
       cerr << "'" << args[i] << "'" << endl;
     return 1;
   }
 
   stringstream in;
-  if (argc == 2) {
-    in << args[1];
-    cin.rdbuf(in.rdbuf());
+  nfaBuilder builder;
+  for (unsigned int i = 1; i < argc; i++) {
+    cout << "main: lexRegex(" << args[i] << ")" << endl;
+    in << args[i];
+    auto p = builder.lexRegex(in);
+    builder.ns[p.second].kind = i;
+    if (in.good())
+      cout << "at least one unread character: '" << in.peek() << "'" << endl;
+    in.str("");
+    in.clear();
   }
-  NFA nfa1 = lexRegex(cin);
+  NFA nfa1(move(builder));
   DFA dfa1(nfa1);
   cout << "start: " << dfa1.start << endl;
   cout << "final: " << show(dfa1.final) << endl;

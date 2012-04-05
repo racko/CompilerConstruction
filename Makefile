@@ -1,4 +1,4 @@
-OBJS = main.o DFA.o NFA.o Regex.o
+OBJS = main.o DFA.o NFA.o Regex.o nfaBuilder.o
 TARGET = x.exe
 
 SRCS = $(OBJS:%.o=%.cpp)

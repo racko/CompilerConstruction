@@ -1,6 +1,7 @@
 #ifndef _NFA_H_
 #define _NFA_H_
 
+#include "nfaBuilder.h"
 #include <unordered_map>
 using std::unordered_map;
 #include <vector>
@@ -48,59 +49,6 @@ using std::pair;
 //  virtual bool contains(const bitset& s) const;
 //  virtual bool isSubsetOf(const bitset& s) const;
 //};
-
-
-struct node {
-  bool deleted;
-  unordered_map<unsigned int,vector<unsigned int>> ns;
-};
-
-struct nfaBuilder {
-  pair<unsigned int,unsigned int> p;
-  vector<node> ns;
-  vector<char> idToSymbol;
-  unordered_map<char, unsigned int> symbolToId;
-  nfaBuilder() {
-    p = getPair();
-    idToSymbol.push_back(0);
-    symbolToId[0] = 0;
-  }
-
-  pair<unsigned int,unsigned int> getPair() {
-    pair<unsigned int,unsigned int> out;
-    out.first = ns.size();
-    ns.emplace_back();
-    out.second = ns.size();
-    ns.emplace_back();
-    return out;
-  }
-
-  pair<unsigned int,unsigned int> alt(pair<unsigned int,unsigned int> nfa1, pair<unsigned int,unsigned int> nfa2) {
-    auto nfa3 = getPair();
-
-    ns[nfa3.first].ns[0].push_back(nfa1.first);
-    ns[nfa3.first].ns[0].push_back(nfa2.first);
-    ns[nfa1.second].ns[0].push_back(nfa3.second);
-    ns[nfa2.second].ns[0].push_back(nfa3.second);
-    return nfa3;
-  }
-
-  pair<unsigned int,unsigned int> closure(pair<unsigned int,unsigned int> nfa1) {
-    auto out = getPair();
-    ns[out.first].ns[0].push_back(nfa1.first);
-    ns[out.first].ns[0].push_back(out.second);
-    ns[nfa1.second].ns[0].push_back(nfa1.first);
-    ns[nfa1.second].ns[0].push_back(out.second);
-    return out;
-  }
-
-  pair<unsigned int,unsigned int> cat(pair<unsigned int,unsigned int> nfa1, pair<unsigned int,unsigned int> nfa2) {
-    ns[nfa1.second] = ns[nfa2.first];
-    ns[nfa2.first].deleted = true;
-    nfa1.second = nfa2.second;
-    return nfa1;
-  }
-};
 
 struct NFA {
   int eps;

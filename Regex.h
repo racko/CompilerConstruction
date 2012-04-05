@@ -20,6 +20,9 @@ ostream& showVector(const vector<T>& v, ostream& os);
 template<class T>
 function<ostream&(ostream&)> show(const vector<T>& v);
 
+template<class T1, class T2>
+function<ostream&(ostream&)> show(const pair<T1,T2>& p);
+
 ostream& operator<<(ostream&, const function<ostream&(ostream&)>&);
 
 template<>
