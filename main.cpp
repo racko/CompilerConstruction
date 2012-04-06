@@ -3,41 +3,20 @@
 #include "DFA.h"
 #include "nfaBuilder.h"
 #include "BitSet.h"
+#include <ctime>
 #include <iostream>
 #include <iomanip>
 using std::cout;
 using std::cin;
 using std::cerr;
 using std::endl;
+using std::hex;
 #include <sstream>
 using std::stringstream;
 using std::move;
 
-enum struct Symbol : unsigned int {
-  a = 0,
-  b = 1,
-  last = b,
-  eps = last + 1
-};
-
 int main(int argc, char** args) {
-  
-  BitSet bs(65);
-  cout << "n: " << bs.n << endl;
-  cout << "m: " << bs.m << endl;
-  for (auto i = 0u; i < bs.size(); i++)
-    bs[i] = i & 1;
-  cout << bs << endl;
-  bs.resize(130);
-  cout << bs << endl;
-  cout << "n: " << bs.n << endl;
-  cout << "m: " << bs.m << endl;
-  for (auto i = 0u; i < bs.size(); i++)
-    bs[i] = i & 1;
-  cout << bs << endl;
 
-
-  return 0;
   if (argc == 1) {
     cerr << "too few arguments:" << endl;
     for (unsigned int i = 1; i < argc; i++)
@@ -52,9 +31,10 @@ int main(int argc, char** args) {
     in << args[i];
     auto p = builder.lexRegex(in);
     builder.ns[p.second].kind = i;
-    if (in.good())
+    if (in.good()) {
       cout << "at least one unread character: '" << in.peek() << "'" << endl;
-    in.str("");
+      in.str("");
+    }
     in.clear();
   }
   NFA nfa1(move(builder));

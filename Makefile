@@ -1,4 +1,4 @@
-OBJS = main.o DFA.o NFA.o Regex.o nfaBuilder.o
+OBJS = main.o DFA.o NFA.o Regex.o nfaBuilder.o BitSet.o
 TARGET = x.exe
 
 SRCS = $(OBJS:%.o=%.cpp)
@@ -7,7 +7,7 @@ DDS = $(OBJS:%.o=%.dd)
 CPPFLAGS = -g -x c++ -std=gnu++11 -Wall
 
 $(TARGET): $(OBJS)
-	g++ -g $^ -o $@
+	g++ $^ -o $@
 
 %.o: %.cpp
 	g++ $(CPPFLAGS) -c $<

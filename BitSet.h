@@ -6,9 +6,15 @@ using std::ceil;
 #include <cstring>
 using std::memmove;
 #include <iostream>
+using std::cerr;
 using std::cout;
 #include <iomanip>
 using std::endl;
+using std::hex;
+using std::dec;
+using std::ostream;
+#include <exception>
+using std::exception;
 
 struct BitSet {
   struct ref {
@@ -16,72 +22,77 @@ struct BitSet {
     unsigned int w;
     unsigned long long m;
     
-    ref(long long* _p, unsigned int i) : p(_p), w(i >> 6), m(1ULL << (i & 0x3F)) {}; // cout << i << ": (" << w << "," << m << ")" << endl; 
+    ref(long long* _p, unsigned int i);
     
-    operator bool () const {
-      return p[w] & m;
-    }
+    operator bool () const;
     
-    ref& operator= (const bool x) {
-      p[w] = (p[w] & ~m) | (-x & m);
-      return *this;
-    }
+    ref& operator= (const bool x);
     
-    ref& operator= (const ref& _x) {
-      bool x = _x;
-      p[w] = (p[w] & ~m) | (-x & m);
-      return *this;
-    }
+    ref& operator= (const ref& _x);
   };
 
   unsigned int n = 0;
   unsigned int m = 0;
   long long* p = nullptr;
 
-  BitSet() {}
+  BitSet();
 
-  BitSet(unsigned int _n) : n(_n), m((n + 63) / 64), p(new long long[m]) {}
+  BitSet(unsigned int _n);
+  BitSet(unsigned int _n, const bool x);
+
+  BitSet(BitSet&& s);
+
+  BitSet(const BitSet& s);
   
-  void resize(unsigned int _n) {
-    if (n >= _n)
-      n = _n;
-    else {
-      unsigned int _m = (_n + 63) / 64;
-      long long* _p = new long long[_m];
-      memmove(_p, p, m * sizeof(long long));
-      delete p;
-      n = _n;
-      m = _m;
-      p = _p;
-    }
-  }
+  BitSet& operator=(const BitSet& s);
   
-  ~BitSet() {
-    if (p != nullptr)
-      delete p;
-  }
-
-  ref operator[](unsigned int i) {
-    return ref(p, i);
-  }
-
-  const ref operator[](unsigned int i) const {
-    return ref(p, i);
-  }
-
-  unsigned int size() const {
-    return n;
-  }
+  void resize(unsigned int _n);
   
-  bool operator== (const BitSet& rhs) const {
-    if (n != rhs.n)
-      return false;
+  ~BitSet();
 
-    for (auto i = 0u; i < m; i++)
-      if (p[i] != rhs.p[i])
-        return false;
-    return true;
-  }
+  ref operator[](unsigned int i);
+
+  const ref operator[](unsigned int i) const;
+
+  unsigned int size() const;
+  
+  bool operator== (const BitSet& rhs) const;
+
+  BitSet& operator|=(const BitSet& rhs);
+
+  BitSet& operator&=(const BitSet& rhs);
+
+  BitSet operator~() const;
+
+  struct sparse_iterator {
+    BitSet* s = nullptr;
+    unsigned int i = 0;
+    unsigned int _c = 0;
+
+    sparse_iterator();
+    
+    sparse_iterator(const BitSet& _s);
+
+    ~sparse_iterator();
+
+    bool operator!=(const sparse_iterator&);
+
+    unsigned int operator*() const;
+
+    sparse_iterator& operator++();
+  };
+
+  sparse_iterator begin() const;
+
+  sparse_iterator end() const;
+
+  int nextSetBit(unsigned int fromIndex) const;
 };
+
+BitSet operator|(const BitSet& lhs, const BitSet& rhs);
+
+BitSet operator&(const BitSet& lhs, const BitSet& rhs);
+
+ostream& operator<<(ostream&, const BitSet&);
 
 #endif

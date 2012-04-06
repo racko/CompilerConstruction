@@ -26,7 +26,6 @@ template<class T1, class T2>
 function<ostream&(ostream&)> show(const pair<T1,T2>& p);
 
 ostream& operator<<(ostream&, const function<ostream&(ostream&)>&);
-ostream& operator<<(ostream&, const BitSet&);
 
 template<>
 ostream& showVector<bool>(const vector<bool>& v, ostream& os);

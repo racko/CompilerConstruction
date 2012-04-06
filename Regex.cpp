@@ -3,6 +3,9 @@ using std::bind;
 #include <tuple>
 using std::pair;
 #include <iostream>
+#include <iomanip>
+using std::hex;
+using std::dec;
 
 template <class T>
 ostream& showVector(const vector<T>& v, ostream& s) {
@@ -42,25 +45,6 @@ ostream& operator<<(ostream& s, const function<ostream&(ostream&)>& f) {
 
 template <>
 ostream& showVector<bool>(const vector<bool>& v, ostream& s) {
-  unsigned int i = 0;
-
-  while (i < v.size() && !v[i])
-    i++;
-
-  if (i == v.size()) {
-    s << "{}";
-    return s;
-  }
-  s << "{ " << i;
-  for (i++; i < v.size(); i++)
-    if (v[i])
-      s << ", " << i;
-
-  s << " }";
-  return s;
-}
-
-ostream& operator<<(ostream& s, const BitSet& v) {
   unsigned int i = 0;
 
   while (i < v.size() && !v[i])

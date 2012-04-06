@@ -8,7 +8,7 @@ using std::dec;
 
 
 void NFA::getClosure(BitSet& S) const {
-  cout << "getClosure(" << show(S) << ")" << endl;
+  cout << "getClosure(" << S << ")" << endl;
   vector<unsigned int> stack;
   for (unsigned int i = 0; i < S.size(); i++)
     if (S[i])
@@ -20,13 +20,14 @@ void NFA::getClosure(BitSet& S) const {
     stack.pop_back();
     cout << "considering state " << q << endl;
     const BitSet& T = table[q][eps];
-    cout << "delta(" << q << ",eps) = " << show(T) << endl;
-    for (unsigned int i = 0; i < T.size(); i++)
-      if (T[i] && !S[i]) {
-        cout << "adding state " << i << endl;
-        stack.push_back(i);
-        S[i] = true;
-      }
+    cout << "delta(" << q << ",eps) = " << T << endl;
+    BitSet newStates = T & ~S;
+    S |= newStates;
+    cout << "newStates: " << newStates << endl;
+    for (auto i = newStates.begin(); i != newStates.end(); ++i) {
+      cout << "adding state " << *i << endl;
+      stack.push_back(*i);
+    }
   }
 }
 
