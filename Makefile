@@ -14,7 +14,7 @@ $(TARGET): $(OBJS)
 
 .PHONY: clean
 clean:
-	rm -f $(OBJS) $(TARGET)
+	rm -f $(OBJS) $(TARGET) $(DDS)
 
 %.dd: %.cpp
 	rm -f $@ && \
