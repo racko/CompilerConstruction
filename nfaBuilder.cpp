@@ -9,11 +9,12 @@ using std::endl;
 using std::exception;
 
 
-nfaBuilder::nfaBuilder() {
-  start = 0;
+nfaBuilder::nfaBuilder() : nfaBuilder(0) {};
+
+nfaBuilder::nfaBuilder(unsigned int _eps) : start(0), eps(_eps) {
   ns.emplace_back();
-  idToSymbol.push_back(0);
-  symbolToId[0] = 0;
+  idToSymbol.push_back(eps);
+  symbolToId[eps] = 0;
 }
 
 pair<unsigned int,unsigned int> nfaBuilder::getPair() {
@@ -28,19 +29,19 @@ pair<unsigned int,unsigned int> nfaBuilder::getPair() {
 pair<unsigned int,unsigned int> nfaBuilder::alt(pair<unsigned int,unsigned int> nfa1, pair<unsigned int,unsigned int> nfa2) {
   auto nfa3 = getPair();
 
-  ns[nfa3.first].ns[0].push_back(nfa1.first);
-  ns[nfa3.first].ns[0].push_back(nfa2.first);
-  ns[nfa1.second].ns[0].push_back(nfa3.second);
-  ns[nfa2.second].ns[0].push_back(nfa3.second);
+  ns[nfa3.first].ns[eps].push_back(nfa1.first);
+  ns[nfa3.first].ns[eps].push_back(nfa2.first);
+  ns[nfa1.second].ns[eps].push_back(nfa3.second);
+  ns[nfa2.second].ns[eps].push_back(nfa3.second);
   return nfa3;
 }
 
 pair<unsigned int,unsigned int> nfaBuilder::closure(pair<unsigned int,unsigned int> nfa1) {
   auto out = getPair();
-  ns[out.first].ns[0].push_back(nfa1.first);
-  ns[out.first].ns[0].push_back(out.second);
-  ns[nfa1.second].ns[0].push_back(nfa1.first);
-  ns[nfa1.second].ns[0].push_back(out.second);
+  ns[out.first].ns[eps].push_back(nfa1.first);
+  ns[out.first].ns[eps].push_back(out.second);
+  ns[nfa1.second].ns[eps].push_back(nfa1.first);
+  ns[nfa1.second].ns[eps].push_back(out.second);
   return out;
 }
 
@@ -227,7 +228,7 @@ pair<unsigned int,unsigned int> nfaBuilder::lexE(istream& in) {
 pair<unsigned int,unsigned int> nfaBuilder::lexRegex(istream& in) {
   cout << "entered lexRegex" << endl;
   pair<unsigned int,unsigned int> nfa1 = lexE(in);
-  ns[start].ns[0].push_back(nfa1.first);
+  ns[start].ns[eps].push_back(nfa1.first);
   cout << "done with lexRegex" << endl;
   cout << "out: (" << nfa1.first << "," << nfa1.second << ")" << endl;
   return nfa1;

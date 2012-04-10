@@ -1,27 +1,31 @@
 #include "BitSet.h"
 #include "Regex.h"
+#include "Random.h"
+#include <vector>
+using std::vector;
+#include <ctime>
+using std::time;
+using std::forward;
+#include <cmath>
 
 BitSet::BitSet() {
   //cout << "constructed BitSet(): " << *this << endl;
 }
 
-BitSet::BitSet(unsigned int _n) : n(_n), m((n + 63) / 64), p(new long long[m]) {
+BitSet::BitSet(unsigned int _n) : n(_n), w((n + 63) >> 6), wordsInUse(w), p(new long long[w]) {
   //cout << "constructed BitSet(" << _n << "): " << *this << endl;
 }
-BitSet::BitSet(unsigned int _n, const bool x) : n(_n), m((n + 63) / 64), p(new long long[m]) {
+
+BitSet::BitSet(unsigned int _n, const bool x) : n(_n), w((n + 63) >> 6), wordsInUse(w), p(new long long[w]) {
   if (x)
-    memset(p, 0xFF, m * sizeof(long long));
+    memset(p, 0xFF, w * sizeof(long long));
   else
-    memset(p, 0x00, m * sizeof(long long));
+    memset(p, 0x00, w * sizeof(long long));
   //cout << "constructed BitSet(" << _n << ", " << x << "): " << *this << endl;
 }
 
-BitSet::BitSet(BitSet&& s) : n(s.n), m(s.m), p(s.p) {
-  //cout << "moving BitSet(" << s << "): ";
-  s.n = 0;
-  s.m = 0;
-  s.p = nullptr;
-  //cout << *this << endl;
+BitSet::BitSet(BitSet&& s) {
+  operator=(forward<BitSet>(s));
 }
 
 BitSet::BitSet(const BitSet& s) {
@@ -30,27 +34,45 @@ BitSet::BitSet(const BitSet& s) {
 
 BitSet& BitSet::operator=(const BitSet& s) {
   //cout << "copying BitSet(" << s << "): ";
-  if (m != s.m && p)
+  if (w < s.wordsInUse && p)
     delete p;
   if (!p)
-    p = new long long[s.m];
-  memmove(p, s.p, s.m * sizeof(long long));
+    p = new long long[s.wordsInUse];
+  memmove(p, s.p, s.wordsInUse * sizeof(long long));
   n = s.n;
-  m = s.m;
+  w = s.wordsInUse;
+  wordsInUse = s.wordsInUse;
+  //cout << *this << endl;
+  return *this;
+}
+
+BitSet& BitSet::operator=(BitSet&& s) {
+  //cout << "moving BitSet(" << s << "): ";
+  n = s.n;
+  w = s.w;
+  wordsInUse = s.wordsInUse;
+  p = s.p;
+  s.n = 0;
+  s.w = 0;
+  s.wordsInUse = 0;
+  s.p = nullptr;
   //cout << *this << endl;
   return *this;
 }
 
 void BitSet::resize(unsigned int _n) {
-  if (n >= _n)
+  auto newWordsInUse = (_n + 63) >> 6;
+  if (w <= newWordsInUse) {
     n = _n;
-  else {
-    unsigned int _m = (_n + 63) / 64;
-    long long* _p = new long long[_m];
-    memmove(_p, p, m * sizeof(long long));
+    wordsInUse = newWordsInUse;
+  } else {
+    unsigned int _w = std::max(newWordsInUse, w << 1);
+    long long* _p = new long long[_w];
+    memmove(_p, p, newWordsInUse * sizeof(long long));
     delete p;
     n = _n;
-    m = _m;
+    w = _w;
+    wordsInUse = newWordsInUse;
     p = _p;
   }
 }
@@ -66,12 +88,43 @@ BitSet::ref BitSet::operator[](unsigned int i) {
   return BitSet::ref(p, i);
 }
 
-const BitSet::ref BitSet::operator[](unsigned int i) const {
-  return BitSet::ref(p, i);
+BitSet::const_ref BitSet::operator[](unsigned int i) const {
+  return BitSet::const_ref(p, i);
 }
 
 unsigned int BitSet::size() const {
   return n;
+}
+
+unsigned int BitSet::count() const {
+  unsigned int c = 0;
+  for (auto i = begin(); i != end(); ++i)
+    c++;
+  //cout << "size before return: " << c << endl;
+  return c;
+//  cerr << "not implemented yet" << endl;
+//  throw exception();
+//  unsigned int c = 0;
+//  for (unsigned int i = 0; i < m-1; i++) {
+//    long long v = p[i];
+//
+//  }
+//  return c;
+}
+
+unsigned long long BitSet::max() const {
+  cerr << "not implemented yet" << endl;
+  throw exception();
+  if (p[w-1] & (0xffffffffffffffffULL << n));
+  long long* word = p + w - 1;
+  while (word == 0)
+    word--;
+  return 0;
+}
+
+void BitSet::clear() {
+  for (int i = 0; i < wordsInUse; i++)
+    p[i] = 0LL;
 }
 
 bool BitSet::operator== (const BitSet& rhs) const {
@@ -80,41 +133,42 @@ bool BitSet::operator== (const BitSet& rhs) const {
 
   if (n == 0)
     return true;
-
-  for (auto i = 0u; i < m - 1; i++)
+  int u = n >> 6;
+  for (auto i = 0u; i < u; i++)
     if (p[i] != rhs.p[i])
       return false;
-  auto mask = (1 << n) - 1;
-  if ((p[m-1] & mask) != (rhs.p[m-1] & mask))
-    return false;
-  return true;
+  auto mask = 0xffffffffffffffffULL >> -(n + 1);
+  return (p[u] & mask) == (rhs.p[u] & mask);
 }
 
 BitSet& BitSet::operator|=(const BitSet& rhs) {
+  //cout << *this << ".operator|(" << rhs << ")" << endl;
   if (n != rhs.n) {
     cerr << "dimensions don't match: " << n << " != " << rhs.n << endl;
     throw exception();
   }
 
-  for (auto i = 0u; i < m; i++)
+  for (auto i = 0u; i < wordsInUse; i++)
     p[i] |= rhs.p[i];
   return *this;
 }
 
 BitSet& BitSet::operator&=(const BitSet& rhs) {
+  //cout << *this << ".operator&(" << rhs << ")" << endl;
   if (n != rhs.n) {
     cerr << "dimensions don't match: " << n << " != " << rhs.n << endl;
     throw exception();
   }
 
-  for (auto i = 0u; i < m; i++)
+  for (auto i = 0u; i < wordsInUse; i++)
     p[i] &= rhs.p[i];
   return *this;
 }
 
 BitSet BitSet::operator~() const {
+  //cout << *this << ".operator~()" << endl;
   BitSet s(n);
-  for (auto i = 0u; i < m; i++)
+  for (auto i = 0u; i < wordsInUse; i++)
     s.p[i] = ~p[i];
   return s;
 }
@@ -124,153 +178,76 @@ BitSet::sparse_iterator BitSet::begin() const {
 }
 
 BitSet::sparse_iterator BitSet::end() const {
-  return BitSet::sparse_iterator();
+  return BitSet::sparse_iterator(*this, n);
 }
 
 int BitSet::nextSetBit(unsigned int fromIndex) const {
-  static const unsigned long long limit = 1ULL << 63;
-  unsigned int w = fromIndex >> 6;
-  unsigned long long m = 1ULL << (fromIndex & 0x3F);
-  while (!(p[w] & m) && fromIndex < n) {
+  while (fromIndex < n && !operator[](fromIndex))
     fromIndex++;
-    if (m < limit) 
-      m <<= 1;
-    else {
-      w++;
-      m = 1;
-    }
-  }
   if (fromIndex < n)
     return int(fromIndex);
   else
     return -1;
 }
 
+std::hash<BitSet>::hash() {
+  unsigned long long h;
+  h = 0x544B2FBACAAF1684LL;
+  for (int j = 0; j < 256; j++) {
+    for (int i = 0; i < 31; i++) {
+      h = (h >> 7) ^ h;
+      h = (h << 11) ^ h;
+      h = (h >> 10) ^ h;
+    }
+    hashfn_tab[j] = h;
+  }
+}
+
+size_t std::hash<BitSet>::operator()(const BitSet &s) const {
+  //cout << "hashing " << s << ": ";
+  unsigned long long h = 0xBB40E64DA205B064LL;
+  unsigned int u = s.n >> 6;
+  int j;
+  char* k;
+  for (j = 0, k = (char*)s.p; j < u * sizeof(unsigned long long); j++, k++)
+    h = (h * 7664345821815920749LL) ^ hashfn_tab[(unsigned char)(*k)];
+  long long lastWord = s.p[u] & (0xffffffffffffffffULL >> -(s.n + 1));
+  for (j = 0, k = (char*)&lastWord; j < sizeof(unsigned long long); j++)
+    h = (h * 7664345821815920749LL) ^ hashfn_tab[(unsigned char)(*k)];
+  //cout << h << endl;
+  return h;
+}
+
+unsigned long long std::hash<BitSet>::hashfn_tab[256];
+
 BitSet operator|(const BitSet& lhs, const BitSet& rhs) {
+  //cout << "operator|(" << lhs << ", " << rhs << ")" << endl;
   if (lhs.n != rhs.n) {
     cerr << "dimensions don't match: " << lhs.n << " != " << rhs.n << endl;
     throw exception();
   }
 
-  BitSet s(lhs.n);
-
-  for (auto i = 0u; i < lhs.m; i++)
-    s.p[i] = lhs.p[i] | rhs.p[i];
+  BitSet s(lhs);
+  s |= rhs;
 
   return s;
 }
 
 BitSet operator&(const BitSet& lhs, const BitSet& rhs) {
+  //cout << "operator&(" << lhs << ", " << rhs << ")" << endl;
   if (lhs.n != rhs.n) {
     cerr << "dimensions don't match: " << lhs.n << " != " << rhs.n << endl;
     throw exception();
   }
 
-  BitSet s(lhs.n);
-
-  for (auto i = 0u; i < lhs.m; i++)
-    s.p[i] = lhs.p[i] & rhs.p[i];
+  BitSet s(lhs);
+  s &= rhs;
 
   return s;
 }
 
-BitSet::ref::ref(long long* _p, unsigned int i) : p(_p), w(i >> 6), m(1ULL << (i & 0x3F)) {};
-
-BitSet::ref::operator bool () const {
-  return p[w] & m;
-}
-
-BitSet::ref& BitSet::ref::operator= (const bool x) {
-  p[w] = (p[w] & ~m) | (-x & m);
-  return *this;
-}
-
-BitSet::ref& BitSet::ref::operator= (const BitSet::ref& _x) {
-  bool x = _x;
-  p[w] = (p[w] & ~m) | (-x & m);
-  return *this;
-}
-
-BitSet::sparse_iterator::sparse_iterator() {}   
-
-BitSet::sparse_iterator::sparse_iterator(const BitSet& _s) : s(new BitSet(_s)) {
-  operator++();
-}
-
-BitSet::sparse_iterator::~sparse_iterator() {
-  if (s)
-    delete(s);
-}
-
-bool BitSet::sparse_iterator::operator!=(const BitSet::sparse_iterator&) {
-  return _c < s->n;
-}
-
-unsigned int BitSet::sparse_iterator::operator*() const {
-  return _c;
-}
-
-BitSet::sparse_iterator& BitSet::sparse_iterator::operator++() {
-  //cout << "operator++" << endl;
-  //cout << *s << endl;
-  //cout << "i = " << i << endl;
-  //cout << "_c = " << _c << endl;
-
-  while (s->p[i] == 0 && _c < s->n) {
-    //cout << "p[" << i << "] == 0" << endl;
-    i++;
-    _c = i * 64;
-    //cout << *s << endl;
-    //cout << "i = " << i << endl;
-    //cout << "_c = " << _c << endl;
-  }
-
-  if (_c >= s->n) {
-    //cout << "_c >= n: " << _c << " >= " << s->n << endl;
-    return *this;
-  }
-
-  int c = 0;
-  if (!(s->p[i] & 0x1)) {
-    if ((s->p[i] & 0xffffffff) == 0) {
-      s->p[i] >>= 32;
-      c += 32;
-    }
-    if ((s->p[i] & 0xffff) == 0) {
-      s->p[i] >>= 16;
-      c += 16;
-    }
-    if ((s->p[i] & 0xff) == 0) {
-      s->p[i] >>= 8;
-      c += 8;
-    }
-    if ((s->p[i] & 0xf) == 0) {
-      s->p[i] >>= 4;
-      c += 4;
-    }
-    if ((s->p[i] & 0x3) == 0) {
-      s->p[i] >>= 2;
-      c += 2;
-    }
-    if ((s->p[i] & 0x1) == 0) {
-      s->p[i] >>= 1;
-      c += 1;
-    }
-  }
-  //cout << c << " clear bits." << endl;
-  _c += c;
-  //cout << "_c = " << _c << endl;
-  //cout << *s << endl;
-  //cout << "i = " << i << endl;
-  s->p[i] &= ~0x1ULL;
-  //cout << "cleared lsb" << endl;
-  //cout << *s << endl;
-  //cout << "i = " << i << endl;
-  return *this;
-}
-
 ostream& operator<<(ostream& s, const BitSet& v) {
-  s << "(" << hex << &v << dec << ")";
+  s << "(" << hex << &v << dec << ":" << v.n << ")";
   unsigned int i = 0;
 
   while (i < v.size() && !v[i])
@@ -287,4 +264,10 @@ ostream& operator<<(ostream& s, const BitSet& v) {
 
   s << " }";
   return s;
+}
+
+void testBitSet() {
+  Ranq1(time(0));
+  BitSet bs;
+  vector<bool> v;
 }

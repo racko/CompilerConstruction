@@ -39,6 +39,26 @@ function<ostream&(ostream&)> show(const pair<T1,T2>& p) {
   return bind(showPair<T1,T2>, p, _1);
 }
 
+template<class T>
+function<ostream&(ostream&)> bin(T x) {
+  return [x] (ostream& s) -> ostream& {
+    int n = 8 * sizeof(T);
+    int i = 0;
+    while (i < n && !(x & (T(1) << i)))
+      i++;
+    if (i == n) {
+      s << "{}";
+      return s;
+    }
+    s << "{ " << i;
+    for (i++; i < n; i++)
+      if (x & (T(1) << i))
+        s << ", " << i;
+    s << " }";
+    return s;
+  };
+}
+
 ostream& operator<<(ostream& s, const function<ostream&(ostream&)>& f) {
   return f(s);
 }
@@ -83,6 +103,8 @@ ostream& showVector(const vector<pair<unsigned int,unsigned int>>& v, ostream& s
 template function<ostream&(ostream&)> show<unsigned int>(const vector<unsigned int>& v);
 template function<ostream&(ostream&)> show<bool>(const vector<bool>& v);
 template function<ostream&(ostream&)> show<char>(const vector<char>& v);
+template function<ostream&(ostream&)> bin<long long>(long long x);
+template function<ostream&(ostream&)> bin<unsigned long long>(unsigned long long x);
 template function<ostream&(ostream&)> show<unsigned int, unsigned int>(const pair<unsigned int, unsigned int>& p);
 template function<ostream&(ostream&)> show<pair<unsigned int,unsigned int>>(const vector<pair<unsigned int,unsigned int>>& v);
 

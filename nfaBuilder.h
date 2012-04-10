@@ -18,10 +18,12 @@ struct node {
 
 struct nfaBuilder {
   unsigned int start;
+  unsigned int eps;
   vector<node> ns;
   vector<char> idToSymbol;
   unordered_map<char, unsigned int> symbolToId;
   nfaBuilder();
+  nfaBuilder(unsigned int _eps);
 
   pair<unsigned int,unsigned int> getPair();
   pair<unsigned int,unsigned int> alt(pair<unsigned int,unsigned int> nfa1, pair<unsigned int,unsigned int> nfa2);
