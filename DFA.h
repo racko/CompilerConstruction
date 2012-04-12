@@ -10,7 +10,7 @@ struct DFA {
   vector<unsigned int> final;
   vector<vector<unsigned int>> T;
   vector<unsigned int> symbolToId;
-  DFA(const NFA& nfa);
+  DFA(NFA& nfa);
   void minimize();
 };
 

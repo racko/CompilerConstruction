@@ -191,7 +191,7 @@ size_t std::hash<HashSet>::operator()(const HashSet &s) const {
   //cout << "hashing " << s << ": ";
   unsigned long long h = 0xBB40E64DA205B064LL;
   for (auto it = s.begin(); it != s.end(); ++it) {
-    int j;
+    unsigned int j;
     char* k;
     for (j = 0, k = (char*)&(*it); j < sizeof(*it); j++, k++)
       h = (h * 7664345821815920749LL) ^ hashfn_tab[(unsigned char)(*k)];

@@ -1,27 +1,25 @@
 OBJS = DFA.o NFA.o Regex.o nfaBuilder.o BitSet.o HashSet.o
 
 SRCS = $(OBJS:%.o=%.cpp)
-DDS = $(OBJS:%.o=%.dd)
+OBJS_AND_TARGETS = $(OBJS) main.o pokerMain.o
+DDS = $(OBJS_AND_TARGETS:%.o=%.dd)
 
-DEBUG = -g
-FAST = -O3 #-flto
-
-CPPFLAGS = $(FAST) -std=gnu++11 -Wall
+CPPFLAGS = -O3 -flto -std=gnu++11 -Wall
 
 x.exe: main.o $(OBJS)
-	g++ $^ -o $@ $(FAST)
+	g++ $^ -O3 -flto -o $@
 
 .PHONY: poker
 poker: poker.exe
 poker.exe: pokerMain.o $(OBJS)
-	g++ $^ -o $@ $(FAST)
+	g++ $^ -O3 -flto -o $@
 
 %.o: %.cpp
 	g++ $(CPPFLAGS) -c $<
 
 .PHONY: clean
 clean:
-	rm -f x.exe poker.exe main.o pokerMain.o $(OBJS) $(DDS)
+	rm -f x.exe poker.exe $(OBJS_AND_TARGETS) $(DDS)
 
 %.dd: %.cpp
 	rm -f $@ && \

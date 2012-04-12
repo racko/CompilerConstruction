@@ -23,8 +23,9 @@ using std::sort;
 using std::ref;
 using std::cref;
 using std::move;
+using std::tie;
 
-DFA::DFA(const NFA& nfa) : symbolCount(nfa.symbolCount - 1), symbolToId(128,symbolCount) {
+DFA::DFA(NFA& nfa) : symbolCount(nfa.symbolCount - 1), symbolToId(128,symbolCount) {
   cout << "DFA constructor" << endl;
   cout << "stateCount = " << nfa.stateCount << endl;
   cout << "symbolCount = " << symbolCount << endl;
@@ -56,11 +57,11 @@ DFA::DFA(const NFA& nfa) : symbolCount(nfa.symbolCount - 1), symbolToId(128,symb
   id++;
 
   while(!stack.empty()) {
-    cout << "stack: " << show(stack) << endl;
+    //cout << "stack: " << show(stack) << endl;
     unsigned int q = stack.back();
     stack.pop_back();
-    auto& _p = idToState[q];
-    cout << "state: " << _p << endl;
+    //auto& _p = idToState[q];
+    //cout << "state: " << _p << endl;
     if (T.size() < q + 1)
       T.resize(q + 1, vector<unsigned int>(symbolCount));
     for (unsigned int a = 0; a < nfa.symbolCount; a++) {
@@ -135,6 +136,77 @@ DFA::DFA(const NFA& nfa) : symbolCount(nfa.symbolCount - 1), symbolToId(128,symb
   }
 }
 
+bool swapToFront(unsigned int l, unsigned int h, const BitSet& tmp, vector<unsigned int>& p, vector<unsigned int>& pI) {
+  //cout << "swapping in-splitter to front" << endl;
+  bool done = false;
+  for (auto i = l; i <= h && !done; i++)
+    if (tmp[p[i]]) {
+      std::swap(p[l], p[i]);
+      //cout << "swapping " << l << " and " << i << ": " << show(p) << endl;
+      pI[p[l]] = l;
+      pI[p[i]] = i;
+      done = true;
+    }
+  return done;
+}
+
+bool swapToBack(unsigned int l, unsigned int h, const BitSet& tmp, vector<unsigned int>& p, vector<unsigned int>& pI) {
+  //cout << "swapping not-in-splitter to end" << endl;
+  bool done = false;
+  for (int i = h; i >= int(l) && !done; i--) {
+    if (!tmp[p[i]]) {
+      std::swap(p[i], p[h]);
+      //cout << "swapping " << i << " and " << h << ": " << show(p) << endl;
+      pI[p[h]] = h;
+      pI[p[i]] = i;
+      done = true;
+    }
+  }
+  return done;
+}
+
+pair<unsigned int,unsigned int> swapRest(unsigned int l, unsigned int h, const BitSet& tmp, vector<unsigned int>& p, vector<unsigned int>& pI) {
+  //cout << "swapping all others" << endl;
+  auto j = l;
+  auto k = h;
+  for (;;) {
+    do j++; while (tmp[p[j]]);
+    do k--; while (!tmp[p[k]]);
+    if (k < j) break;
+    std::swap(p[j], p[k]);
+    //cout << "swapping " << j << " and " << k << ": " << show(p) << endl;
+    pI[p[j]] = j;
+    pI[p[k]] = k;
+  }
+  return make_pair(j, k);
+}
+
+void update(unsigned int l, unsigned int h, unsigned int j, unsigned int k, unsigned int b, vector<unsigned int>& c, vector<pair<unsigned int,unsigned int>>& c_i, vector<unsigned int>& stack) {
+  auto A = make_pair(l,j-1);
+  auto B = make_pair(k+1,h);
+
+  //cout << "B': (" << A.first << "-" << A.second << ")" << endl;
+  //cout << "B'': (" << B.first << "-" << B.second << ")" << endl;
+
+  unsigned int A_size = A.second - A.first + 1;
+  unsigned int B_size = B.second - B.first + 1;
+  auto newIx = c_i.size();
+  stack.push_back(newIx);
+  if (A_size > B_size) {
+    c_i[b] = A;
+    c_i.push_back(B);
+    for (auto i = B.first; i <= B.second; i++)
+      c[i] = newIx;
+    //cout << "Pushing B'' on the stack. Index: " << newIx << endl;
+  } else {
+    c_i[b] = B;
+    c_i.push_back(A);
+    for (auto i = A.first; i <= A.second; i++)
+      c[i] = newIx;
+    //cout << "Pushing B' on the stack. Index: " << newIx << endl;
+  }
+}
+
 void DFA::minimize() {
   cout << "minimize" << endl;
 
@@ -192,6 +264,7 @@ void DFA::minimize() {
   for (int i = kinds.size() - 2; i >= 0; i--)
     stack.push_back(i);
 
+  BitSet tmp(stateCount, false);
   while (!stack.empty()) {
     //cout << "stack: " << show(stack) << endl;
     auto splitter = stack.back();
@@ -200,8 +273,8 @@ void DFA::minimize() {
     cout << "splitter: " << splitter << "(" << t1.first << "-" << t1.second << ")" << endl;
     for (unsigned int a = 0; a < symbolCount; a++) {
       //cout << "considering symbol " << a << endl;
-      BitSet tmp(stateCount, false);
-      for (unsigned int q = t1.first; q <= t1.second; q++) {
+      tmp = tI[a][p[t1.first]];
+      for (unsigned int q = t1.first + 1; q <= t1.second; q++) {
         //cout << "collecting tI[" << a << "][" << p[q] << "]: " << tI[a][p[q]] << endl;
         tmp |= tI[a][p[q]];
       }
@@ -212,66 +285,14 @@ void DFA::minimize() {
         auto l = indices.first;
         auto h = indices.second;
         //cout << "B: " << b << "(" << l << "-" << h << ")" << endl;
-        auto j = l;
-        auto k = h;
-        bool done = false;
-        //cout << "swapping in-splitter to front" << endl;
-        for (auto i = l; i <= h && !done; i++)
-          if (tmp[p[i]]) {
-            std::swap(p[l], p[i]);
-            //cout << "swapping " << l << " and " << i << ": " << show(p) << endl;
-            pI[p[l]] = l;
-            pI[p[i]] = i;
-            done = true;
-          }
-        if (!done)
+        if (!swapToFront(l, h, tmp, p, pI))
           continue;
-        done = false;
-        //cout << "swapping not-in-splitter to end" << endl;
-        for (int i = h; i >= int(l) && !done; i--) {
-          if (!tmp[p[i]]) {
-            std::swap(p[i], p[h]);
-            //cout << "swapping " << i << " and " << h << ": " << show(p) << endl;
-            pI[p[h]] = h;
-            pI[p[i]] = i;
-            done = true;
-          }
-        }
-        if (!done) 
+        if (!swapToBack(l, h, tmp, p, pI)) 
           continue;
-        //cout << "swapping all others" << endl;
-        for (;;) {
-          do j++; while (tmp[p[j]]);
-          do k--; while (!tmp[p[k]]);
-          if (k < j) break;
-          std::swap(p[j], p[k]);
-          //cout << "swapping " << j << " and " << k << ": " << show(p) << endl;
-          pI[p[j]] = j;
-          pI[p[k]] = k;
-        }
-        auto A = make_pair(l,j-1);
-        auto B = make_pair(k+1,h);
-
-        //cout << "B': (" << A.first << "-" << A.second << ")" << endl;
-        //cout << "B'': (" << B.first << "-" << B.second << ")" << endl;
-
-        unsigned int A_size = A.second - A.first + 1;
-        unsigned int B_size = B.second - B.first + 1;
-        auto newIx = c_i.size();
-        stack.push_back(newIx);
-        if (A_size > B_size) {
-          c_i[b] = A;
-          c_i.push_back(B);
-          for (auto i = B.first; i <= B.second; i++)
-            c[i] = newIx;
-          //cout << "Pushing B'' on the stack. Index: " << newIx << endl;
-        } else {
-          c_i[b] = B;
-          c_i.push_back(A);
-          for (auto i = A.first; i <= A.second; i++)
-            c[i] = newIx;
-          //cout << "Pushing B' on the stack. Index: " << newIx << endl;
-        }
+        unsigned int j;
+        unsigned int k;
+        tie(j, k) = swapRest(l, h, tmp, p, pI);
+        update(l, h, j, k, b, c, c_i, stack);
       }
     }
   }
@@ -296,5 +317,6 @@ void DFA::minimize() {
   start = c[pI[start]];
   final = newFinal;
   stateCount = newStateCount;
-  T = newT;
+  T = move(newT);
 }
+

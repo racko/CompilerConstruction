@@ -17,6 +17,8 @@ using std::ostream;
 #include <exception>
 using std::exception;
 
+struct BitSetComplement;
+
 struct BitSet {
   struct ref {
     long long *p;
@@ -63,6 +65,8 @@ struct BitSet {
   BitSet& operator=(const BitSet& s);
   
   BitSet& operator=(BitSet&& s);
+  
+  BitSet& operator=(const BitSetComplement& s);
   
   void resize(unsigned int _n);
   
@@ -124,6 +128,25 @@ namespace std {
   };
 }
 
+inline BitSet::ref BitSet::operator[](unsigned int i) {
+  return BitSet::ref(p, i);
+}
+
+inline BitSet::const_ref BitSet::operator[](unsigned int i) const {
+  return BitSet::const_ref(p, i);
+}
+
+inline unsigned int BitSet::size() const {
+  return n;
+}
+
+inline BitSet::~BitSet() {
+  //cout << "deleting BitSet: " << *this << endl;
+  if (p) {
+    delete p;
+  }
+}
+
 BitSet operator|(const BitSet& lhs, const BitSet& rhs);
 
 BitSet operator&(const BitSet& lhs, const BitSet& rhs);
@@ -177,7 +200,7 @@ inline unsigned int BitSet::sparse_iterator::operator*() const {
 //ostream& operator<<(ostream&, const function<ostream&(ostream&)>&);
 
 inline BitSet::sparse_iterator& BitSet::sparse_iterator::operator++() {
-  int u = next >> 6;
+  unsigned int u = next >> 6;
   long long i = s.p[u] & (0xffffffffffffffffLL << next);
 
   while (true) {
@@ -290,6 +313,19 @@ inline BitSet::sparse_iterator& BitSet::sparse_iterator::operator++() {
 //  cout << *s << endl;
 //  cout << "i = " << i << endl;
 //  return *this;
+}
+
+struct BitSetComplement {
+  const BitSet& s;
+  BitSetComplement(const BitSet&_s) : s(_s) {}
+};
+
+inline BitSet::sparse_iterator BitSet::begin() const {
+  return BitSet::sparse_iterator(*this);
+}
+
+inline BitSet::sparse_iterator BitSet::end() const {
+  return BitSet::sparse_iterator(*this, n);
 }
 
 #endif

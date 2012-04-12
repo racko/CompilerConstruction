@@ -17,9 +17,9 @@ using std::move;
 using std::unordered_map;
 
 int main(int argc, char** args) {
-  auto kickerMask = 0x1FFFLL;
-  auto pairMask = 0x1FFFLL << 13;
-  auto threeKMask = 0x1FFFLL << 26;
+//  auto kickerMask = 0x1FFFLL;
+//  auto pairMask = 0x1FFFLL << 13;
+//  auto threeKMask = 0x1FFFLL << 26;
   auto fourKMask = 0x1FFFLL << 39;
   
   nfaBuilder builder(52); //eps = 52 ... greater than [0..51]
@@ -45,7 +45,7 @@ int main(int argc, char** args) {
   builder.ns[builder.start].ns[builder.eps].push_back(offset);
   ix++;
   
-  while(!stack.empty()) {
+  while(!stack.empty() && ix < 5000) {
     //cout << "stack: " << show(stack) << endl;
     auto ii = stack.back();
     //cout << "considering " << ii << endl;
@@ -203,17 +203,17 @@ int main(int argc, char** args) {
     }
   }
   cout << ix << endl;
-  NFA nfa1(move(builder));
+  NFA* nfa1 = new NFA(move(builder));
   cout << "nfa done" << endl;
-  DFA dfa1(nfa1);
-  return 0;
-  nfa1.~NFA();
+  DFA dfa1(*nfa1);
+  delete nfa1;
   dfa1.minimize();
-  cout << "start: " << dfa1.start << endl;
-  cout << "final: " << show(dfa1.final) << endl;
-  for (unsigned int q = 0; q < dfa1.stateCount; q++) {
-    for (unsigned int a = 0; a < dfa1.symbolCount; a++)
-      cout << "(" << q << "," << a << ") -> " << dfa1.T[q][a] << endl;
-  }
+//  cout << "start: " << dfa1.start << endl;
+//  cout << "final: " << show(dfa1.final) << endl;
+//  for (unsigned int q = 0; q < dfa1.stateCount; q++) {
+//    for (unsigned int a = 0; a < dfa1.symbolCount; a++)
+//      cout << "(" << q << "," << a << ") -> " << dfa1.T[q][a] << endl;
+//  }
+  cout << "The End" << endl;
   return 0;
 }

@@ -19,14 +19,14 @@ int main(int argc, char** args) {
 
   if (argc == 1) {
     cerr << "too few arguments:" << endl;
-    for (unsigned int i = 1; i < argc; i++)
+    for (int i = 1; i < argc; i++)
       cerr << "'" << args[i] << "'" << endl;
     return 1;
   }
 
   stringstream in;
   nfaBuilder builder;
-  for (unsigned int i = 1; i < argc; i++) {
+  for (int i = 1; i < argc; i++) {
     cout << "main: lexRegex(" << args[i] << ")" << endl;
     in << args[i];
     auto p = builder.lexRegex(in);

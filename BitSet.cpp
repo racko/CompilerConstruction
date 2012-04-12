@@ -48,6 +48,8 @@ BitSet& BitSet::operator=(const BitSet& s) {
 
 BitSet& BitSet::operator=(BitSet&& s) {
   //cout << "moving BitSet(" << s << "): ";
+  if (p)
+    delete p;
   n = s.n;
   w = s.w;
   wordsInUse = s.wordsInUse;
@@ -56,6 +58,19 @@ BitSet& BitSet::operator=(BitSet&& s) {
   s.w = 0;
   s.wordsInUse = 0;
   s.p = nullptr;
+  //cout << *this << endl;
+  return *this;
+}
+
+BitSet& BitSet::operator=(const BitSetComplement& rhs) {
+  //cout << "copying BitSet(" << s << "): ";
+  if (n != rhs.s.n) {
+    cerr << "dimensions don't match: " << n << " != " << rhs.s.n << endl;
+    throw exception();
+  }
+
+  for (auto i = 0u; i < wordsInUse; i++)
+    p[i] = ~rhs.s.p[i];
   //cout << *this << endl;
   return *this;
 }
@@ -75,25 +90,6 @@ void BitSet::resize(unsigned int _n) {
     wordsInUse = newWordsInUse;
     p = _p;
   }
-}
-
-BitSet::~BitSet() {
-  //cout << "deleting BitSet: " << *this << endl;
-  if (p) {
-    delete p;
-  }
-}
-
-BitSet::ref BitSet::operator[](unsigned int i) {
-  return BitSet::ref(p, i);
-}
-
-BitSet::const_ref BitSet::operator[](unsigned int i) const {
-  return BitSet::const_ref(p, i);
-}
-
-unsigned int BitSet::size() const {
-  return n;
 }
 
 unsigned int BitSet::count() const {
@@ -123,7 +119,7 @@ unsigned long long BitSet::max() const {
 }
 
 void BitSet::clear() {
-  for (int i = 0; i < wordsInUse; i++)
+  for (unsigned int i = 0; i < wordsInUse; i++)
     p[i] = 0LL;
 }
 
@@ -133,7 +129,7 @@ bool BitSet::operator== (const BitSet& rhs) const {
 
   if (n == 0)
     return true;
-  int u = n >> 6;
+  unsigned int u = n >> 6;
   for (auto i = 0u; i < u; i++)
     if (p[i] != rhs.p[i])
       return false;
@@ -173,14 +169,6 @@ BitSet BitSet::operator~() const {
   return s;
 }
 
-BitSet::sparse_iterator BitSet::begin() const {
-  return BitSet::sparse_iterator(*this);
-}
-
-BitSet::sparse_iterator BitSet::end() const {
-  return BitSet::sparse_iterator(*this, n);
-}
-
 int BitSet::nextSetBit(unsigned int fromIndex) const {
   while (fromIndex < n && !operator[](fromIndex))
     fromIndex++;
@@ -207,7 +195,7 @@ size_t std::hash<BitSet>::operator()(const BitSet &s) const {
   //cout << "hashing " << s << ": ";
   unsigned long long h = 0xBB40E64DA205B064LL;
   unsigned int u = s.n >> 6;
-  int j;
+  unsigned int j;
   char* k;
   for (j = 0, k = (char*)s.p; j < u * sizeof(unsigned long long); j++, k++)
     h = (h * 7664345821815920749LL) ^ hashfn_tab[(unsigned char)(*k)];

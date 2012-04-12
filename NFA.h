@@ -11,17 +11,18 @@ using std::vector;
 using std::pair;
 
 struct NFA {
-  int eps;
+  unsigned int eps;
   unsigned int symbolCount, stateCount, start;
   vector<unsigned int> final;
   vector<vector<BitSet>> table;
   vector<char> symbols;
-  NFA(unsigned int _symbolCount, unsigned int _stateCount, int _eps, unsigned int _start, vector<unsigned int>&& _final) : eps(_eps), symbolCount(_symbolCount), stateCount(_stateCount), start(_start), final(std::forward<vector<unsigned int>>(_final)), symbols(symbolCount) {
+  BitSet newStates;
+  NFA(unsigned int _symbolCount, unsigned int _stateCount, int _eps, unsigned int _start, vector<unsigned int>&& _final) : eps(_eps), symbolCount(_symbolCount), stateCount(_stateCount), start(_start), final(std::forward<vector<unsigned int>>(_final)), symbols(symbolCount), newStates(stateCount) {
     for (unsigned int i = 0; i < symbolCount; i++)
       symbols[i] = i;
   };
   NFA(nfaBuilder&& nfa);
-  void getClosure(BitSet& s) const;
+  void getClosure(BitSet& s);
 };
 
 #endif
