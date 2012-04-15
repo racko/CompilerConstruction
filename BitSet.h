@@ -143,7 +143,7 @@ inline unsigned int BitSet::size() const {
 inline BitSet::~BitSet() {
   //cout << "deleting BitSet: " << *this << endl;
   if (p) {
-    delete p;
+    delete[] p;
   }
 }
 
