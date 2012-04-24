@@ -17,6 +17,7 @@ using std::pair;
 #include <iostream>
 using std::cerr;
 using std::cout;
+using std::cin;
 #include <iomanip>
 using std::endl;
 #include <ios>
@@ -61,22 +62,23 @@ struct Lexer {
     // TODO: make sure c points to input?
     auto c0 = c, c1 = c;
     while(*c != EOF && s != dfa.deadState) {
-      cout << "got '" << *c << "'" << endl;
+      cout << "got '" << (int)*c << "'" << endl;
       s = dfa.T[s][dfa.symbolToId[*c]];
       if (dfa.final[s]) {
         f = dfa.final[s];
         c1 = c;
       }
       cout << "new state " << s << ", type " << dfa.final[s] << ", last final: " << f << endl;
-      cout << "read " << (c1 - c + 1) << ", current token length: " << (c1 - c0 + 1) << endl;
+      cout << "read " << (c - c0 + 1) << ", current token length: " << (c1 - c0 + 1) << endl;
       c++;
-      cin.get();
+      //cin.get();
     }
     if (*c == EOF)
       cout << "got EOF" << endl;
     if (s == dfa.deadState)
       cout << "ran into dead end" << endl;
     if (f != 0) {
+      c = c1 + 1;
       return action(c0, c1 - c0 + 1, f);
     } else {
       cerr << "Lexical error" << endl;

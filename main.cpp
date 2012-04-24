@@ -66,7 +66,7 @@ int main(int argc, char** args) {
   cin.get(lex.c, 4096);
   auto ll = cin.gcount();
   cout << "read " << ll << " characters" << endl;
-  lex.c[ll] = '\0';
+  lex.c[ll] = EOF;
   while (*lex.c != EOF) {
     string s = lex.getToken();
     cout << "\ngot \"" << s << "\"" << endl;
