@@ -14,6 +14,16 @@ using std::hex;
 #include <sstream>
 using std::stringstream;
 using std::move;
+#include <string>
+using std::string;
+
+struct myLexer : public Lexer<string> {
+  myLexer(const DFA& dfa) : Lexer(dfa) {}
+  string action(char* s, unsigned int n, unsigned int t) {
+    cout << "action(" << n << ", " << t << ")" << endl;
+    return string(s, n);
+  }
+};
 
 int main(int argc, char** args) {
 
@@ -51,6 +61,15 @@ int main(int argc, char** args) {
   for (unsigned int q = 0; q < dfa1.stateCount; q++) {
     for (unsigned int a = 0; a < dfa1.symbolCount; a++)
       cout << "(" << q << "," << a << ") -> " << dfa1.T[q][a] << endl;
+  }
+  myLexer lex(dfa1);
+  cin.get(lex.c, 4096);
+  auto ll = cin.gcount();
+  cout << "read " << ll << " characters" << endl;
+  lex.c[ll] = '\0';
+  while (*lex.c != EOF) {
+    string s = lex.getToken();
+    cout << "\ngot \"" << s << "\"" << endl;
   }
   return 0;
 }

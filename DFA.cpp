@@ -125,14 +125,16 @@ DFA::DFA(NFA& nfa) : symbolCount(nfa.symbolCount - 1), symbolToId(128,symbolCoun
   final.resize(stateCount, 0);
   for (unsigned int q = 0; q < stateCount; q++) {
     const BitSet& U = idToState[q];
-    cout << "checking " << q << ": " << U << endl;
-    for (auto s = U.begin(); s != U.end(); ++s)
+    cout << "checking dfa state " << q << ": " << U << endl;
+    for (auto s = U.begin(); s != U.end(); ++s) {
+      //cout << "checking nfa state " << *s << endl;
       if (nfa.final[*s] != 0 && final[q] == 0) {
         final[q] = nfa.final[*s];
         cout << "dfa.final[" << q << "] = " << "nfa.final[" << *s << "] = " << nfa.final[*s] << endl;
       } else if (nfa.final[*s] != 0) {
         cout << "dfa.final[" << q << "] is ambiguous. Might also be nfa.final[" << *s << "] = " << nfa.final[*s] << endl;
       }
+    }
   }
 }
 
@@ -318,5 +320,33 @@ void DFA::minimize() {
   final = newFinal;
   stateCount = newStateCount;
   T = move(newT);
+  determineDeadState();
 }
 
+void DFA::determineDeadState() {
+  cout << "determineDeadState" << endl;
+  bool found = false;
+  for(auto q = 0u; q < stateCount && !found; q++) {
+    cout << "checking state " << q << endl;
+    if (!final[q]) {
+      cout << "not final ..." << endl;
+      bool dead = true;
+      for (auto a = 0u; a < symbolCount && dead; a++)
+        if (T[q][a] != q) {
+          dead = false;
+          cout << "T[" << q << "][" << a << "] != " << q << " = > not dead" << endl;
+        }
+      if (dead) {
+        deadState = q;
+        found = true;
+        cout << q << " is the dead state" << endl;
+      }
+    } else {
+      cout << "final => not dead" << endl;
+    }
+  }
+  if (!found) {
+    cout << "there is no dead state" << endl;
+    deadState = stateCount;
+  }
+}

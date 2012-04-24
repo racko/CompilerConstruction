@@ -249,7 +249,7 @@ inline BitSet::sparse_iterator& BitSet::sparse_iterator::operator++() {
       return *this;
     }
     if (++u == s.wordsInUse) {
-      next = s.n;
+      next = s.n + 1;
       //cout << "reached end" << endl;
       return *this;
     }
@@ -325,7 +325,7 @@ inline BitSet::sparse_iterator BitSet::begin() const {
 }
 
 inline BitSet::sparse_iterator BitSet::end() const {
-  return BitSet::sparse_iterator(*this, n);
+  return BitSet::sparse_iterator(*this, n + 1);
 }
 
 #endif

@@ -40,10 +40,21 @@ int main(int argc, char** args) {
   stateToId[idToState[ix]] = ix;
   vector<unsigned int> stack;
   stack.push_back(ix);
+  ix++;
   int offset = builder.ns.size();
   builder.ns.emplace_back();
   builder.ns[builder.start].ns[builder.eps].push_back(offset);
-  ix++;
+  //straight flush
+  for (unsigned int c = 0; c < 4; c++) {
+    
+  }
+  //flush
+  
+  //straight
+  
+  offset = builder.ns.size();
+  builder.ns.emplace_back();
+  builder.ns[builder.start].ns[builder.eps].push_back(offset);
   
   while(!stack.empty() && ix < 5000) {
     //cout << "stack: " << show(stack) << endl;

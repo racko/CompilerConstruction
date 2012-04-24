@@ -1,6 +1,7 @@
 #ifndef _REGEX_H_
 #define _REGEX_H_
 
+#include "DFA.h"
 #include <ostream>
 using std::ostream;
 #include <vector>
@@ -13,6 +14,15 @@ using std::istream;
 using std::filebuf;
 #include <tuple>
 using std::pair;
+#include <iostream>
+using std::cerr;
+using std::cout;
+#include <iomanip>
+using std::endl;
+#include <ios>
+using std::ios_base;
+#include <exception>
+using std::exception;
 
 template<class T>
 ostream& showVector(const vector<T>& v, ostream& os);
@@ -33,11 +43,46 @@ ostream& showVector<bool>(const vector<bool>& v, ostream& os);
 
 template<class T>
 struct Lexer {
-  istream& in;
-  virtual T action(const char*, unsigned int, unsigned int) = 0;
+  char a[4096];
+  char b[4096];
+  char *p1, *p2, *c;
+  const DFA& dfa;
+  virtual T action(char*, unsigned int, unsigned int) = 0;
 
-  Lexer(istream& _in) : in(_in) {};
-  T getToken() final { return T(); };
+  Lexer(const DFA& _dfa) : p1(a), p2(b), c(p1), dfa(_dfa) {
+    a[4095] = '\0';
+    b[4095] = '\0';
+  };
+  virtual T getToken() final {
+    cout << "entered getToken()" << endl;
+    auto s = dfa.start;
+    auto f = dfa.final[s];
+    cout << "starting in state " << s << ", type " << f << endl;
+    // TODO: make sure c points to input?
+    auto c0 = c, c1 = c;
+    while(*c != EOF && s != dfa.deadState) {
+      cout << "got '" << *c << "'" << endl;
+      s = dfa.T[s][dfa.symbolToId[*c]];
+      if (dfa.final[s]) {
+        f = dfa.final[s];
+        c1 = c;
+      }
+      cout << "new state " << s << ", type " << dfa.final[s] << ", last final: " << f << endl;
+      cout << "read " << (c1 - c + 1) << ", current token length: " << (c1 - c0 + 1) << endl;
+      c++;
+      cin.get();
+    }
+    if (*c == EOF)
+      cout << "got EOF" << endl;
+    if (s == dfa.deadState)
+      cout << "ran into dead end" << endl;
+    if (f != 0) {
+      return action(c0, c1 - c0 + 1, f);
+    } else {
+      cerr << "Lexical error" << endl;
+      throw exception();
+    }
+  };
 
 };
 #endif
