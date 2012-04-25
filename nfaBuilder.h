@@ -31,6 +31,7 @@ struct nfaBuilder {
   pair<unsigned int,unsigned int> cat(pair<unsigned int,unsigned int> nfa1, pair<unsigned int,unsigned int> nfa2);
 
   void match(istream& in, char c);
+  char lexH(istream& in);
   pair<unsigned int,unsigned int> lexG(istream& in);
   pair<unsigned int,unsigned int> lexFR(istream& in, pair<unsigned int,unsigned int> nfa1);
   pair<unsigned int,unsigned int> lexF(istream& in);

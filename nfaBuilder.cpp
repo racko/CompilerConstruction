@@ -61,6 +61,29 @@ void nfaBuilder::match(istream& in, char c) {
   }
 }
 
+char nfaBuilder::lexH(istream& in) {
+  char c = in.peek();
+  cout << "lexH (peek: '" << c << "')" << endl;
+  switch (c) {
+    case '\\':
+    case '|':
+    case '*':
+    case '(':
+    case ')':
+      match(in, c);
+      return c;
+    case 'n':
+      match(in, c);
+      return '\n';
+    case 't':
+      match(in, c);
+      return '\t';
+    default:
+      cerr << "lexH Error: '" << c << "'" << endl;
+      throw exception();
+  }
+}
+
 pair<unsigned int,unsigned int> nfaBuilder::lexG(istream& in) {
   char c = in.peek();
   cout << "lexG (peek: '" << c << "')" << endl;
@@ -72,6 +95,25 @@ pair<unsigned int,unsigned int> nfaBuilder::lexG(istream& in) {
         match(in, ')');
         cout << "lexG out: " << show(nfa1) << endl;
         return nfa1;
+      }
+    case '\\':
+      {
+        match(in, c);
+        char _c = lexH(in);
+        auto out = getPair();
+
+        auto it = symbolToId.find(_c);
+        unsigned int id;
+        if (it == symbolToId.end()) {
+          id = symbolToId.size();
+          cout << "new symbol: '" << _c << "' (id: " << id << ")" << endl;
+          symbolToId[_c] = id;
+          idToSymbol.push_back(_c);
+        } else
+          id = it->second;
+        ns[out.first].ns[id].push_back(out.second);
+        cout << "lexG out: " << show(out) << endl;
+        return out;
       }
     case '|':
     case EOF:
@@ -107,7 +149,8 @@ pair<unsigned int,unsigned int> nfaBuilder::lexFR(istream& in, pair<unsigned int
     case '*':
       {
         match(in, '*');
-        auto out = closure(nfa1);
+        auto nfa2 = closure(nfa1);
+        auto out = lexFR(in, nfa2);
         cout << "lexFR out: " << show(out) << endl;
         return out;
       }
