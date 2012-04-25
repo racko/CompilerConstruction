@@ -167,7 +167,7 @@ int main(int argc, char** args) {
   cout << "read " << ll << " characters" << endl;
   lex.c[ll] = EOF;
   Parser pp(lex);
-  cout << *pp.parse();
+  cout << *pp.parse() << endl;
 //  while (*lex.c != EOF) {
 //    Token* t = lex.getToken();
 //    cout << "\ngot \"";

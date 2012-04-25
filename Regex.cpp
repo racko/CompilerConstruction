@@ -6,6 +6,8 @@ using std::pair;
 #include <iomanip>
 using std::hex;
 using std::dec;
+#include <string>
+using std::string;
 
 template <class T>
 ostream& showVector(const vector<T>& v, ostream& s) {
@@ -103,6 +105,7 @@ ostream& showVector(const vector<pair<unsigned int,unsigned int>>& v, ostream& s
 template function<ostream&(ostream&)> show<unsigned int>(const vector<unsigned int>& v);
 template function<ostream&(ostream&)> show<bool>(const vector<bool>& v);
 template function<ostream&(ostream&)> show<char>(const vector<char>& v);
+template function<ostream&(ostream&)> show<string>(const vector<string>& v);
 template function<ostream&(ostream&)> bin<long long>(long long x);
 template function<ostream&(ostream&)> bin<unsigned long long>(unsigned long long x);
 template function<ostream&(ostream&)> show<unsigned int, unsigned int>(const pair<unsigned int, unsigned int>& p);

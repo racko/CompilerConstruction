@@ -3,6 +3,8 @@
 
 #include "lexer.h"
 using std::forward;
+#include <vector>
+using std::vector;
 
 struct AST_Node {
   virtual ~AST_Node() {}
@@ -11,20 +13,20 @@ struct AST_Node {
 
 ostream& operator<<(ostream& s, AST_Node& n) {
   n.writeTo(s);
-  return s << endl;
+  return s;
 }
 
 struct AbsNode : public AST_Node {
-  string id;
+  vector<string> id;
   AST_Node* body;
-  AbsNode(string&& _id, AST_Node* _body) : id(forward<string>(_id)), body(_body) {}
+  AbsNode(vector<string>&& _id, AST_Node* _body) : id(forward<vector<string>>(_id)), body(_body) {}
   ~AbsNode() {
     if (body)
       delete body;
   }
 
   void writeTo(ostream& s) {
-    s << "\\ " << id << " . (";
+    s << "\\ " << show(id) << " . (";
     body->writeTo(s);
     s << ")";
   }
@@ -97,6 +99,41 @@ struct Parser {
     return tmp;
   }
 
+  void parseDR(vector<string>& ids) {
+    cout << "parseDR(" << show(ids) << ")" << endl;
+    switch (t->tag) {
+      case (unsigned)Token::type::VAR:
+        {
+          Var* id = dynamic_cast<Var*>(match((unsigned)Token::type::VAR)); //TODO: static_cast, if not debugging
+          ids.emplace_back(std::move(id->val));
+          delete id;
+          parseDR(ids);
+          return;
+        }
+      case '.':
+        return;
+      default:
+        cerr << "Error: " << t->tag << endl;
+        throw exception();
+    }
+  }
+  vector<string> parseD() {
+    cout << "parseD()" << endl;
+    switch (t->tag) {
+      case (unsigned)Token::type::VAR:
+        {
+          Var* id = dynamic_cast<Var*>(match((unsigned)Token::type::VAR)); //TODO: static_cast, if not debugging
+          vector<string> ids{std::move(id->val)};
+          delete id;
+          parseDR(ids);
+          return ids;
+        }
+      default:
+        cerr << "Error: " << t->tag << endl;
+        throw exception();
+    }
+  }
+
   AST_Node* parseC() {
     cout << "parseC()" << endl;
     switch (t->tag) {
@@ -163,11 +200,9 @@ struct Parser {
       case '\\':
         {
           ignoreMatch('\\');
-          Var* id = dynamic_cast<Var*>(match((unsigned)Token::type::VAR)); //TODO: static_cast, if not debugging
+          auto ids = parseD();
           ignoreMatch('.');
-          AST_Node* n = new AbsNode(std::move(id->val), parseA());
-          delete id;
-          return n;
+          return new AbsNode(std::move(ids), parseA());
         }
       case '(':
       case (unsigned)Token::type::VAR:
