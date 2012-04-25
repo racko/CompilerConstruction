@@ -54,6 +54,8 @@ struct Lexer {
     a[4095] = '\0';
     b[4095] = '\0';
   };
+  
+  virtual T eofToken() = 0;
   virtual T getToken() final {
     cout << "entered getToken()" << endl;
     auto s = dfa.start;
@@ -63,7 +65,12 @@ struct Lexer {
     auto c0 = c, c1 = c;
     while(*c != EOF && s != dfa.deadState) {
       cout << "got '" << (int)*c << "'" << endl;
-      s = dfa.T[s][dfa.symbolToId[*c]];
+      auto _c = dfa.symbolToId.at(*c);
+      if (_c == dfa.symbolCount) {
+        cout << "invalid symbol '" << (int)*c << "'" << endl;
+        throw exception();
+      }
+      s = dfa.T[s][_c];
       if (dfa.final[s]) {
         f = dfa.final[s];
         c1 = c;
@@ -80,6 +87,8 @@ struct Lexer {
     if (f != 0) {
       c = c1 + 1;
       return action(c0, c1 - c0 + 1, f);
+    } else if (*c == EOF) {
+      return eofToken();
     } else {
       cerr << "Lexical error" << endl;
       throw exception();

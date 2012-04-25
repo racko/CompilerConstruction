@@ -56,7 +56,7 @@ void nfaBuilder::match(istream& in, char c) {
   cout << "match('" << c << "')" << endl;
   char d = in.get();
   if (d != c) {
-    cerr << "expected '" << c << "'" << ", got '" << d << "'" << endl;
+    cerr << "expected '" << c << "', got '" << d << "'" << endl;
     throw exception();
   }
 }
