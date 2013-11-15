@@ -155,13 +155,13 @@ ostream& operator<<(ostream&, const BitSet&);
 
 void testBitSet();
 
-inline BitSet::ref::ref(long long* _p, unsigned int i) : p(_p), w(i >> 6), m(0x1ULL << i) {};
+inline BitSet::ref::ref(long long* _p, unsigned int i) : p(_p), w(i >> 6), m(0x1ULL << i) {}
 
 inline BitSet::ref::operator bool () const {
   return p[w] & m;
 }
 
-inline BitSet::const_ref::const_ref(const long long* _p, unsigned int i) : p(_p), w(i >> 6), m(0x1ULL << i) {};
+inline BitSet::const_ref::const_ref(const long long* _p, unsigned int i) : p(_p), w(i >> 6), m(0x1ULL << i) {}
 
 inline BitSet::const_ref::operator bool () const {
   return p[w] & m;

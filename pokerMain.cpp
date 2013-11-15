@@ -214,7 +214,7 @@ int main(int argc, char** args) {
     }
   }
   cout << ix << endl;
-  NFA* nfa1 = new NFA(move(builder));
+  NFA* nfa1 = new NFA(builder);
   cout << "nfa done" << endl;
   DFA dfa1(*nfa1);
   delete nfa1;

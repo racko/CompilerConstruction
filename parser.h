@@ -8,10 +8,10 @@ using std::vector;
 
 struct AST_Node {
   virtual ~AST_Node() {}
-  virtual void writeTo(ostream&) = 0;
+  virtual void writeTo(ostream&) const = 0;
 };
 
-ostream& operator<<(ostream& s, AST_Node& n) {
+ostream& operator<<(ostream& s, const AST_Node& n) {
   n.writeTo(s);
   return s;
 }
@@ -27,7 +27,7 @@ struct PNode : public AST_Node {
       delete scs;
   }
 
-  void writeTo(ostream& s) {
+  void writeTo(ostream& s) const {
     sc->writeTo(s);
     s << ";\n";
     scs->writeTo(s);
@@ -44,7 +44,7 @@ struct SNode : public AST_Node {
       delete body;
   }
 
-  void writeTo(ostream& s) {
+  void writeTo(ostream& s) const {
     s << id << " " << show(ids) << " = ";
     body->writeTo(s);
   }
@@ -62,7 +62,7 @@ struct LetNode : public AST_Node {
       delete l;
   }
 
-  void writeTo(ostream& s) {
+  void writeTo(ostream& s) const {
     s << (rec ? "letrec " : "let ");
     p->writeTo(s);
     s << " in ";
@@ -79,7 +79,7 @@ struct AbsNode : public AST_Node {
       delete body;
   }
 
-  void writeTo(ostream& s) {
+  void writeTo(ostream& s) const {
     s << "\\ " << show(id) << " . (";
     body->writeTo(s);
     s << ")";
@@ -97,7 +97,7 @@ struct AppNode : public AST_Node {
       delete b;
   }
 
-  void writeTo(ostream&s) {
+  void writeTo(ostream&s) const {
     s << "App (";
     a->writeTo(s);
     s << ") (";
@@ -109,7 +109,7 @@ struct AppNode : public AST_Node {
 struct VarNode : public AST_Node {
   string id;
   VarNode(string&& _id) : id(forward<string>(_id)) {}
-  void writeTo(ostream&s) {
+  void writeTo(ostream&s) const {
     s << "Var " << id;
   }
 };
@@ -117,7 +117,7 @@ struct VarNode : public AST_Node {
 struct NumNode : public AST_Node {
   unsigned long long n;
   NumNode(unsigned long long _n) : n(_n) {}
-  void writeTo(ostream&s) {
+  void writeTo(ostream&s) const {
     s << "Num " << n;
   }
 };
@@ -153,6 +153,7 @@ struct Parser {
     return tmp;
   }
 
+  // DR -> var DR | eps
   void parseDR(vector<string>& ids) {
     cout << "parseDR(" << show(ids) << ")" << endl;
     switch (t->tag) {
@@ -172,6 +173,8 @@ struct Parser {
         throw exception();
     }
   }
+
+  // D -> var DR
   vector<string> parseD() {
     cout << "parseD()" << endl;
     switch (t->tag) {
@@ -189,6 +192,7 @@ struct Parser {
     }
   }
 
+  // C -> (A) | var | num
   AST_Node* parseC() {
     cout << "parseC()" << endl;
     switch (t->tag) {
@@ -219,6 +223,7 @@ struct Parser {
     }
   }
 
+  // BR -> C BR | eps
   AST_Node* parseBR(AST_Node* a) {
     cout << "parseBR()" << endl;
     switch (t->tag) {
@@ -236,6 +241,7 @@ struct Parser {
     }
   }
 
+  // B -> C BR
   AST_Node* parseB() {
     cout << "parseB()" << endl;
     switch (t->tag) {
@@ -249,6 +255,7 @@ struct Parser {
     }
   }
 
+  // L -> let P in L | letrec P in L | B
   AST_Node* parseL() {
     cout << "parseL()" << endl;
     bool rec = false;
@@ -273,6 +280,7 @@ struct Parser {
     }
   }
 
+  // A -> \ D . A | L
   AST_Node* parseA() {
     cout << "parseA()" << endl;
     switch (t->tag) {
@@ -295,6 +303,7 @@ struct Parser {
     }
   }
 
+  // S -> var DR = A
   AST_Node* parseS() {
     cout << "parseS()" << endl;
     switch (t->tag) {
@@ -315,6 +324,7 @@ struct Parser {
     }
   }
 
+  // PR -> S ; PR | eps
   AST_Node* parsePR(AST_Node* a) {
     cout << "parsePR()" << endl;
     switch (t->tag) {
@@ -333,6 +343,7 @@ struct Parser {
     }
   }
 
+  // P -> S ; PR
   AST_Node* parseP() {
     cout << "parseP()" << endl;
     switch (t->tag) {

@@ -106,8 +106,8 @@ ostream& operator<<(ostream&, const HashSet&);
 
 void testHashSet();
 
-inline HashSet::ref::ref(unordered_set<unsigned int>& _s, unsigned int _i) : s(_s), i(_i) {};
-inline HashSet::const_ref::const_ref(const unordered_set<unsigned int>& _s, unsigned int _i) : s(_s), i(_i) {};
+inline HashSet::ref::ref(unordered_set<unsigned int>& _s, unsigned int _i) : s(_s), i(_i) {}
+inline HashSet::const_ref::const_ref(const unordered_set<unsigned int>& _s, unsigned int _i) : s(_s), i(_i) {}
 
 inline HashSet::ref::operator bool () const {
   return s.count(i) > 0;

@@ -99,6 +99,44 @@ ostream& showVector(const vector<pair<unsigned int,unsigned int>>& v, ostream& s
   return s;
 }
 
+function<ostream&(ostream&)> showChar(char c) {
+  // TODO: Put all 256 values into an array?
+  static const char* const controlChars[] = { "EOF", "NUL", "SOH", "STX", "ETX", "EOT", "ENQ", "ACK", "BEL", "BS", "HT", "LF", "VT", "FF", "CR", "SO", "SI", "DLE", "DC1", "DC2", "DC3", "DC4", "NAK", "SYN", "ETB", "CAN", "EM", "SUB", "ESC", "FS", "GS", "RS", "US", "SPACE" };
+  return [c] (ostream& s) -> ostream& {
+    if (c < -1 || c > 127)
+      s << (int)c;
+    else if (c < 33)
+      s << controlChars[c + 1];
+    else if (c == 127)
+      s << "DEL";
+    else
+      s << c;
+
+    return s;
+  };
+}
+
+function<ostream&(ostream&)> showCharEscaped(char c) {
+  // TODO: Put all 256 values into an array?
+  static const char* const controlChars[] = { "EOF", "NUL", "SOH", "STX", "ETX", "EOT", "ENQ", "ACK", "BEL", "BS", "HT", "LF", "VT", "FF", "CR", "SO", "SI", "DLE", "DC1", "DC2", "DC3", "DC4", "NAK", "SYN", "ETB", "CAN", "EM", "SUB", "ESC", "FS", "GS", "RS", "US", "SPACE" };
+  return [c] (ostream& s) -> ostream& {
+    if (c < -1 || c > 127)
+      s << (int)c;
+    else if (c < 33)
+      s << controlChars[c + 1];
+    else if (c == 127)
+      s << "DEL";
+    else if (c == '"')
+      s << "\\\"";
+    else if (c == '\\')
+      s << "BSL";
+    else
+      s << c;
+
+    return s;
+  };
+}
+
 //template ostream& showVector<unsigned int>(const vector<unsigned int>& v, ostream& s);
 //template ostream& showVector<bool>(const vector<bool>& v, ostream& s);
 //template ostream& showVector<pair<unsigned int,unsigned int>>(const vector<pair<unsigned int,unsigned int>>& v, ostream& s);

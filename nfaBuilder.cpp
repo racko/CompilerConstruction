@@ -9,7 +9,7 @@ using std::endl;
 using std::exception;
 
 
-nfaBuilder::nfaBuilder() : nfaBuilder(0) {};
+nfaBuilder::nfaBuilder() : nfaBuilder(0) {}
 
 nfaBuilder::nfaBuilder(unsigned int _eps) : start(0), eps(_eps) {
   ns.emplace_back();

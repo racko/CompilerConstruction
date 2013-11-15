@@ -31,6 +31,9 @@ ostream& showVector(const vector<T>& v, ostream& os);
 template<class T>
 function<ostream&(ostream&)> show(const vector<T>& v);
 
+function<ostream&(ostream&)> showChar(char c);
+function<ostream&(ostream&)> showCharEscaped(char c); // this should be given a set of chars to be replaced
+
 template<class T>
 function<ostream&(ostream&)> bin(T x);
 
@@ -47,13 +50,14 @@ struct Lexer {
   char a[4096];
   char b[4096];
   char *p1, *p2, *c;
-  const DFA& dfa;
+  DFA dfa;
   virtual T action(char*, unsigned int, unsigned int) = 0;
 
-  Lexer(const DFA& _dfa) : p1(a), p2(b), c(p1), dfa(_dfa) {
+  template<class T1>
+  Lexer(T1&& _dfa) : p1(a), p2(b), c(p1), dfa(std::forward<T1>(_dfa)) {
     a[4095] = '\0';
     b[4095] = '\0';
-  };
+  }
   
   virtual T eofToken() = 0;
   virtual T getToken() final {
@@ -93,7 +97,8 @@ struct Lexer {
       cerr << "Lexical error" << endl;
       throw exception();
     }
-  };
+  }
 
+  virtual ~Lexer() {}
 };
 #endif

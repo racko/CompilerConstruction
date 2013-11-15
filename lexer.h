@@ -16,6 +16,8 @@ using std::string;
 using std::array;
 #include <sstream>
 using std::stringstream;
+#undef NDEBUG
+#include <cassert>
 
 struct Token {
   enum struct type : unsigned int {
@@ -33,7 +35,7 @@ struct Token {
   unsigned int tag;
   Token(unsigned int t) : tag(t) {}
   virtual ~Token() {}
-  virtual void print(ostream& s) = 0;
+  virtual void print(ostream& s) const = 0;
 };
 
 template<class T>
@@ -41,16 +43,17 @@ struct TokenBase : public Token {
   T val;
   
   TokenBase(unsigned int t, const T& v) : Token(t), val(v) {
-    cout << "TokenBase: copy constructor" << endl;
+    cout << "TokenBase(" << t << ", \"" << v << "\")" << endl;
   }
-  virtual void print(ostream& s) {
+
+  virtual void print(ostream& s) const {
     s << val;
   }
 };
 
 struct Keyword : public TokenBase<string> {
-  static array<string, 3> strs;
-  Keyword(unsigned int op) : TokenBase<string>(op, op >= unsigned(Token::type::LET) && op <= unsigned(Token::type::LETREC) ? strs[op - unsigned(Token::type::LET)] : nullptr) {
+  static const array<string, 3> strs;
+  Keyword(unsigned int op) : TokenBase<string>(op, op >= unsigned(Token::type::LET) && op <= unsigned(Token::type::LETREC) ? strs[op - unsigned(Token::type::LET)] : "") {
     if (op < unsigned(Token::type::LET) || op > unsigned(Token::type::LETREC)) {
       cerr << "invalid keyword: " << op << endl;
       throw exception();
@@ -58,11 +61,11 @@ struct Keyword : public TokenBase<string> {
   }
 };
 
-array<string, 3> Keyword::strs = {{"let", "in", "letrec"}};
+const array<string, 3> Keyword::strs{{"let", "in", "letrec"}};
 
 struct BinOp : public TokenBase<string> {
-  static array<string, 4> strs;
-  BinOp(unsigned int op) : TokenBase<string>(op, op >= (unsigned)Token::type::LE && op <= (unsigned)Token::type::GE ? strs[op - (unsigned)Token::type::LE] : op < 256 ? string(1, (char)op) : nullptr) {
+  static const array<string, 4> strs;
+  BinOp(unsigned int op) : TokenBase<string>(op, op >= (unsigned)Token::type::LE && op <= (unsigned)Token::type::GE ? strs[op - (unsigned)Token::type::LE] : op < 256 ? string(1, (char)op) : "") {
     if ((op < (unsigned)Token::type::LE || op > (unsigned)Token::type::GE) && op >= 256) {
       cerr << "invalid binop: " << op << endl;
       throw exception();
@@ -70,7 +73,7 @@ struct BinOp : public TokenBase<string> {
   }
 };
 
-array<string, 4> BinOp::strs = {{"<=", "==", "!=", ">="}};
+const array<string, 4> BinOp::strs = {{"<=", "==", "!=", ">="}};
 
 struct Num : public TokenBase<unsigned long long> {
   Num(unsigned long long n) : TokenBase<unsigned long long>((unsigned)Token::type::NUM, n) {}
@@ -89,21 +92,21 @@ struct Whitespace : public TokenBase<char> {
 };
 
 struct myLexer : public Lexer<Token*> {
-  vector<unsigned int> m;
-  myLexer(const DFA& dfa)
-    : Lexer(dfa),
-      m{0, ';', '=', '.', '(', ')', '+', '-', '*', '/', '<', '>', '&', '|', '\\',
-        (unsigned)Token::type::LE, (unsigned)Token::type::EQ, (unsigned)Token::type::NE, (unsigned)Token::type::GE,
-        (unsigned)Token::type::LET, (unsigned)Token::type::IN, (unsigned)Token::type::LETREC,
-        (unsigned)Token::type::VAR, (unsigned)Token::type::NUM, (unsigned)Token::type::WS} {}
+  static const vector<unsigned int> m;
+
+  template<class T>
+  myLexer(T&& dfa) : Lexer(std::forward<T>(dfa)) {}
+
   Token* eofToken() {
     return new Other(EOF);
   }
+
   Token* action(char* s, unsigned int n, unsigned int t) {
     cout << "action(\"";
     cout.write(s, n);
     cout << "\", " << n << ", " << t << ")" << endl;
     Token* tok;
+    assert(t < m.size());
     unsigned int c = m[t];
     switch(c) {
       case ';':
@@ -155,5 +158,10 @@ struct myLexer : public Lexer<Token*> {
     return tok;
   }
 };
+
+const vector<unsigned int> myLexer::m{0, ';', '=', '.', '(', ')', '+', '-', '*', '/', '<', '>', '&', '|', '\\',
+    (unsigned)Token::type::LE, (unsigned)Token::type::EQ, (unsigned)Token::type::NE, (unsigned)Token::type::GE,
+    (unsigned)Token::type::LET, (unsigned)Token::type::IN, (unsigned)Token::type::LETREC,
+    (unsigned)Token::type::VAR, (unsigned)Token::type::NUM, (unsigned)Token::type::WS};
 
 #endif

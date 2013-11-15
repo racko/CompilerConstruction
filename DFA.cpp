@@ -25,7 +25,7 @@ using std::cref;
 using std::move;
 using std::tie;
 
-DFA::DFA(NFA& nfa) : symbolCount(nfa.symbolCount - 1), symbolToId(128,symbolCount) {
+DFA::DFA(const NFA& nfa) : symbolCount(nfa.symbolCount - 1), deadState(stateCount), symbolToId(128,symbolCount), idToSymbol(128,symbolCount) {
   cout << "DFA constructor" << endl;
   cout << "stateCount = " << nfa.stateCount << endl;
   cout << "symbolCount = " << symbolCount << endl;
@@ -35,6 +35,7 @@ DFA::DFA(NFA& nfa) : symbolCount(nfa.symbolCount - 1), symbolToId(128,symbolCoun
     if (i != nfa.eps) {
       symbolMap[i] = nonEpsSymbol;
       symbolToId[nfa.symbols[i]] = nonEpsSymbol;
+      idToSymbol[nonEpsSymbol] = nfa.symbols[i];
       nonEpsSymbol++;
     }
 
@@ -66,10 +67,11 @@ DFA::DFA(NFA& nfa) : symbolCount(nfa.symbolCount - 1), symbolToId(128,symbolCoun
       T.resize(q + 1, vector<unsigned int>(symbolCount));
     for (unsigned int a = 0; a < nfa.symbolCount; a++) {
       if (a != nfa.eps) {
-        auto& p = idToState[q];
+        const auto& p = idToState[q];
         //cout << "Constructing delta(" << p << "," << a << ")" << endl;
         BitSet U(nfa.stateCount, false);
-        for (auto s = p.begin(); s != p.end(); ++s) {
+        auto p_end = p.end();
+        for (auto s = p.begin(); s != p_end; ++s) {
           //cout << "collecting T[" << *s << "][" << a << "] = " << nfa.table[*s][a] << endl;
           U |= nfa.table[*s][a];
         }
@@ -126,7 +128,8 @@ DFA::DFA(NFA& nfa) : symbolCount(nfa.symbolCount - 1), symbolToId(128,symbolCoun
   for (unsigned int q = 0; q < stateCount; q++) {
     const BitSet& U = idToState[q];
     cout << "checking dfa state " << q << ": " << U << endl;
-    for (auto s = U.begin(); s != U.end(); ++s) {
+    auto u_end = U.end();
+    for (auto s = U.begin(); s != u_end; ++s) {
       //cout << "checking nfa state " << *s << endl;
       if (nfa.final[*s] != 0 && final[q] == 0) {
         final[q] = nfa.final[*s];
@@ -136,6 +139,8 @@ DFA::DFA(NFA& nfa) : symbolCount(nfa.symbolCount - 1), symbolToId(128,symbolCoun
       }
     }
   }
+
+  determineDeadState();
 }
 
 bool swapToFront(unsigned int l, unsigned int h, const BitSet& tmp, vector<unsigned int>& p, vector<unsigned int>& pI) {
@@ -317,7 +322,7 @@ void DFA::minimize() {
     newFinal[q] = final[p[s]];
   }
   start = c[pI[start]];
-  final = newFinal;
+  final = move(newFinal);
   stateCount = newStateCount;
   T = move(newT);
   determineDeadState();
@@ -349,4 +354,20 @@ void DFA::determineDeadState() {
     cout << "there is no dead state" << endl;
     deadState = stateCount;
   }
+}
+
+std::ostream& operator<<(std::ostream& s, const DFA& dfa) {
+  s << "digraph G {\n";
+  for (unsigned int p = 0; p < dfa.stateCount; p++) {
+    if (p == dfa.deadState)
+      continue;
+
+    if (dfa.final[p])
+      s << "  " << p << "[shape = doublecircle];\n";
+    for (auto a = 0u; a < dfa.symbolCount; ++a)
+      if (dfa.T[p][a] != dfa.deadState)
+        s << "  " << p << " -> " << dfa.T[p][a] << " [label = \"" << showCharEscaped(dfa.idToSymbol[a]) << "\"];\n";
+  }
+  s << "}\n";
+  return s;
 }

@@ -6,6 +6,7 @@ using std::vector;
 #include <ctime>
 using std::time;
 using std::forward;
+using std::move;
 #include <cmath>
 
 BitSet::BitSet() {
@@ -25,7 +26,7 @@ BitSet::BitSet(unsigned int _n, const bool x) : n(_n), w((n + 63) >> 6), wordsIn
 }
 
 BitSet::BitSet(BitSet&& s) {
-  operator=(forward<BitSet>(s));
+  operator=(move(s));
 }
 
 BitSet::BitSet(const BitSet& s) {

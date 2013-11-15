@@ -8,7 +8,7 @@ using std::endl;
 using std::dec;
 
 
-void NFA::getClosure(BitSet& S) {
+void NFA::getClosure(BitSet& S) const {
   //cout << "getClosure(" << S << ")" << endl;
   vector<unsigned int> stack;
   for (auto i = S.begin(); i != S.end(); ++i)
@@ -33,7 +33,7 @@ void NFA::getClosure(BitSet& S) {
   }
 }
 
-NFA::NFA(nfaBuilder&& nfa) : eps(nfa.eps), symbolCount(nfa.symbolToId.size()), stateCount(nfa.ns.size()), start(nfa.start), final(stateCount), table(stateCount, vector<BitSet>(symbolCount, BitSet(stateCount, false))), symbols(nfa.idToSymbol), newStates(nfa.ns.size()) {
+NFA::NFA(const nfaBuilder& nfa) : eps(nfa.eps), symbolCount(nfa.symbolToId.size()), stateCount(nfa.ns.size()), start(nfa.start), final(stateCount), table(stateCount, vector<BitSet>(symbolCount, BitSet(stateCount, false))), symbols(nfa.idToSymbol), newStates(nfa.ns.size()) {
   cout << "constructing NFA from nfaBuilder" << endl;
   cout << "stateCount: " << stateCount << endl;
   cout << "start: " << nfa.start << endl;
@@ -55,4 +55,31 @@ NFA::NFA(nfaBuilder&& nfa) : eps(nfa.eps), symbolCount(nfa.symbolToId.size()), s
       //cout << "not considering state " << p << ": deleted" << endl;
     }
   }
+}
+
+
+
+std::ostream& operator<<(std::ostream& s, const NFA& nfa) {
+  s << "digraph G {\n";
+  for (unsigned int p = 0; p < nfa.stateCount; p++) {
+    if (nfa.final[p])
+      s << "  " << p << "[shape = doublecircle];\n";
+    for (auto a = 0u; a < nfa.symbolCount; ++a) {
+      if (nfa.table[p][a].count() > 0) {
+        s << "  " << p << " -> { ";
+        auto q = nfa.table[p][a].begin();
+        auto q_end = nfa.table[p][a].end();
+        if (q != q_end) {
+          s << *q;
+        }
+        ++q;
+        for (; q != q_end; ++q) {
+          s << ", " << *q;
+        }
+        s << " } [label = \"" << showCharEscaped(nfa.symbols[a]) << "\"];\n";
+      }
+    }
+  }
+  s << "}\n";
+  return s;
 }

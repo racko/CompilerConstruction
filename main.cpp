@@ -5,6 +5,7 @@
 //#include "BitSet.h"
 #include "lexer.h"
 #include "parser.h"
+#include "lrParser.h"
 #include <ctime>
 #include <iostream>
 #include <iomanip>
@@ -20,6 +21,8 @@ using std::move;
 using std::string;
 #include <array>
 using std::array;
+
+#include <boost/dynamic_bitset.hpp>
 
 int main(int argc, char** args) {
 
@@ -145,21 +148,120 @@ int main(int argc, char** args) {
 //    }
 //    in.clear();
 //  }
-  NFA nfa1(move(builder));
+  NFA nfa1(builder);
+  {
+    std::ofstream nfa_dot{"nfa.dot"};
+    nfa_dot << nfa1;
+    nfa_dot.close();
+  }
+
   DFA dfa1(nfa1);
-  cout << "start: " << dfa1.start << endl;
-  cout << "final: " << show(dfa1.final) << endl;
-  for (unsigned int q = 0; q < dfa1.stateCount; q++) {
-    for (unsigned int a = 0; a < dfa1.symbolCount; a++)
-      cout << "(" << q << "," << a << ") -> " << dfa1.T[q][a] << endl;
+  {
+    std::ofstream dfa_dot{"dfa.dot"};
+    dfa_dot << dfa1;
+    dfa_dot.close();
   }
+//  cout << "start: " << dfa1.start << endl;
+//  cout << "final: " << show(dfa1.final) << endl;
+//  for (unsigned int q = 0; q < dfa1.stateCount; q++) {
+//    for (unsigned int a = 0; a < dfa1.symbolCount; a++)
+//      cout << "(" << q << "," << a << ") -> " << dfa1.T[q][a] << endl;
+//  }
   dfa1.minimize();
-  cout << "start: " << dfa1.start << endl;
-  cout << "final: " << show(dfa1.final) << endl;
-  for (unsigned int q = 0; q < dfa1.stateCount; q++) {
-    for (unsigned int a = 0; a < dfa1.symbolCount; a++)
-      cout << "(" << q << "," << a << ") -> " << dfa1.T[q][a] << endl;
+  {
+    std::ofstream dfa_dot{"dfa_minimized.dot"};
+    dfa_dot << dfa1;
+    dfa_dot.close();
   }
+
+  {
+    Grammar::NonterminalID start = uint32_t(NT::ASSIGN) - uint32_t(T::EPS) - 1;
+    Grammar::TerminalID eof = uint32_t(T::EOI);
+    size_t terminalCount = uint32_t(T::EPS);
+    size_t nonterminalCount = uint32_t(NT::max) - uint32_t(T::EPS) - 1;
+    std::vector<std::vector<Grammar::String>> productions(nonterminalCount);
+    productions[int32_t(NT::LOC) - uint32_t(T::EPS) - 1] = {
+        {uint32_t(NT::LOC), uint32_t(T::LEFTBR), uint32_t(NT::ASSIGN), uint32_t(T::RIGHTBR)}, {uint32_t(T::ID)}, {uint32_t(NT::LOC), uint32_t(T::PERIOD), uint32_t(T::ID)}
+    };
+    productions[uint32_t(NT::ASSIGN) - uint32_t(T::EPS) - 1] = {
+        {uint32_t(NT::BOOL), uint32_t(T::ASSIGN), uint32_t(NT::ASSIGN)}, {uint32_t(NT::BOOL)}
+    };
+    productions[uint32_t(NT::BOOL) - uint32_t(T::EPS) - 1] = {
+        {uint32_t(NT::BOOL), uint32_t(T::OR), uint32_t(NT::JOIN)}, {uint32_t(NT::JOIN)}
+    };
+    productions[uint32_t(NT::JOIN) - uint32_t(T::EPS) - 1] = {
+        {uint32_t(NT::JOIN), uint32_t(T::AND), uint32_t(NT::EQ)}, {uint32_t(NT::EQ)}
+    };
+    productions[uint32_t(NT::EQ) - uint32_t(T::EPS) - 1] = {
+        {uint32_t(NT::EQ), uint32_t(T::EQ), uint32_t(NT::REL)}, {uint32_t(NT::EQ), uint32_t(T::NEQ), uint32_t(NT::REL)}, {uint32_t(NT::REL)}
+    };
+    productions[uint32_t(NT::REL) - uint32_t(T::EPS) - 1] = {
+        {uint32_t(NT::EXPR), uint32_t(T::LT), uint32_t(NT::EXPR)}, {uint32_t(NT::EXPR), uint32_t(T::LE), uint32_t(NT::EXPR)}, {uint32_t(NT::EXPR), uint32_t(T::GE), uint32_t(NT::EXPR)}, {uint32_t(NT::EXPR), uint32_t(T::GT), uint32_t(NT::EXPR)}, {uint32_t(NT::EXPR)}
+    };
+    productions[uint32_t(NT::EXPR) - uint32_t(T::EPS) - 1] = {
+        {uint32_t(NT::EXPR), uint32_t(T::PLUS), uint32_t(NT::TERM)}, {uint32_t(NT::EXPR), uint32_t(T::MINUS), uint32_t(NT::TERM)}, {uint32_t(NT::TERM)}
+    };
+    productions[uint32_t(NT::TERM) - uint32_t(T::EPS) - 1] = {
+        {uint32_t(NT::TERM), uint32_t(T::TIMES), uint32_t(NT::UNARY)}, {uint32_t(NT::TERM), uint32_t(T::DIV), uint32_t(NT::UNARY)}, {uint32_t(NT::UNARY)}
+    };
+    productions[uint32_t(NT::UNARY) - uint32_t(T::EPS) - 1] = {
+        {uint32_t(T::NOT), uint32_t(NT::UNARY)}, {uint32_t(T::MINUS), uint32_t(NT::UNARY)}, {uint32_t(NT::FACTOR)}
+    };
+    productions[uint32_t(NT::FACTOR) - uint32_t(T::EPS) - 1] = {
+        {uint32_t(T::LEFTPAR), uint32_t(NT::ASSIGN), uint32_t(T::RIGHTPAR)},{uint32_t(NT::LOC)}, {uint32_t(T::NUM)}, {uint32_t(T::REAL)}, {uint32_t(T::TRUE)}, {uint32_t(T::FALSE)}, {uint32_t(T::STRING)}, {uint32_t(NT::FUNCALL)}
+    };
+    productions[uint32_t(NT::FUNCALL) - uint32_t(T::EPS) - 1] = {
+        {uint32_t(T::ID), uint32_t(T::LEFTPAR), uint32_t(NT::OPTARGS), uint32_t(T::RIGHTPAR)}
+    };
+    productions[uint32_t(NT::OPTARGS) - uint32_t(T::EPS) - 1] = {
+        {uint32_t(NT::ARGS)}, {uint32_t(T::EPS)}
+    };
+    productions[uint32_t(NT::ARGS) - uint32_t(T::EPS) - 1] = {
+        {uint32_t(NT::ASSIGN), uint32_t(T::COMMA), uint32_t(NT::ARGS)}, {uint32_t(NT::ASSIGN)}
+    };
+
+//    Grammar::NonterminalID start = uint32_t(NT::S) - uint32_t(T::EPS) - 1;
+//    Grammar::TerminalID eof = uint32_t(T::EOI);
+//    size_t terminalCount = uint32_t(T::EPS);
+//    size_t nonterminalCount = uint32_t(NT::max) - uint32_t(T::EPS) - 1;
+//    std::vector<std::vector<Grammar::String>> productions(nonterminalCount);
+//
+//    productions[int32_t(NT::S) - uint32_t(T::EPS) - 1] = {
+//        {uint32_t(NT::C), uint32_t(NT::C)}
+//    };
+//    productions[uint32_t(NT::C) - uint32_t(T::EPS) - 1] = {
+//        {uint32_t(T::C), uint32_t(NT::C)}, {uint32_t(T::D)}
+//    };
+//
+    Grammar G(productions, start, eof, terminalCount, nonterminalCount);
+//
+//    // [C ->   c C     c]< [S ->       C C     EOF] = true
+//    auto item1 = item(G, uint32_t(NT::C) - uint32_t(T::EPS) - 1, item::String{}, item::String{uint32_t(T::C), uint32_t(NT::C)}, uint32_t(T::C));
+//    auto item2 = item(G, uint32_t(NT::S) - uint32_t(T::EPS) - 1, item::String{}, item::String{uint32_t(NT::C), uint32_t(NT::C)}, uint32_t(T::EOI));
+//    std::cout <<  "testing... " << (item1 < item2) << std::endl;
+
+    for (Grammar::NonterminalID A = 0u; A < G.getNumberOfNonterminals(); ++A) {
+      std::cout << NT(G.idOfNonterminal(A)) << ": ";
+      const auto& firsts = G.getFirsts(G.idOfNonterminal(A));
+      for (Grammar::TerminalID a = 0u; a < G.getNumberOfTerminals(); ++a)
+        if (firsts[a])
+          std::cout << T(G.idOfTerminal(a)) << ", ";
+      if (firsts[G.idOfEps()])
+        std::cout << "EPS, ";
+      std::cout << std::endl;
+    }
+
+    auto C = items(G);
+    print(std::cout, G, C);
+  }
+
+  return 0;
+//  cout << "start: " << dfa1.start << endl;
+//  cout << "final: " << show(dfa1.final) << endl;
+//  for (unsigned int q = 0; q < dfa1.stateCount; q++) {
+//    for (unsigned int a = 0; a < dfa1.symbolCount; a++)
+//      cout << "(" << q << "," << a << ") -> " << dfa1.T[q][a] << endl;
+//  }
   myLexer lex(dfa1);
   cout << "> ";
   cin.get(lex.c, 4096);
@@ -167,7 +269,9 @@ int main(int argc, char** args) {
   cout << "read " << ll << " characters" << endl;
   lex.c[ll] = EOF;
   Parser pp(lex);
-  cout << *pp.parse() << endl;
+  auto ast_node = pp.parse();
+  cout << *ast_node << endl;
+  delete ast_node;
 //  while (*lex.c != EOF) {
 //    Token* t = lex.getToken();
 //    cout << "\ngot \"";

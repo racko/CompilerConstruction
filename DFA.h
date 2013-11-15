@@ -3,6 +3,7 @@
 
 #include <vector>
 using std::vector;
+#include <ostream>
 
 struct NFA;
 struct DFA {
@@ -10,9 +11,12 @@ struct DFA {
   vector<unsigned int> final;
   vector<vector<unsigned int>> T;
   vector<unsigned int> symbolToId;
-  DFA(NFA& nfa);
+  vector<char> idToSymbol;
+  DFA(const NFA& nfa);
   void minimize();
   void determineDeadState();
 };
+
+std::ostream& operator<<(std::ostream&, const DFA&);
 
 #endif
