@@ -6,6 +6,7 @@
 #include <list>
 #include <sstream>
 #include <boost/dynamic_bitset_fwd.hpp>
+#include <cassert>
 
 enum class kind { EPS, TERMINAL, NONTERMINAL };
 
@@ -92,7 +93,7 @@ public:
 
   const std::vector<String>& getProductions(NonterminalID A) const {
     if (A == getStartOfExtendedGrammar()) {
-      static const std::vector<String> extProd{getStart()};
+      static const std::vector<String> extProd{String{idOfNonterminal(getStart())}}; // not correct ... wrong constructor chosen ... I guess
       return extProd;
     }
 
@@ -139,6 +140,48 @@ private:
   size_t numberOfNonterminals;
 };
 
+enum class type : uint32_t {
+  SHIFT,
+  REDUCE,
+  ACCEPT,
+  FAIL
+};
+
+inline uint32_t bits(type t) { return uint32_t(t) << 30; }
+
+struct action {
+  uint32_t x;
+  static const uint32_t mask = 3u << 30;
+
+  action(type t, uint32_t s) : x(bits(t) | s) { assert(s < (1u << 31) && t == type::SHIFT); }
+  action(type t) : x(bits(t)) { assert(t == type::ACCEPT || t == type::FAIL); }
+  action(type t, uint32_t A, uint32_t length) : x(bits(t) | A << 15 | length) {
+    assert(A < (1u << 16) && length < (1u << 16) && t == type::REDUCE);
+    auto a = getHead();
+    auto l = getLength();
+    assert(a == A && l == length);}
+  type getType() const { return type(x >> 30); }
+  uint32_t getState() const { auto t = getType(); assert(t == type::SHIFT); return x & ~mask; }
+  uint32_t getHead() const {
+    assert(getType() == type::REDUCE);
+    auto shifted = x >> 15;
+    auto mask = (1 << 15) - 1;
+    return shifted & mask;
+  }
+  uint32_t getLength() const { assert(getType() == type::REDUCE); return x & ((1 << 15) - 1); }
+};
+
+struct LRParser {
+  using state = uint32_t;
+  Grammar G;
+  std::vector<std::vector<state>> goto_table;
+  std::vector<std::vector<action>> action_table;
+
+  LRParser(const Grammar& G);
+  void parse(const Grammar::String& s) const;
+//  void parse(std::initializer_list<Grammar::GrammarElement> s) const { parse(Grammar::String(s)); }
+};
+
 boost::dynamic_bitset<> first(const Grammar&, Grammar::GrammarElement);
 
 struct item {
@@ -177,6 +220,8 @@ enum class NT : uint32_t {
 //  max
 //};
 
+std::ostream& operator<<(std::ostream& s, action a);
+
 std::ostream& operator<<(std::ostream& s, T a);
 
 std::ostream& operator<<(std::ostream& s, NT A);
@@ -192,5 +237,7 @@ void print(std::ostream& s, const Grammar& G, const item& i);
 void print(std::ostream& s, const Grammar& G, const std::set<item>& I);
 
 void print(std::ostream& s, const Grammar& G, const std::set<std::set<item>>& C);
+
+void print(std::ostream& s, const Grammar& G, const std::vector<std::set<item>>& C);
 
 #endif /* LRPARSER_H_ */
