@@ -12,6 +12,7 @@ using std::function;
 using std::istream;
 #include <fstream>
 using std::filebuf;
+#include <sstream>
 #include <tuple>
 using std::pair;
 #include <iostream>
@@ -51,6 +52,9 @@ struct Lexer {
   char b[4096];
   char *p1, *p2, *c;
   DFA dfa;
+
+  Lexer() = default;
+
   virtual T action(char*, unsigned int, unsigned int) = 0;
 
   template<class T1>
@@ -59,7 +63,8 @@ struct Lexer {
     b[4095] = '\0';
   }
   
-  virtual T eofToken() = 0;
+  virtual T eofToken() const = 0;
+  virtual T whiteSpaceToken() const = 0;
   virtual T getToken() final {
     cout << "entered getToken()" << endl;
     auto s = dfa.start;
@@ -68,11 +73,12 @@ struct Lexer {
     // TODO: make sure c points to input?
     auto c0 = c, c1 = c;
     while(*c != EOF && s != dfa.deadState) {
-      cout << "got '" << (int)*c << "'" << endl;
+      cout << "got '" << showCharEscaped(*c) << "'" << endl;
       auto _c = dfa.symbolToId.at(*c);
       if (_c == dfa.symbolCount) {
-        cout << "invalid symbol '" << (int)*c << "'" << endl;
-        throw exception();
+        std::stringstream ss;
+        ss << "invalid symbol '" << showCharEscaped(*c) << "'";
+        throw std::runtime_error(ss.str());
       }
       s = dfa.T[s][_c];
       if (dfa.final[s]) {
@@ -90,15 +96,30 @@ struct Lexer {
       cout << "ran into dead end" << endl;
     if (f != 0) {
       c = c1 + 1;
-      return action(c0, c1 - c0 + 1, f);
+      auto tok = action(c0, c1 - c0 + 1, f);
+      if (tok != whiteSpaceToken())
+        return tok;
+      else
+        return getToken();
     } else if (*c == EOF) {
       return eofToken();
     } else {
-      cerr << "Lexical error" << endl;
-      throw exception();
+      throw std::runtime_error("Lexical error");
     }
   }
 
   virtual ~Lexer() {}
+
+  struct iterator {
+    Lexer& lex;
+    T token;
+
+    iterator(Lexer& l) : lex(l) { operator++(); }
+
+    T operator*() const { return token; }
+    iterator& operator++() { token = lex.getToken(); return *this; }
+  };
+
+  iterator begin() { return iterator(*this); }
 };
 #endif

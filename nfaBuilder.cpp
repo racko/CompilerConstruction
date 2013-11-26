@@ -53,17 +53,17 @@ pair<unsigned int,unsigned int> nfaBuilder::cat(pair<unsigned int,unsigned int> 
 }
 
 void nfaBuilder::match(istream& in, char c) {
-  cout << "match('" << c << "')" << endl;
+  cout << "match('" << showCharEscaped(c) << "')" << endl;
   char d = in.get();
   if (d != c) {
-    cerr << "expected '" << c << "', got '" << d << "'" << endl;
+    cerr << "expected '" << showCharEscaped(c) << "', got '" << showCharEscaped(d) << "'" << endl;
     throw exception();
   }
 }
 
 char nfaBuilder::lexH(istream& in) {
   char c = in.peek();
-  cout << "lexH (peek: '" << c << "')" << endl;
+  cout << "lexH (peek: '" << showCharEscaped(c) << "')" << endl;
   switch (c) {
     case '\\':
     case '|':
@@ -79,14 +79,14 @@ char nfaBuilder::lexH(istream& in) {
       match(in, c);
       return '\t';
     default:
-      cerr << "lexH Error: '" << c << "'" << endl;
+      cerr << "lexH Error: '" << showCharEscaped(c) << "'" << endl;
       throw exception();
   }
 }
 
 pair<unsigned int,unsigned int> nfaBuilder::lexG(istream& in) {
   char c = in.peek();
-  cout << "lexG (peek: '" << c << "')" << endl;
+  cout << "lexG (peek: '" << showCharEscaped(c) << "')" << endl;
   switch (c) {
     case '(':
       {
@@ -106,7 +106,7 @@ pair<unsigned int,unsigned int> nfaBuilder::lexG(istream& in) {
         unsigned int id;
         if (it == symbolToId.end()) {
           id = symbolToId.size();
-          cout << "new symbol: '" << _c << "' (id: " << id << ")" << endl;
+          cout << "new symbol: '" << showCharEscaped(_c) << "' (id: " << id << ")" << endl;
           symbolToId[_c] = id;
           idToSymbol.push_back(_c);
         } else
@@ -119,7 +119,7 @@ pair<unsigned int,unsigned int> nfaBuilder::lexG(istream& in) {
     case EOF:
     case ')':
     case '*':
-      cerr << "lexG Error: '" << c << "'" << endl;
+      cerr << "lexG Error: '" << showCharEscaped(c) << "'" << endl;
       throw exception();
     default:
       {
@@ -130,7 +130,7 @@ pair<unsigned int,unsigned int> nfaBuilder::lexG(istream& in) {
         unsigned int id;
         if (it == symbolToId.end()) {
           id = symbolToId.size();
-          cout << "new symbol: '" << c << "' (id: " << id << ")" << endl;
+          cout << "new symbol: '" << showCharEscaped(c) << "' (id: " << id << ")" << endl;
           symbolToId[c] = id;
           idToSymbol.push_back(c);
         } else
@@ -144,7 +144,7 @@ pair<unsigned int,unsigned int> nfaBuilder::lexG(istream& in) {
 
 pair<unsigned int,unsigned int> nfaBuilder::lexFR(istream& in, pair<unsigned int,unsigned int> nfa1) {
   char c = in.peek();
-  cout << "lexFR(" << show(nfa1) << ") (peek: '" << c << "')" << endl;
+  cout << "lexFR(" << show(nfa1) << ") (peek: '" << showCharEscaped(c) << "')" << endl;
   switch (c) {
     case '*':
       {
@@ -162,13 +162,13 @@ pair<unsigned int,unsigned int> nfaBuilder::lexFR(istream& in, pair<unsigned int
 
 pair<unsigned int,unsigned int> nfaBuilder::lexF(istream& in) {
   char c = in.peek();
-  cout << "lexF (peek: '" << c << "')" << endl;
+  cout << "lexF (peek: '" << showCharEscaped(c) << "')" << endl;
   switch (c) {
     case '|':
     case EOF:
     case ')':
     case '*':
-      cerr << "lexF Error: '" << c << "'" << endl;
+      cerr << "lexF Error: '" << showCharEscaped(c) << "'" << endl;
       throw exception();
     default:
       {
@@ -182,7 +182,7 @@ pair<unsigned int,unsigned int> nfaBuilder::lexF(istream& in) {
 
 pair<unsigned int,unsigned int> nfaBuilder::lexTR(istream& in, pair<unsigned int,unsigned int> nfa1) {
   char c = in.peek();
-  cout << "lexTR(" << show(nfa1) << ") (peek: '" << c << "')" << endl;
+  cout << "lexTR(" << show(nfa1) << ") (peek: '" << showCharEscaped(c) << "')" << endl;
   switch (c) {
     case '|':
     case EOF:
@@ -190,7 +190,7 @@ pair<unsigned int,unsigned int> nfaBuilder::lexTR(istream& in, pair<unsigned int
       cout << "lexTR out: " << show(nfa1) << endl;
       return nfa1;
     case '*':
-      cerr << "lexTR Error: '" << c << "'" << endl;
+      cerr << "lexTR Error: '" << showCharEscaped(c) << "'" << endl;
       throw exception();
     default:
       {
@@ -205,13 +205,13 @@ pair<unsigned int,unsigned int> nfaBuilder::lexTR(istream& in, pair<unsigned int
 
 pair<unsigned int,unsigned int> nfaBuilder::lexT(istream& in) {
   char c = in.peek();
-  cout << "lexT (peek: '" << c << "')" << endl;
+  cout << "lexT (peek: '" << showCharEscaped(c) << "')" << endl;
   switch (c) {
     case '|':
     case EOF:
     case ')':
     case '*':
-      cerr << "lexT Error: '" << c << "'" << endl;
+      cerr << "lexT Error: '" << showCharEscaped(c) << "'" << endl;
       throw exception();
     default:
       {
@@ -225,7 +225,7 @@ pair<unsigned int,unsigned int> nfaBuilder::lexT(istream& in) {
 
 pair<unsigned int,unsigned int> nfaBuilder::lexER(istream& in, pair<unsigned int,unsigned int> nfa1) {
   char c = in.peek();
-  cout << "lexER(" << show(nfa1) << ") (peek: '" << c << "')" << endl;
+  cout << "lexER(" << show(nfa1) << ") (peek: '" << showCharEscaped(c) << "')" << endl;
   switch (c) {
     case '|':
       {
@@ -243,20 +243,20 @@ pair<unsigned int,unsigned int> nfaBuilder::lexER(istream& in, pair<unsigned int
       cout << "lexER out: " << show(nfa1) << endl;
       return nfa1;
     default:
-      cerr << "lexER Error: '" << c << "'" << endl;
+      cerr << "lexER Error: '" << showCharEscaped(c) << "'" << endl;
       throw exception();
   }
 }
 
 pair<unsigned int,unsigned int> nfaBuilder::lexE(istream& in) {
   char c = in.peek();
-  cout << "lexE (peek: '" << c << "')" << endl;
+  cout << "lexE (peek: '" << showCharEscaped(c) << "')" << endl;
   switch (c) {
     case '|':
     case EOF:
     case ')':
     case '*':
-      cerr << "lexE Error: '" << c << "'" << endl;
+      cerr << "lexE Error: '" << showCharEscaped(c) << "'" << endl;
       throw exception();
     default:
       {

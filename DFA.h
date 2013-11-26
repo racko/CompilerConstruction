@@ -12,6 +12,7 @@ struct DFA {
   vector<vector<unsigned int>> T;
   vector<unsigned int> symbolToId;
   vector<char> idToSymbol;
+  DFA() = default;
   DFA(const NFA& nfa);
   void minimize();
   void determineDeadState();

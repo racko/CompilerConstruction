@@ -108,7 +108,8 @@ struct AppNode : public AST_Node {
 
 struct VarNode : public AST_Node {
   string id;
-  VarNode(string&& _id) : id(forward<string>(_id)) {}
+  template<class STRING>
+  VarNode(STRING&& _id) : id(forward<STRING>(_id)) {}
   void writeTo(ostream&s) const {
     s << "Var " << id;
   }
@@ -137,8 +138,10 @@ struct Parser {
   Token* move() {
     cout << "move()" << endl;
     t = lex.getToken();
-    while (t->tag == (unsigned)Token::type::WS)
+    while (t->tag == (unsigned)Token::type::WS) {
+//      delete t; // lexer now returns nullptr on whitespace, so no delete
       t = lex.getToken();
+    }
     return t;
   }
 

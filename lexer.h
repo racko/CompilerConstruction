@@ -2,6 +2,7 @@
 #define _LEXER_H_
 
 #include "Regex.h"
+#include "nfaBuilder.h"
 #include <iostream>
 using std::ostream;
 using std::cerr;
@@ -94,11 +95,159 @@ struct Whitespace : public TokenBase<char> {
 struct myLexer : public Lexer<Token*> {
   static const vector<unsigned int> m;
 
-  template<class T>
-  myLexer(T&& dfa) : Lexer(std::forward<T>(dfa)) {}
+  DFA getDFA() {
+      stringstream in;
+      nfaBuilder builder;
 
-  Token* eofToken() {
+      char alpha[] = "(a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z)";
+      char digit[] = "(0|1|2|3|4|5|6|7|8|9)";
+      stringstream varch;
+      varch << "(" << alpha << "|" << digit << "|_)";
+      stringstream num;
+      num << digit << digit << "*";
+      stringstream var;
+      var << alpha << varch.rdbuf() << "*";
+      //';', '=', '.', '(', ')', '+', '-', '*', '/', '<', '>', '&', '|', '\\',
+      in << ";";
+      auto p = builder.lexRegex(in);
+      builder.ns[p.second].kind = 1;
+      in.clear();
+      in << "=";
+      p = builder.lexRegex(in);
+      builder.ns[p.second].kind = 2;
+      in.clear();
+      in << ".";
+      p = builder.lexRegex(in);
+      builder.ns[p.second].kind = 3;
+      in.clear();
+      in << "\\(";
+      p = builder.lexRegex(in);
+      builder.ns[p.second].kind = 4;
+      in.clear();
+      in << "\\)";
+      p = builder.lexRegex(in);
+      builder.ns[p.second].kind = 5;
+      in.clear();
+      in << "+";
+      p = builder.lexRegex(in);
+      builder.ns[p.second].kind = 6;
+      in.clear();
+      in << "-";
+      p = builder.lexRegex(in);
+      builder.ns[p.second].kind = 7;
+      in.clear();
+      in << "\\*";
+      p = builder.lexRegex(in);
+      builder.ns[p.second].kind = 8;
+      in.clear();
+      in << "/";
+      p = builder.lexRegex(in);
+      builder.ns[p.second].kind = 9;
+      in.clear();
+      in << "<";
+      p = builder.lexRegex(in);
+      builder.ns[p.second].kind = 10;
+      in.clear();
+      in << ">";
+      p = builder.lexRegex(in);
+      builder.ns[p.second].kind = 11;
+      in.clear();
+      in << "&";
+      p = builder.lexRegex(in);
+      builder.ns[p.second].kind = 12;
+      in.clear();
+      in << "\\|";
+      p = builder.lexRegex(in);
+      builder.ns[p.second].kind = 13;
+      in.clear();
+      in << "\\\\";
+      p = builder.lexRegex(in);
+      builder.ns[p.second].kind = 14;
+      in.clear();
+      in << "<=";
+      p = builder.lexRegex(in);
+      builder.ns[p.second].kind = 15;
+      in.clear();
+      in << "==";
+      p = builder.lexRegex(in);
+      builder.ns[p.second].kind = 16;
+      in.clear();
+      in << "!=";
+      p = builder.lexRegex(in);
+      builder.ns[p.second].kind = 17;
+      in.clear();
+      in << ">=";
+      p = builder.lexRegex(in);
+      builder.ns[p.second].kind = 18;
+      in.clear();
+      in << "let";
+      p = builder.lexRegex(in);
+      builder.ns[p.second].kind = 19;
+      in.clear();
+      in << "in";
+      p = builder.lexRegex(in);
+      builder.ns[p.second].kind = 20;
+      in.clear();
+      in << "letrec";
+      p = builder.lexRegex(in);
+      builder.ns[p.second].kind = 21;
+      p = builder.lexRegex(var);
+      builder.ns[p.second].kind = 22;
+      p = builder.lexRegex(num);
+      builder.ns[p.second].kind = 23;
+      in.clear();
+      in << "( |\t|\n)( |\t|\n)*";
+      p = builder.lexRegex(in);
+      builder.ns[p.second].kind = 24;
+    //  for (int i = 1; i < argc; i++) {
+    //  for (int i = 1; i < argc; i++) {
+    //    cout << "main: lexRegex(" << args[i] << ")" << endl;
+    //    in << args[i];
+    //    auto p = builder.lexRegex(in);
+    //    builder.ns[p.second].kind = i;
+    //    if (in.good()) {
+    //      cout << "at least one unread character: '" << in.peek() << "'" << endl;
+    //      in.str("");
+    //    }
+    //    in.clear();
+    //  }
+      NFA nfa1(builder);
+//      {
+//        std::ofstream nfa_dot{"nfa.dot"};
+//        nfa_dot << nfa1;
+//        nfa_dot.close();
+//      }
+
+      DFA dfa1(nfa1);
+//      {
+//        std::ofstream dfa_dot{"dfa.dot"};
+//        dfa_dot << dfa1;
+//        dfa_dot.close();
+//      }
+    //  cout << "start: " << dfa1.start << endl;
+    //  cout << "final: " << show(dfa1.final) << endl;
+    //  for (unsigned int q = 0; q < dfa1.stateCount; q++) {
+    //    for (unsigned int a = 0; a < dfa1.symbolCount; a++)
+    //      cout << "(" << q << "," << a << ") -> " << dfa1.T[q][a] << endl;
+    //  }
+      dfa1.minimize();
+//      {
+//        std::ofstream dfa_dot{"dfa_minimized.dot"};
+//        dfa_dot << dfa1;
+//        dfa_dot.close();
+//      }
+      return dfa1;
+  }
+
+
+  myLexer() : Lexer(getDFA()) {}
+
+  Token* eofToken() const {
     return new Other(EOF);
+  }
+
+  Token* whiteSpaceToken() const {
+    return nullptr;
   }
 
   Token* action(char* s, unsigned int n, unsigned int t) {
@@ -143,17 +292,22 @@ struct myLexer : public Lexer<Token*> {
         {
           unsigned long long i;
           stringstream ss;
+          ss.exceptions(std::ifstream::failbit | std::ifstream::badbit);
           ss.write(s, n);
           ss >> i;
           tok = new Num(i);
           break;
         }
       case (unsigned)Token::type::WS:
-        tok = new Whitespace();
+        tok = nullptr;
         break;
       default:
-        cerr << "invalid token type: " << t << endl;
-        throw exception();
+      {
+        stringstream ss;
+        ss << "invalid token type: " << t;
+        throw std::runtime_error(ss.str());
+      }
+
     }
     return tok;
   }
