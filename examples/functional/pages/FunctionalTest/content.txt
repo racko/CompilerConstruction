@@ -1,0 +1,14 @@
+!define TEST_SYSTEM {slim} 
+!define TEST_RUNNER {/home/racko/btsync/git/Regex/build/functional_fitnesse.exe}
+!define COMMAND_PATTERN {%m} 
+!define SLIM_VERSION {0.0} 
+!define SLIM_PORT {8081}
+
+!|import|
+|FixtureInCpp.cpp|
+
+|Functional|
+|Text|Evaluate?|
+|a = 1; b = 2; const x y = x; flip f x y = f y x; pair x y = \f . f x y; fst p = p const; snd p = p (flip const); main = snd (pair a b);|2|
+|main = 1;|1|
+
