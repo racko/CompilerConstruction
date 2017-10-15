@@ -6,16 +6,16 @@ struct NumEqual : public LambdaConstVisitor {
     const NumConst& lhs_;
     bool equal;
     NumEqual(const NumConst& lhs) : lhs_(lhs) {}
-    void visit(const App& rhs) {
+    void visit(const App&) {
         equal = false;
     }
-    void visit(const Abs& rhs) {
+    void visit(const Abs&) {
         equal = false;
     }
     void visit(const NumConst& rhs) {
         equal = rhs.val == lhs_.val;
     }
-    void visit(const ::Var& rhs) {
+    void visit(const ::Var&) {
         equal = false;
     }
 };
@@ -24,13 +24,13 @@ struct VarEqual : public LambdaConstVisitor {
     const ::Var& lhs_;
     bool equal;
     VarEqual(const ::Var& lhs) : lhs_(lhs) {}
-    void visit(const App& rhs) {
+    void visit(const App&) {
         equal = false;
     }
-    void visit(const Abs& rhs) {
+    void visit(const Abs&) {
         equal = false;
     }
-    void visit(const NumConst& rhs) {
+    void visit(const NumConst&) {
         equal = false;
     }
     void visit(const ::Var& rhs) {
@@ -42,16 +42,16 @@ struct AbsEqual : public LambdaConstVisitor {
     const Abs& lhs_;
     bool equal;
     AbsEqual(const Abs& lhs) : lhs_(lhs) {}
-    void visit(const App& rhs) {
+    void visit(const App&) {
         equal = false;
     }
     void visit(const Abs& rhs) {
         equal = rhs.x == lhs_.x && *rhs.body == *lhs_.body;
     }
-    void visit(const NumConst& rhs) {
+    void visit(const NumConst&) {
         equal = false;
     }
-    void visit(const ::Var& rhs) {
+    void visit(const ::Var&) {
         equal = false;
     }
 };
@@ -63,13 +63,13 @@ struct AppEqual : public LambdaConstVisitor {
     void visit(const App& rhs) {
         equal = *rhs.f == *lhs_.f && *rhs.x == *lhs_.x;
     }
-    void visit(const Abs& rhs) {
+    void visit(const Abs&) {
         equal = false;
     }
-    void visit(const NumConst& rhs) {
+    void visit(const NumConst&) {
         equal = false;
     }
-    void visit(const ::Var& rhs) {
+    void visit(const ::Var&) {
         equal = false;
     }
 };

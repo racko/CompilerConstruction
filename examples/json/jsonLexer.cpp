@@ -1,8 +1,55 @@
 #include "jsonLexer.h"
+#include "jsonLLGrammar.h"
 #include "NFA.h"
 #include "nfaBuilder.h"
+#include "Regex.h"
 
-auto myLexer::getDFA() -> DFA_t {
+struct myLexer::impl {
+    using T = json::T;
+    using Token = json::Token;
+
+    using DFA_t = Lexer::DFA_t;
+    using Symbol = Lexer::Symbol;
+    using State = Lexer::State;
+    using TokenId = Lexer::TokenId;
+
+    //static const vector<unsigned int> m;
+
+    Lexer lexer;
+    Token token;
+
+    impl() : lexer(getDFA(), {nullptr, 0, static_cast<json::type>(T::EOI) + 1}, static_cast<json::type>(T::WS) + 1) {}
+
+    //Token eofToken() const {
+    //    return {T::EOI,boost::blank()};
+    //}
+
+    //Token whiteSpaceToken() const {
+    //    return {T::WS,boost::blank()};
+    //}
+
+    static DFA_t getDFA();
+    static Token action(const char* s, size_t n, Lexer::TokenId t);
+    static json::Token t2t(::Token t) {
+        return action(t.start, t.length, t.tokenId);
+    }
+
+    const Token& operator*() const { return token; }
+    // required to move from token. Is there a better solution?
+    Token& operator*() { return token; }
+    impl& operator++() { token = t2t(lexer.getToken()); return *this; }
+};
+
+myLexer::myLexer() : pimpl(std::make_unique<impl>()) {}
+myLexer::~myLexer() = default;
+
+void myLexer::setText(const char* text) { pimpl->lexer.c = text; pimpl->token = pimpl->t2t(pimpl->lexer.getToken()); }
+
+const json::Token& myLexer::operator*() const { return *(*pimpl); }
+json::Token& myLexer::operator*() { return *(*pimpl); }
+myLexer& myLexer::operator++() { ++(*pimpl); return *this; }
+
+auto myLexer::impl::getDFA() -> DFA_t {
     std::stringstream in;
     std::cout << "nfaBuilder" << std::endl;
     nfaBuilder<Symbol,State,TokenId> builder;
@@ -117,4 +164,37 @@ auto myLexer::getDFA() -> DFA_t {
     return dfa1;
 }
 
-
+auto myLexer::impl::action(const char* s, size_t n, TokenId t) -> Token {
+    //cout << "action(\"";
+    //cout.write(s, n);
+    //cout << "\", " << n << ", " << t << ")" << endl;
+    auto tid = TerminalID<json::Grammar>(t - 1);
+    switch(tid) {
+    case T::TRUE:
+        return {tid,true};
+    case T::FALSE:
+        return {tid,false};
+    case T::NULL:
+    case T::BEGIN_ARRAY:
+    case T::BEGIN_OBJECT:
+    case T::END_ARRAY:
+    case T::END_OBJECT:
+    case T::NAME_SEPARATOR:
+    case T::VALUE_SEPARATOR:
+        return {tid,boost::blank()};
+    case T::STRING:
+        return {T::STRING,boost::string_view(s+1, n-2)}; // the arithmetic removes quotation marks
+    case T::NUM: {
+        return {T::NUM,json::num_view(s, n)};
+    }
+    case T::WS:
+        return {T::WS,boost::blank()};
+    case T::EOI:
+        return {T::EOI,boost::blank()};
+    default: {
+        std::stringstream ss;
+        ss << "invalid token type: " << int(t);
+        throw std::runtime_error(ss.str());
+    }
+    }
+}

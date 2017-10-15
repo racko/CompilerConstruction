@@ -1,7 +1,7 @@
 #include "Print.h"
 
 template <>
-ostream& showVector(const vector<bool>& v, ostream& s) {
+std::ostream& showVector(const std::vector<bool>& v, std::ostream& s) {
     unsigned int i = 0;
 
     while (i < v.size() && !v[i])
@@ -21,7 +21,7 @@ ostream& showVector(const vector<bool>& v, ostream& s) {
 }
 
 template <>
-ostream& showVector(const vector<pair<unsigned int,unsigned int>>& v, ostream& s) {
+std::ostream& showVector(const std::vector<std::pair<unsigned int,unsigned int>>& v, std::ostream& s) {
     if (v.empty()) {
         s << "[]";
         return s;
@@ -35,7 +35,7 @@ ostream& showVector(const vector<pair<unsigned int,unsigned int>>& v, ostream& s
 }
 
 template <>
-ostream& showVector(const vector<char>& v, ostream& s) {
+std::ostream& showVector(const std::vector<char>& v, std::ostream& s) {
     if (v.empty()) {
         s << "[]";
         return s;
@@ -48,24 +48,24 @@ ostream& showVector(const vector<char>& v, ostream& s) {
     return s;
 }
 
-std::string print(char c) {
+std::string print(int c) {
     // TODO: Put all 256 values into an array?
     static const char* const controlChars[] = { "EOF", "NUL", "SOH", "STX", "ETX", "EOT", "ENQ", "ACK", "BEL", "BS", "HT", "LF", "VT", "FF", "CR", "SO", "SI", "DLE", "DC1", "DC2", "DC3", "DC4", "NAK", "SYN", "ETB", "CAN", "EM", "SUB", "ESC", "FS", "GS", "RS", "US", "SPACE" };
     if (c < -1 || c > 127)
-        return std::to_string(int(c));
+        return std::to_string(c);
     else if (c < 33)
         return controlChars[c + 1];
     else if (c == 127)
         return "DEL";
     else
-        return std::string(1, c);
+        return std::string(1, static_cast<char>(c));
 }
 
-std::string printEscaped(char c) {
+std::string printEscaped(int c) {
     // TODO: Put all 256 values into an array?
     static const char* const controlChars[] = { "EOF", "NUL", "SOH", "STX", "ETX", "EOT", "ENQ", "ACK", "BEL", "BS", "HT", "LF", "VT", "FF", "CR", "SO", "SI", "DLE", "DC1", "DC2", "DC3", "DC4", "NAK", "SYN", "ETB", "CAN", "EM", "SUB", "ESC", "FS", "GS", "RS", "US", "SPACE" };
     if (c < -1 || c > 127)
-        return std::to_string(int(c));
+        return std::to_string(c);
     else if (c < 33)
         return controlChars[c + 1];
     else if (c == 127)
@@ -75,6 +75,6 @@ std::string printEscaped(char c) {
     else if (c == '\\')
         return "BSL";
     else
-        return std::string(1, c);
+        return std::string(1, static_cast<char>(c));
 }
 

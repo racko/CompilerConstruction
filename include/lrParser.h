@@ -1,5 +1,4 @@
-#ifndef LRPARSER_H_
-#define LRPARSER_H_
+#pragma once
 
 #include "Grammar.h"
 #include "Print.h"
@@ -35,7 +34,8 @@ struct action {
         assert(A.x < (1u << 16) && production < (1u << 16) && t == type::REDUCE);
         auto a = getHead();
         auto p = getProduction();
-        assert(a == A && p == production);}
+        assert(a == A && p == production);
+    }
     type getType() const { return type(x >> 30); }
     uint32_t getState() const { auto t = getType(); assert(t == type::SHIFT); return x & ~mask; }
     NonterminalID<G> getHead() const {
@@ -64,6 +64,13 @@ using SetOfItems = std::set<item<G>>;
 
 template<class G, class T>
 struct LRParser {
+    LRParser();
+    template<class InputIterator>
+    T parse(InputIterator w);
+private:
+    virtual T reduce(NonterminalID<G> A, uint32_t production, T* alpha, size_t n) = 0;
+    virtual T shift(typename G::Token_rv_reference t) = 0;
+
     using state = uint32_t;
     std::vector<SetOfItems<G>> items;
     //std::vector<std::unordered_map<NonterminalID<G>, state>> goto_table;
@@ -71,12 +78,8 @@ struct LRParser {
     std::vector<std::vector<state>> goto_table;
     std::vector<std::vector<action<G>>> action_table;
 
-    LRParser();
-    virtual ~LRParser() = default;
-    template<class InputIterator>
-    T parse(InputIterator w);
-    virtual T reduce(NonterminalID<G> A, uint32_t production, T* alpha, size_t n) = 0;
-    virtual T shift(typename G::Token_rv_reference t) = 0;
+protected:
+    ~LRParser() = default;
 };
 
 template<class G>
@@ -397,9 +400,9 @@ template<class InputIterator>
 T LRParser<G, T>::parse(InputIterator a) {
     std::vector<state> stack{0};
     std::vector<T> attributes{T()}; // Do we need this initialization?
-    while(!stack.empty()) {
+    do {
         auto s = stack.back();
-        auto& token = *a;
+        auto token = std::move(*a); /// @FIXME: only move from *a when we shift. Current implementation only works because it just copies
         std::cout << "state " << s << std::endl;
         auto tag = G::getTag(token);
         //auto it = action_table[s].find(tag);
@@ -457,12 +460,7 @@ T LRParser<G, T>::parse(InputIterator a) {
             std::cout << "Fail." << std::endl;
             return T();
         }
-    }
-
-    if (stack.empty()) {
-        std::cout << "empty stack" << std::endl;
-    }
-    return T();
+        // Could the stack be empty? 4 cases. SHIFT and REDUCE add elements (after removing a valid number of elements in one case)
+        // ACCEPT and FAIL return. So the stack can't be empty.
+    } while(true);
 }
-
-#endif /* LRPARSER_H_ */

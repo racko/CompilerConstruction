@@ -10,10 +10,10 @@
 #include <iostream>
 
 namespace Functional {
-    using type = uint32_t;
-    struct Grammar;
-    enum class T : uint32_t;
-    enum class NT : uint32_t;
+using type = uint32_t;
+struct Grammar;
+enum class T : uint32_t;
+enum class NT : uint32_t;
 }
 
 template<>
@@ -26,75 +26,74 @@ template<>
 struct GrammarElement<Functional::Grammar>;
 
 namespace Functional {
+enum class T : type {
+    SEMICOLON, ASSIGN, PERIOD, LPAREN, RPAREN, PLUS, MINUS, TIMES, DIV, LT, GT, AND, OR, BSL, LE, EQ, NE, GE, LET, IN, LETREC, VAR, NUM, WS, EOI, EPS
+};
 
-    enum class T : type {
-        SEMICOLON, ASSIGN, PERIOD, LPAREN, RPAREN, PLUS, MINUS, TIMES, DIV, LT, GT, AND, OR, BSL, LE, EQ, NE, GE, LET, IN, LETREC, VAR, NUM, WS, EOI, EPS
-    };
+enum class NT : type {
+    START, P, S, D, C, A, B, L
+};
 
-    enum class NT : type {
-        START, P, S, D, C, A, B, L
-    };
+extern const char* nt_strings[];
+extern const char* t_strings[];
 
-    extern const char* nt_strings[];
-    extern const char* t_strings[];
+struct Token;
+template<class T>
+    struct TokenBase;
+struct Keyword;
+struct BinOp;
+struct Num;
+struct Other;
+struct Var;
+struct Whitespace;
 
-    struct Token;
-    template<class T>
-        struct TokenBase;
-    struct Keyword;
-    struct BinOp;
-    struct Num;
-    struct Other;
-    struct Var;
-    struct Whitespace;
+struct Grammar {
+    using type = Functional::type;
 
-    struct Grammar {
+    // order: true terminals, EOF, EPS, nonterminals. S' is just the starting symbol
 
-        // order: true terminals, EOF, EPS, nonterminals. S' is just the starting symbol
+    using String = std::vector<GrammarElement<Grammar>>;
 
-        using String = std::vector<GrammarElement<Grammar>>;
+    static kind kindOf(GrammarElement<Grammar> X);
 
-        static kind kindOf(GrammarElement<Grammar> X);
+    static type getNumberOfTerminals() {
+        return numberOfTerminals;
+    }
 
-        static type getNumberOfTerminals() {
-            return numberOfTerminals;
-        }
+    static type getNumberOfNonterminals() {
+        return numberOfNonterminals;
+    }
 
-        static type getNumberOfNonterminals() {
-            return numberOfNonterminals;
-        }
+    static type getNumberOfGrammarElements() {
+        return numberOfTerminals + numberOfNonterminals;
+    }
 
-        static type getNumberOfGrammarElements() {
-            return numberOfTerminals + numberOfNonterminals;
-        }
+    static const std::unordered_map<NonterminalID<Grammar>, std::vector<String>>& getProductions() {
+        return productions;
+    }
 
-        static const std::unordered_map<NonterminalID<Grammar>, std::vector<String>>& getProductions() {
-            return productions;
-        }
+    static const std::vector<String>& getProductions(NonterminalID<Grammar> A);
 
-        static const std::vector<String>& getProductions(NonterminalID<Grammar> A);
+    static const std::unordered_map<GrammarElement<Grammar>, std::unordered_set<TerminalID<Grammar>>>& getFirsts() {
+        return firsts;
+    }
 
-        static const std::unordered_map<GrammarElement<Grammar>, std::unordered_set<TerminalID<Grammar>>>& getFirsts() {
-            return firsts;
-        }
+    static const std::unordered_set<TerminalID<Grammar>>& getFirsts(const GrammarElement<Grammar>& X) ;
 
-        static const std::unordered_set<TerminalID<Grammar>>& getFirsts(const GrammarElement<Grammar>& X) ;
+    //using Token_const_reference = const Functional::Token*;
+    using Token_rv_reference = const Token*;
 
-        //using Token_const_reference = const Functional::Token*;
-        using Token_rv_reference = const Token*;
+    static TerminalID<Grammar> getTag(const Token* x);
 
-        static TerminalID<Grammar> getTag(const Token* x);
+    static const NonterminalID<Grammar> start;
+    static const TerminalID<Grammar> eof;
+    static const TerminalID<Grammar> eps;
+    static const type numberOfNonterminals;
+    static const type numberOfTerminals;
+    static const std::unordered_map<NonterminalID<Grammar>, std::vector<String>> productions;
+    static const std::unordered_map<GrammarElement<Grammar>, std::unordered_set<TerminalID<Grammar>>> firsts;
 
-        static const NonterminalID<Grammar> start;
-        static const TerminalID<Grammar> eof;
-        static const TerminalID<Grammar> eps;
-        static const type numberOfNonterminals;
-        static const type numberOfTerminals;
-        static const std::unordered_map<NonterminalID<Grammar>, std::vector<String>> productions;
-        static const std::unordered_map<GrammarElement<Grammar>, std::unordered_set<TerminalID<Grammar>>> firsts;
-
-    };
-
+};
 }
 
 template<>

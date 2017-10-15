@@ -1,5 +1,4 @@
-#ifndef _NFABUILDER_H_
-#define _NFABUILDER_H_
+#pragma once
 
 #include <nfaBuilder_fwd.h>
 #include <tuple>
@@ -116,7 +115,7 @@ auto nfaBuilder<Symbol,State,TokenId>::cat(const Pair& nfa1, const Pair& nfa2) -
 
 template<typename Symbol, typename State, typename TokenId>
 void nfaBuilder<Symbol,State,TokenId>::match(istream& in, Symbol c) const {
-    std::cout << "match('" << showCharEscaped(c) << "')" << endl;
+    std::cout << "match('" << showCharEscaped(c) << "')" << std::endl;
     //static_assert(std::is_same<Symbol,int>::value, "Symbol needs to be int.");
     auto d = Symbol(in.get());
     if (d != c) {
@@ -209,7 +208,7 @@ auto nfaBuilder<Symbol,State,TokenId>::singletonLexer(char c) -> Pair {
     unsigned int id;
     if (it == symbolToId.end()) {
         id = symbolToId.size();
-        std::cout << "new symbol: '" << showCharEscaped(c) << "' (id: " << id << ")" << endl;
+        std::cout << "new symbol: '" << showCharEscaped(c) << "' (id: " << id << ")" << std::endl;
         symbolToId[c] = id;
         idToSymbol.push_back(c);
     } else
@@ -221,7 +220,7 @@ auto nfaBuilder<Symbol,State,TokenId>::singletonLexer(char c) -> Pair {
 template<typename Symbol, typename State, typename TokenId>
 auto nfaBuilder<Symbol,State,TokenId>::lexH(istream& in) -> Pair {
     auto c = in.peek();
-    std::cout << "lexH (peek: '" << showCharEscaped(c) << "')" << endl;
+    std::cout << "lexH (peek: '" << showCharEscaped(c) << "')" << std::endl;
     switch (c) {
         case '\\':
         case '|':
@@ -231,7 +230,7 @@ auto nfaBuilder<Symbol,State,TokenId>::lexH(istream& in) -> Pair {
         case ')': {
             match(in, c);
             auto out = singletonLexer(c);
-            std::cout << "lexH out: " << show(out) << endl;
+            std::cout << "lexH out: " << show(out) << std::endl;
             return out;
         }
         default:
@@ -242,21 +241,21 @@ auto nfaBuilder<Symbol,State,TokenId>::lexH(istream& in) -> Pair {
 template<typename Symbol, typename State, typename TokenId>
 auto nfaBuilder<Symbol,State,TokenId>::lexG(istream& in) -> Pair {
     auto c = in.peek();
-    std::cout << "lexG (peek: '" << showCharEscaped(c) << "')" << endl;
+    std::cout << "lexG (peek: '" << showCharEscaped(c) << "')" << std::endl;
     switch (c) {
         case '(':
             {
                 match(in, '(');
                 auto nfa1 = lexE(in);
                 match(in, ')');
-                std::cout << "lexG out: " << show(nfa1) << endl;
+                std::cout << "lexG out: " << show(nfa1) << std::endl;
                 return nfa1;
             }
         case '\\':
             {
                 match(in, '\\');
                 auto out = lexH(in);
-                std::cout << "lexG out: " << show(out) << endl;
+                std::cout << "lexG out: " << show(out) << std::endl;
                 return out;
             }
         case '|':
@@ -269,7 +268,7 @@ auto nfaBuilder<Symbol,State,TokenId>::lexG(istream& in) -> Pair {
             {
                 match(in, c);
                 auto out = singletonLexer(c);
-                std::cout << "lexG out: " << show(out) << endl;
+                std::cout << "lexG out: " << show(out) << std::endl;
                 return out;
             }
     }
@@ -278,14 +277,14 @@ auto nfaBuilder<Symbol,State,TokenId>::lexG(istream& in) -> Pair {
 template<typename Symbol, typename State, typename TokenId>
 auto nfaBuilder<Symbol,State,TokenId>::lexFR(istream& in, const Pair& nfa1) -> Pair {
     auto c = in.peek();
-    std::cout << "lexFR(" << show(nfa1) << ") (peek: '" << showCharEscaped(c) << "')" << endl;
+    std::cout << "lexFR(" << show(nfa1) << ") (peek: '" << showCharEscaped(c) << "')" << std::endl;
     switch (c) {
         case '*':
             {
                 match(in, '*');
                 auto nfa2 = closure(nfa1);
                 auto out = lexFR(in, nfa2);
-                std::cout << "lexFR out: " << show(out) << endl;
+                std::cout << "lexFR out: " << show(out) << std::endl;
                 return out;
             }
         case '?':
@@ -293,11 +292,11 @@ auto nfaBuilder<Symbol,State,TokenId>::lexFR(istream& in, const Pair& nfa1) -> P
                 match(in, '?');
                 auto nfa2 = opt(nfa1);
                 auto out = lexFR(in, nfa2);
-                std::cout << "lexFR out: " << show(out) << endl;
+                std::cout << "lexFR out: " << show(out) << std::endl;
                 return out;
             }
         default:
-            std::cout << "lexFR out: " << show(nfa1) << endl;
+            std::cout << "lexFR out: " << show(nfa1) << std::endl;
             return nfa1;
     }
 }
@@ -305,7 +304,7 @@ auto nfaBuilder<Symbol,State,TokenId>::lexFR(istream& in, const Pair& nfa1) -> P
 template<typename Symbol, typename State, typename TokenId>
 auto nfaBuilder<Symbol,State,TokenId>::lexF(istream& in) -> Pair {
     auto c = in.peek();
-    std::cout << "lexF (peek: '" << showCharEscaped(c) << "')" << endl;
+    std::cout << "lexF (peek: '" << showCharEscaped(c) << "')" << std::endl;
     switch (c) {
         case '|':
         case EOF:
@@ -317,7 +316,7 @@ auto nfaBuilder<Symbol,State,TokenId>::lexF(istream& in) -> Pair {
             {
                 auto nfa1 = lexG(in);
                 auto nfa2 = lexFR(in, nfa1);
-                std::cout << "lexF out: " << show(nfa2) << endl;
+                std::cout << "lexF out: " << show(nfa2) << std::endl;
                 return nfa2;
             }
     }
@@ -326,12 +325,12 @@ auto nfaBuilder<Symbol,State,TokenId>::lexF(istream& in) -> Pair {
 template<typename Symbol, typename State, typename TokenId>
 auto nfaBuilder<Symbol,State,TokenId>::lexTR(istream& in, const Pair& nfa1) -> Pair {
     auto c = in.peek();
-    std::cout << "lexTR(" << show(nfa1) << ") (peek: '" << showCharEscaped(c) << "')" << endl;
+    std::cout << "lexTR(" << show(nfa1) << ") (peek: '" << showCharEscaped(c) << "')" << std::endl;
     switch (c) {
         case '|':
         case EOF:
         case ')':
-            std::cout << "lexTR out: " << show(nfa1) << endl;
+            std::cout << "lexTR out: " << show(nfa1) << std::endl;
             return nfa1;
         case '*':
         case '?':
@@ -341,7 +340,7 @@ auto nfaBuilder<Symbol,State,TokenId>::lexTR(istream& in, const Pair& nfa1) -> P
                 auto nfa2 = lexF(in);
                 auto nfa3 = cat(nfa1, nfa2);
                 auto nfa4 = lexTR(in, nfa3);
-                std::cout << "lexTR out: " << show(nfa4) << endl;
+                std::cout << "lexTR out: " << show(nfa4) << std::endl;
                 return nfa4;
             }
     }
@@ -350,7 +349,7 @@ auto nfaBuilder<Symbol,State,TokenId>::lexTR(istream& in, const Pair& nfa1) -> P
 template<typename Symbol, typename State, typename TokenId>
 auto nfaBuilder<Symbol,State,TokenId>::lexT(istream& in) -> Pair {
     auto c = in.peek();
-    std::cout << "lexT (peek: '" << showCharEscaped(c) << "')" << endl;
+    std::cout << "lexT (peek: '" << showCharEscaped(c) << "')" << std::endl;
     switch (c) {
         case '|':
         case EOF:
@@ -362,7 +361,7 @@ auto nfaBuilder<Symbol,State,TokenId>::lexT(istream& in) -> Pair {
             {
                 auto nfa1 = lexF(in);
                 auto nfa2 = lexTR(in, nfa1);
-                std::cout << "lexT out: " << show(nfa2) << endl;
+                std::cout << "lexT out: " << show(nfa2) << std::endl;
                 return nfa2;
             }
     }
@@ -371,7 +370,7 @@ auto nfaBuilder<Symbol,State,TokenId>::lexT(istream& in) -> Pair {
 template<typename Symbol, typename State, typename TokenId>
 auto nfaBuilder<Symbol,State,TokenId>::lexER(istream& in, const Pair& nfa1) -> Pair {
     auto c = in.peek();
-    std::cout << "lexER(" << show(nfa1) << ") (peek: '" << showCharEscaped(c) << "')" << endl;
+    std::cout << "lexER(" << show(nfa1) << ") (peek: '" << showCharEscaped(c) << "')" << std::endl;
     switch (c) {
         case '|':
             {
@@ -381,12 +380,12 @@ auto nfaBuilder<Symbol,State,TokenId>::lexER(istream& in, const Pair& nfa1) -> P
                 auto nfa3 = alt(nfa1, nfa2);
 
                 auto nfa4 = lexER(in, nfa3);
-                std::cout << "lexER out: " << show(nfa4) << endl;
+                std::cout << "lexER out: " << show(nfa4) << std::endl;
                 return nfa4;
             }
         case EOF:
         case ')':
-            std::cout << "lexER out: " << show(nfa1) << endl;
+            std::cout << "lexER out: " << show(nfa1) << std::endl;
             return nfa1;
         default:
             throw std::runtime_error("lexER Error: '" + printEscaped(c) + "'");
@@ -396,7 +395,7 @@ auto nfaBuilder<Symbol,State,TokenId>::lexER(istream& in, const Pair& nfa1) -> P
 template<typename Symbol, typename State, typename TokenId>
 auto nfaBuilder<Symbol,State,TokenId>::lexE(istream& in) -> Pair {
     auto c = in.peek();
-    std::cout << "lexE (peek: '" << showCharEscaped(c) << "')" << endl;
+    std::cout << "lexE (peek: '" << showCharEscaped(c) << "')" << std::endl;
     switch (c) {
         case '|':
         case EOF:
@@ -408,7 +407,7 @@ auto nfaBuilder<Symbol,State,TokenId>::lexE(istream& in) -> Pair {
             {
                 auto nfa1 = lexT(in);
                 auto nfa2 = lexER(in, nfa1);
-                std::cout << "lexE out: " << show(nfa2) << endl;
+                std::cout << "lexE out: " << show(nfa2) << std::endl;
                 return nfa2;
             }
     }
@@ -416,13 +415,11 @@ auto nfaBuilder<Symbol,State,TokenId>::lexE(istream& in) -> Pair {
 
 template<typename Symbol, typename State, typename TokenId>
 void nfaBuilder<Symbol,State,TokenId>::lexRegex(istream& in, TokenId kind) {
-    std::cout << "entered lexRegex" << endl;
+    std::cout << "entered lexRegex" << std::endl;
     Pair nfa1 = lexE(in);
     assert(symbolToId.at(eps) == 0);
     ns[start].ns[0].push_back(nfa1.first);
     ns[nfa1.second].kind = kind;
-    std::cout << "done with lexRegex" << endl;
-    std::cout << "out: (" << nfa1.first << "," << nfa1.second << ")" << endl;
+    std::cout << "done with lexRegex" << std::endl;
+    std::cout << "out: (" << nfa1.first << "," << nfa1.second << ")" << std::endl;
 }
-
-#endif

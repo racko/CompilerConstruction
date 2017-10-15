@@ -1,35 +1,30 @@
-#ifndef _PRINT_H_
-#define _PRINT_H_
+#pragma once
 
 #include <ostream>
-using std::ostream;
 #include <vector>
-using std::vector;
 #include <functional>
-using std::function;
 #include <tuple>
-using std::pair;
 
-std::string print(char c);
-std::string printEscaped(char c); // this should be given a set of chars to be replaced
-inline function<ostream&(ostream&)> showChar(char c) {
-    return [c] (ostream& s) -> ostream& {
+std::string print(int c);
+std::string printEscaped(int c); // this should be given a set of chars to be replaced
+inline std::function<std::ostream&(std::ostream&)> showChar(int c) {
+    return [c] (std::ostream& s) -> std::ostream& {
         return s << print(c);
     };
 }
 
-inline function<ostream&(ostream&)> showCharEscaped(char c) {
-    return [c] (ostream& s) -> ostream& {
+inline std::function<std::ostream&(std::ostream&)> showCharEscaped(int c) {
+    return [c] (std::ostream& s) -> std::ostream& {
         return s << printEscaped(c);
     };
 }
 
-inline ostream& operator<<(ostream& s, const function<ostream&(ostream&)>& f) {
+inline std::ostream& operator<<(std::ostream& s, const std::function<std::ostream&(std::ostream&)>& f) {
     return f(s);
 }
 
 template <class T>
-ostream& showVector(const vector<T>& v, ostream& s) {
+std::ostream& showVector(const std::vector<T>& v, std::ostream& s) {
   if (v.empty()) {
     s << "[]";
     return s;
@@ -43,7 +38,7 @@ ostream& showVector(const vector<T>& v, ostream& s) {
 }
 
 template<class T1, class T2>
-ostream& showPair(const pair<T1,T2>& p, ostream& s) {
+std::ostream& showPair(const std::pair<T1,T2>& p, std::ostream& s) {
   s << "(" << p.first << "," << p.second << ")";
   return s;
 }
@@ -51,18 +46,18 @@ ostream& showPair(const pair<T1,T2>& p, ostream& s) {
 using namespace std::placeholders;
 
 template<class T>
-function<ostream&(ostream&)> show(const vector<T>& v) {
+std::function<std::ostream&(std::ostream&)> show(const std::vector<T>& v) {
   return bind(showVector<T>, v, _1);
 }
 
 template<class T1, class T2>
-function<ostream&(ostream&)> show(const pair<T1,T2>& p) {
+std::function<std::ostream&(std::ostream&)> show(const std::pair<T1,T2>& p) {
   return bind(showPair<T1,T2>, p, _1);
 }
 
 template<class T>
-function<ostream&(ostream&)> bin(T x) {
-  return [x] (ostream& s) -> ostream& {
+std::function<std::ostream&(std::ostream&)> bin(T x) {
+  return [x] (std::ostream& s) -> std::ostream& {
     int n = 8 * sizeof(T);
     int i = 0;
     while (i < n && !(x & (T(1) << i)))
@@ -81,10 +76,8 @@ function<ostream&(ostream&)> bin(T x) {
 }
 
 template <>
-ostream& showVector(const vector<bool>& v, ostream& s);
+std::ostream& showVector(const std::vector<bool>& v, std::ostream& s);
 template <>
-ostream& showVector(const vector<pair<unsigned int,unsigned int>>& v, ostream& s);
+std::ostream& showVector(const std::vector<std::pair<unsigned int,unsigned int>>& v, std::ostream& s);
 template <>
-ostream& showVector(const vector<char>& v, ostream& s);
-
-#endif
+std::ostream& showVector(const std::vector<char>& v, std::ostream& s);

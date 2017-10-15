@@ -6,6 +6,6 @@ JsonParser::JsonParser() : lex(std::make_unique<myLexer>()), parser(std::make_un
 JsonParser::~JsonParser() = default;
 
 value* JsonParser::run(const char* text) {
-    lex->c = text;
+    lex->setText(text);
     return parser->parse(lex->begin());
 }

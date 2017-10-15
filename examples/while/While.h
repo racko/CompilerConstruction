@@ -9,9 +9,9 @@
 #include <boost/dynamic_bitset.hpp>
 
 namespace While {
-    struct Grammar;
-    enum class T : uint32_t;
-    enum class NT : uint32_t;
+struct Grammar;
+enum class T : uint32_t;
+enum class NT : uint32_t;
 }
 
 template<>
@@ -24,75 +24,74 @@ template<>
 struct GrammarElement<While::Grammar>;
 
 namespace While {
+enum class T : uint32_t {
+    DEF, LEFTCURLY, RIGHTCURLY, SEMICOLON, BASIC, RECORD, IF, ELSE, WHILE, DO, BREAK, CONTINUE, RETURN, LEFTBR, RIGHTBR, ID, PERIOD, ASSIGN, OR, AND, EQ, NEQ, LT, LE, GE, GT, PLUS, MINUS, TIMES, DIV, NOT, LEFTPAR, RIGHTPAR, NUM, REAL, TRUE, FALSE, STRING, COMMA, WS, EOI,
+    EPS
+};
 
-    enum class T : uint32_t {
-        DEF, LEFTCURLY, RIGHTCURLY, SEMICOLON, BASIC, RECORD, IF, ELSE, WHILE, DO, BREAK, CONTINUE, RETURN, LEFTBR, RIGHTBR, ID, PERIOD, ASSIGN, OR, AND, EQ, NEQ, LT, LE, GE, GT, PLUS, MINUS, TIMES, DIV, NOT, LEFTPAR, RIGHTPAR, NUM, REAL, TRUE, FALSE, STRING, COMMA, WS, EOI,
-        EPS
-    };
+enum class NT : uint32_t {
+    S, PROGRAM, FUNCS, FUNC, OPTPARAMS, PARAMS, BLOCK, DECLS, DECL, TYPE, STMTS, STMT, LOC, ASSIGN, BOOL, JOIN, EQ, REL, EXPR, TERM, UNARY, FACTOR, FUNCALL, OPTARGS, ARGS
+};
 
-    enum class NT : uint32_t {
-        S, PROGRAM, FUNCS, FUNC, OPTPARAMS, PARAMS, BLOCK, DECLS, DECL, TYPE, STMTS, STMT, LOC, ASSIGN, BOOL, JOIN, EQ, REL, EXPR, TERM, UNARY, FACTOR, FUNCALL, OPTARGS, ARGS
-    };
+extern const char* nt_strings[];
+extern const char* t_strings[];
 
-    extern const char* nt_strings[];
-    extern const char* t_strings[];
+struct Token;
+struct Basic;
+struct Num;
+struct Real;
+struct ID;
+struct String;
 
-    struct Token;
-    struct Basic;
-    struct Num;
-    struct Real;
-    struct ID;
-    struct String;
+struct Grammar {
+    using type = std::uint32_t; // TODO: actually use this typedef
 
-    struct Grammar {
+    // order: true terminals, EOF, EPS, nonterminals. S' is just the starting symbol
 
-        // order: true terminals, EOF, EPS, nonterminals. S' is just the starting symbol
+    using String = std::vector<GrammarElement<Grammar>>;
 
-        using String = std::vector<GrammarElement<Grammar>>;
+    static kind kindOf(GrammarElement<Grammar> X);
 
-        static kind kindOf(GrammarElement<Grammar> X);
+    static size_t getNumberOfTerminals() {
+        return numberOfTerminals;
+    }
 
-        static size_t getNumberOfTerminals() {
-            return numberOfTerminals;
-        }
+    static size_t getNumberOfNonterminals() {
+        return numberOfNonterminals;
+    }
 
-        static size_t getNumberOfNonterminals() {
-            return numberOfNonterminals;
-        }
+    static size_t getNumberOfGrammarElements() {
+        return numberOfTerminals + numberOfNonterminals;
+    }
 
-        static size_t getNumberOfGrammarElements() {
-            return numberOfTerminals + numberOfNonterminals;
-        }
+    static const std::unordered_map<NonterminalID<Grammar>, std::vector<String>>& getProductions() {
+        return productions;
+    }
 
-        static const std::unordered_map<NonterminalID<Grammar>, std::vector<String>>& getProductions() {
-            return productions;
-        }
+    static const std::vector<String>& getProductions(NonterminalID<Grammar> A);
 
-        static const std::vector<String>& getProductions(NonterminalID<Grammar> A);
+    static const std::unordered_map<GrammarElement<Grammar>, std::unordered_set<TerminalID<Grammar>>>& getFirsts() {
+        return firsts;
+    }
 
-        static const std::unordered_map<GrammarElement<Grammar>, std::unordered_set<TerminalID<Grammar>>>& getFirsts() {
-            return firsts;
-        }
-
-        static const std::unordered_set<TerminalID<Grammar>>& getFirsts(const GrammarElement<Grammar>& X) ;
+    static const std::unordered_set<TerminalID<Grammar>>& getFirsts(const GrammarElement<Grammar>& X) ;
 
 
-        //using Token_const_reference = const While::Token*;
-        using Token_rv_reference = const Token*;
+    //using Token_const_reference = const While::Token*;
+    using Token_rv_reference = const Token*;
 
-        //  static TerminalID<Grammar> getTag(const While::Token& x);
-        static TerminalID<Grammar> getTag(const While::Token* x);
+    //  static TerminalID<Grammar> getTag(const While::Token& x);
+    static TerminalID<Grammar> getTag(const While::Token* x);
 
-        static const NonterminalID<Grammar> start;
-        static const TerminalID<Grammar> eof;
-        static const TerminalID<Grammar> eps;
-        static const size_t numberOfNonterminals;
-        static const size_t numberOfTerminals;
-        static const std::unordered_map<NonterminalID<Grammar>, std::vector<String>> productions;
-        static const std::unordered_map<GrammarElement<Grammar>, std::unordered_set<TerminalID<Grammar>>> firsts;
+    static const NonterminalID<Grammar> start;
+    static const TerminalID<Grammar> eof;
+    static const TerminalID<Grammar> eps;
+    static const size_t numberOfNonterminals;
+    static const size_t numberOfTerminals;
+    static const std::unordered_map<NonterminalID<Grammar>, std::vector<String>> productions;
+    static const std::unordered_map<GrammarElement<Grammar>, std::unordered_set<TerminalID<Grammar>>> firsts;
 
-    };
-
+};
 }
 
 template<>

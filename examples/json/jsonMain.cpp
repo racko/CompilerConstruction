@@ -4,6 +4,7 @@
 #include <boost/interprocess/mapped_region.hpp>
 #include <boost/filesystem.hpp>
 #include <chrono>
+#include <iostream>
 #include <json/json.h>
 
 int main(int argc, char** argv) {
@@ -13,12 +14,12 @@ int main(int argc, char** argv) {
     auto file_name = argv[1];
     {
         JsonParser parser;
-        {
-            std::ofstream dfa_file("json_dfa.dot");
-            dfa_file << parser.lex->dfa;
-        }
+        //{
+        //    std::ofstream dfa_file("json_dfa.dot");
+        //    dfa_file << parser.lex->dfa;
+        //}
         std::cout << std::boolalpha;
-        //cout << "> ";
+        //std::cout << "> ";
         //cin.get(lex.c, 4096);
         //auto ll = cin.gcount();
         namespace bi = boost::interprocess;
@@ -32,7 +33,7 @@ int main(int argc, char** argv) {
         file_mapping file(file_name, read_only);
         mapped_region region(file, copy_on_write, 0, size + 1);
         auto ll = region.get_size();
-        cout << "read " << ll << " characters" << endl;
+        std::cout << "read " << ll << " characters" << std::endl;
         //std::cout << "parsing \"" << lex.c << "\"" << std::endl;
         static_cast<char*>(region.get_address())[ll-1] = EOF;
         region.flush(ll-1);

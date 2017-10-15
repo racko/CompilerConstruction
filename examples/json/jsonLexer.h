@@ -1,56 +1,34 @@
 #pragma once
-#include "Regex.h"
-#include "jsonGrammar.h"
 
-struct myLexer : public Lexer<json::Token> {
-    using T = json::T;
-    using Token = json::Token;
-    static const vector<unsigned int> m;
+#include <memory>
 
-    DFA_t getDFA();
+namespace jsonLL { struct Token; }
+namespace json = jsonLL;
 
-    myLexer() : Lexer(getDFA()) {}
+struct myLexer {
 
-    Token eofToken() const override {
-        return {T::EOI,boost::blank()};
-    }
+    myLexer();
+    ~myLexer();
+    
+    struct iterator {
+        myLexer* lex_;
 
-    Token whiteSpaceToken() const override {
-        return {T::WS,boost::blank()};
-    }
+        iterator(myLexer* lex) : lex_(lex) {}
 
-    Token action(const char* s, size_t n, TokenId t) override {
-        //cout << "action(\"";
-        //cout.write(s, n);
-        //cout << "\", " << n << ", " << t << ")" << endl;
-        auto tid = TerminalID<json::Grammar>(t - 1);
-        switch(tid) {
-        case T::TRUE:
-            return {tid,true};
-        case T::FALSE:
-            return {tid,false};
-        case T::NULL:
-        case T::BEGIN_ARRAY:
-        case T::BEGIN_OBJECT:
-        case T::END_ARRAY:
-        case T::END_OBJECT:
-        case T::NAME_SEPARATOR:
-        case T::VALUE_SEPARATOR:
-            return {tid,boost::blank()};
-        case T::STRING:
-            return {T::STRING,boost::string_view(s+1, n-2)}; // the arithmetic removes quotation marks
-        case T::NUM: {
-            return {T::NUM,json::num_view(s, n)};
-        }
-        case T::WS:
-            return {T::WS,boost::blank()};
-        default: {
-            std::stringstream ss;
-            ss << "invalid token type: " << t;
-            throw std::runtime_error(ss.str());
-        }
+        const json::Token& operator*() const { return *(*lex_); }
+        json::Token& operator*() { return *(*lex_); }
+        iterator& operator++() { ++(*lex_); return *this; }
+    };
 
-        }
-    }
+    //iterator begin() { return iterator(*this); }
+    iterator begin() { return iterator(this); }
+    void setText(const char*);
+
+    const json::Token& operator*() const;
+    json::Token& operator*();
+    myLexer& operator++();
+
+    struct impl;
+    std::unique_ptr<impl> pimpl;
 };
 

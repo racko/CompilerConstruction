@@ -1,10 +1,12 @@
 #pragma once
-#include "jsonGrammar.h"
+#include "jsonLLGrammar.h"
 
 #include <boost/variant.hpp>
 #include <boost/utility/string_view.hpp>
 #include <iosfwd>
 #include <utility>
+
+namespace json = jsonLL;
 
 struct value;
 

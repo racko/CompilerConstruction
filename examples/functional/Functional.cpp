@@ -19,7 +19,7 @@ const LambdaExpr* reduce(const LambdaExpr& p) {
 const LambdaExpr* run(const char* text) {
     myLexer lex;
     Parser parser;
-    lex.c = text;
+    lex.setText(text);
     auto result = parser.parse(lex.begin());
     //return reduce(result);
     return evaluator::evalProgram(toProgram(result), make_eager(evaluator::eval));

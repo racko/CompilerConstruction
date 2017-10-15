@@ -1,8 +1,7 @@
-#ifndef _NFA_H_
-#define _NFA_H_
+#pragma once
 
 #include <NFA_fwd.h>
-#include <nfaBuilder_fwd.h>
+#include <nfaBuilder.h>
 #include "Print.h"
 //#include <BitSet.h>
 #include <HashSet.h>
@@ -40,16 +39,16 @@ std::ostream& operator<<(std::ostream&, const NFA<Symbol,State,TokenId>&);
 
 template<typename Symbol, typename State, typename TokenId>
 void NFA<Symbol,State,TokenId>::getClosure(BitSet& S) const {
-    //cout << "getClosure(" << S << ")" << endl;
+    //cout << "getClosure(" << S << ")" << std::endl;
     stack.insert(stack.end(), S.begin(), S.end());
 
     while (!stack.empty()) {
-        //cout << "stack: " << show(stack) << endl;
+        //cout << "stack: " << show(stack) << std::endl;
         unsigned int q = stack.back();
         stack.pop_back();
-        //cout << "considering state " << q << endl;
+        //cout << "considering state " << q << std::endl;
         const BitSet& T = table[q][eps];
-        //cout << "delta(" << q << ",eps) = " << T << endl;
+        //cout << "delta(" << q << ",eps) = " << T << std::endl;
 
         //newStates = BitSetComplement(S);
         //newStates &= T;
@@ -57,28 +56,28 @@ void NFA<Symbol,State,TokenId>::getClosure(BitSet& S) const {
 
         //BitSet newStates = T & ~S;
         S |= newStates;
-        //cout << "newStates: " << newStates << endl;
+        //cout << "newStates: " << newStates << std::endl;
         stack.insert(stack.end(), newStates.begin(), newStates.end());
     }
 }
 
 template<typename Symbol, typename State, typename TokenId>
 NFA<Symbol,State,TokenId>::NFA(const nfaBuilder<Symbol,State,TokenId>& nfa) : eps(nfa.eps), symbolCount(nfa.symbolToId.size()), stateCount(nfa.ns.size()), start(nfa.start), final(stateCount), table(stateCount, vector<BitSet>(symbolCount, BitSet(stateCount, false))), symbols(nfa.idToSymbol), newStates(nfa.ns.size()) {
-    cout << "constructing NFA from nfaBuilder" << endl;
-    cout << "stateCount: " << stateCount << endl;
-    cout << "start: " << nfa.start << endl;
-    cout << "symbolCount: " << symbolCount << endl;
-    //  cout << "symbols: " << show(nfa.idToSymbol) << endl;
+    cout << "constructing NFA from nfaBuilder" << std::endl;
+    cout << "stateCount: " << stateCount << std::endl;
+    cout << "start: " << nfa.start << std::endl;
+    cout << "symbolCount: " << symbolCount << std::endl;
+    //  cout << "symbols: " << show(nfa.idToSymbol) << std::endl;
 
     for (unsigned int p = 0; p < stateCount; p++) {
         for (auto& t : nfa.ns[p].ns) {
-            //cout << "d(" << p << "," << nfa.idToSymbol[t.first] << ") = " << show(t.second) << endl;
+            //cout << "d(" << p << "," << nfa.idToSymbol[t.first] << ") = " << show(t.second) << std::endl;
             for (auto& q : t.second) {
                 table[p][t.first][q] = true;
             }
-            //cout << "T[" << p << "][" << t.first << "] = " << table[p][t.first] << endl;
+            //cout << "T[" << p << "][" << t.first << "] = " << table[p][t.first] << std::endl;
         }
-        //cout << "kind(" << p << ") = " << nfa.ns[p].kind << endl;
+        //cout << "kind(" << p << ") = " << nfa.ns[p].kind << std::endl;
         final[p] = nfa.ns[p].kind;
     }
 }
@@ -110,4 +109,3 @@ std::ostream& operator<<(std::ostream& s, const NFA<Symbol,State,TokenId>& nfa) 
     s << "}\n";
     return s;
 }
-#endif

@@ -6,77 +6,53 @@
 #include <sstream>
 #include <vector>
 
-struct myLexer : public Lexer<Functional::Token*> {
+//struct myLexer : public Lexer<Functional::Token*> {
+struct myLexer {
     using Token = Functional::Token;
     using T= Functional::T;
-    static const vector<unsigned int> m;
 
-    DFA_t getDFA();
+    using DFA_t = Lexer::DFA_t;
+    using Symbol = Lexer::Symbol;
+    using State = Lexer::State;
+    using TokenId = Lexer::TokenId;
 
-    myLexer() : Lexer(getDFA()) {}
+    //static const vector<unsigned int> m;
 
-    Token* eofToken() const override {
-        return new Token(T::EOI);
-    }
+    Lexer lexer;
+    Token* token = nullptr;
 
-    Token* whiteSpaceToken() const override {
-        return nullptr;
-    }
+    static DFA_t getDFA();
 
-    Token* action(const char* s, size_t n, TokenId t) override {
-        cout << "action(\"";
-        cout.write(s, n);
-        cout << "\", " << n << ", " << int(t) << ")" << endl;
-        Token* tok;
-        auto tid = TerminalID<Functional::Grammar>(t - 1);
-        switch(tid) {
-        case T::SEMICOLON:
-        case T::ASSIGN:
-        case T::PERIOD:
-        case T::LPAREN:
-        case T::RPAREN:
-        case T::BSL:
-        case T::PLUS:
-        case T::MINUS:
-        case T::TIMES:
-        case T::DIV:
-        case T::LT:
-        case T::GT:
-        case T::AND:
-        case T::OR:
-        case T::LE:
-        case T::EQ:
-        case T::NE:
-        case T::GE:
-        case T::LET:
-        case T::IN:
-        case T::LETREC:
-            tok = new Token(tid);
-            break;
-        case T::VAR:
-            tok = new Functional::Var(string(s, n));
-            break;
-        case T::NUM: {
-            unsigned long long i;
-            std::stringstream ss;
-            ss.exceptions(std::stringstream::failbit | std::stringstream::badbit);
-            ss.write(s, n);
-            ss >> i;
-            tok = new Functional::Num(i);
-            break;
-        }
-        case T::WS:
-            tok = nullptr;
-            break;
-        default: {
-            std::stringstream ss;
-            ss << "invalid token type: " << t;
-            throw std::runtime_error(ss.str());
-        }
+    myLexer() : lexer(getDFA(), {nullptr, 0, static_cast<Functional::type>(T::EOI) + 1}, static_cast<Functional::type>(T::WS) + 1) {}
 
-        }
-        return tok;
-    }
+    //Token* eofToken() const override {
+    //    return new Token(T::EOI);
+    //}
+
+    //Token* whiteSpaceToken() const override {
+    //    return nullptr;
+    //}
+
+    static Token* action(const char* s, size_t n, TokenId t);
+    static Token* t2t(::Token t) { return action(t.start, t.length, t.tokenId); }
+
+    struct iterator {
+        myLexer* lex_;
+
+        iterator(myLexer* lex) : lex_(lex) {}
+
+        const Token* operator*() const { return *(*lex_); }
+        Token* operator*() { return *(*lex_); }
+        iterator& operator++() { ++(*lex_); return *this; }
+    };
+
+    //iterator begin() { return iterator(*this); }
+    iterator begin() { return iterator(this); }
+    void setText(const char* text) { lexer.c = text; token = t2t(lexer.getToken()); }
+
+    const Token* operator*() const { return token; }
+    Token* operator*() { return token; }
+    myLexer& operator++() { token = t2t(lexer.getToken()); return *this; }
 };
 
 
