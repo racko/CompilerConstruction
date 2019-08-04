@@ -91,7 +91,7 @@ static constexpr const auto MaxResultStates = [] {
 // e.g. MaxTransitions is high because for the starting state and eps we have a lot of transitions (one per terminalid) but we might only have a maximum of two labels per state (eps and one non-eps symbol). [I'm not sure.]
 // We can compute this number based on the transitionCounts above.
 
-#define CONSTEXPR
+//#define CONSTEXPR
 #ifdef CONSTEXPR
 static constexpr const auto nfa = [] {
     using G = Graph<State,TokenId,MaxNodes,MaxTransitions,MaxResultStates>;
@@ -102,6 +102,7 @@ static constexpr const auto dfa = toDFA<State>(nfa);
 static constexpr const auto min_dfa = minimize<uint8_t>(dfa);
 #else
 auto nfa = [] {
+    std::cout << std::endl;
     using G = Graph<State,TokenId,MaxNodes,MaxTransitions,MaxResultStates>;
     auto builder = make_nfaBuilder<G>();
     return NFA<Symbol,State,TokenId,MaxNodes,MaxSymbols,MaxTransitions,MaxResultStates>(builder);

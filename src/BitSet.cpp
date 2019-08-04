@@ -1,7 +1,9 @@
 #include "BitSet.h"
+
+#include <array>
+#include <cstring>
 #include <iomanip>
 #include <ostream>
-#include <cstring>
 
 BitSet::BitSet(unsigned int _n) : n(_n), w((n + 63) >> 6), wordsInUse(w), p(new uint64_t[w]) {}
 
@@ -57,14 +59,14 @@ void BitSet::swap(BitSet& rhs) noexcept {
 }
 
 BitSet& BitSet::operator=(const BitSetComplement& rhs) {
-    //std::cout << "copying BitSet(" << s << "): ";
+    // std::cout << "copying BitSet(" << s << "): ";
     if (n != rhs.s.n) {
         throw std::runtime_error("dimensions don't match: " + std::to_string(n) + " != " + std::to_string(rhs.s.n));
     }
 
     for (auto i = 0u; i < wordsInUse; i++)
         p[i] = ~rhs.s.p[i];
-    //std::cout << *this << endl;
+    // std::cout << *this << endl;
     return *this;
 }
 
@@ -88,7 +90,8 @@ void BitSet::resize(unsigned int _n, const bool x) {
         unsigned int _w = std::max(newWordsInUse, w << 1);
         uint64_t* _p = new uint64_t[_w];
 
-        // "Critical Line": only the above can throw, so below we can safely modify *this and have strong exceptions safety
+        // "Critical Line": only the above can throw, so below we can safely modify *this and have strong exceptions
+        // safety
 
         std::copy(p, p + wordsInUse, _p);
         delete[] p;
@@ -111,12 +114,12 @@ unsigned int BitSet::count() const {
     if (wordsInUse == 0)
         return 0;
     unsigned int c = 0;
-    //for (auto i = begin(); i != end(); ++i)
+    // for (auto i = begin(); i != end(); ++i)
     //    c++;
     for (auto i = 0U; i < wordsInUse - 1; ++i) {
         uint64_t v = p[i];
         for (; v; ++c) {
-            v &= v-1;
+            v &= v - 1;
         }
     }
     const auto handled_bits = (n >> 6) << 6;
@@ -134,16 +137,14 @@ unsigned int BitSet::count() const {
 
 uint64_t BitSet::max() const {
     throw std::runtime_error("not implemented yet");
-    //if (p[w-1] & (0xffffffffffffffffULL << n));
-    //uint64_t* word = p + w - 1;
-    //while (word == 0)
+    // if (p[w-1] & (0xffffffffffffffffULL << n));
+    // uint64_t* word = p + w - 1;
+    // while (word == 0)
     //  word--;
-    //return 0;
+    // return 0;
 }
 
-void BitSet::clear() {
-    std::fill(p, p + wordsInUse, 0ULL);
-}
+void BitSet::clear() { std::fill(p, p + wordsInUse, 0ULL); }
 
 bool BitSet::operator==(const BitSet& rhs) const {
     if (n != rhs.n)
@@ -160,7 +161,7 @@ bool BitSet::operator==(const BitSet& rhs) const {
 }
 
 BitSet& BitSet::operator|=(const BitSet& rhs) {
-    //std::cout << *this << ".operator|(" << rhs << ")" << endl;
+    // std::cout << *this << ".operator|(" << rhs << ")" << endl;
     if (n != rhs.n) {
         throw std::runtime_error("dimensions don't match: " + std::to_string(n) + " != " + std::to_string(rhs.n));
     }
@@ -171,7 +172,7 @@ BitSet& BitSet::operator|=(const BitSet& rhs) {
 }
 
 BitSet& BitSet::operator&=(const BitSet& rhs) {
-    //std::cout << *this << ".operator&(" << rhs << ")" << endl;
+    // std::cout << *this << ".operator&(" << rhs << ")" << endl;
     if (n != rhs.n) {
         throw std::runtime_error("dimensions don't match: " + std::to_string(n) + " != " + std::to_string(rhs.n));
     }
@@ -182,7 +183,7 @@ BitSet& BitSet::operator&=(const BitSet& rhs) {
 }
 
 BitSet BitSet::operator~() const {
-    //std::cout << *this << ".operator~()" << endl;
+    // std::cout << *this << ".operator~()" << endl;
     BitSet s(n);
     for (auto i = 0u; i < wordsInUse; i++)
         s.p[i] = ~p[i];
@@ -199,8 +200,8 @@ int BitSet::nextSetBit(unsigned int fromIndex) const {
 }
 
 namespace {
-constexpr std::array<uint64_t,256> make_hashtable() {
-    std::array<uint64_t,256> out{};
+constexpr std::array<uint64_t, 256> make_hashtable() {
+    std::array<uint64_t, 256> out{};
     uint64_t h = 0x544B2FBACAAF1684ULL;
     for (auto j = 0U; j < 256U; j++) {
         for (auto i = 0U; i < 31U; i++) {
@@ -213,11 +214,11 @@ constexpr std::array<uint64_t,256> make_hashtable() {
     return out;
 }
 
-constexpr std::array<uint64_t,256> hashfn_tab = make_hashtable();
-}
+constexpr std::array<uint64_t, 256> hashfn_tab = make_hashtable();
+} // namespace
 
-size_t std::hash<BitSet>::operator()(const BitSet &s) const noexcept {
-    //std::cout << "hashing " << s << ": ";
+size_t std::hash<BitSet>::operator()(const BitSet& s) const noexcept {
+    // std::cout << "hashing " << s << ": ";
     uint64_t h = 0xBB40E64DA205B064ULL;
     const unsigned char* k = (unsigned char*)s.p;
     const unsigned char* const last = (unsigned char*)(s.p + (s.n >> 6));
@@ -235,12 +236,12 @@ size_t std::hash<BitSet>::operator()(const BitSet &s) const noexcept {
     const unsigned char* last2 = (unsigned char*)(&lastWord + 1);
     for (; k != last2; ++k)
         h = (h * 7664345821815920749ULL) ^ hashfn_tab[*k];
-    //std::cout << h << endl;
+    // std::cout << h << endl;
     return h;
 }
 
 BitSet operator|(const BitSet& lhs, const BitSet& rhs) {
-    //std::cout << "operator|(" << lhs << ", " << rhs << ")" << endl;
+    // std::cout << "operator|(" << lhs << ", " << rhs << ")" << endl;
     if (lhs.n != rhs.n) {
         throw std::runtime_error("dimensions don't match: " + std::to_string(lhs.n) + " != " + std::to_string(rhs.n));
     }
@@ -252,7 +253,7 @@ BitSet operator|(const BitSet& lhs, const BitSet& rhs) {
 }
 
 BitSet operator&(const BitSet& lhs, const BitSet& rhs) {
-    //std::cout << "operator&(" << lhs << ", " << rhs << ")" << endl;
+    // std::cout << "operator&(" << lhs << ", " << rhs << ")" << endl;
     if (lhs.n != rhs.n) {
         throw std::runtime_error("dimensions don't match: " + std::to_string(lhs.n) + " != " + std::to_string(rhs.n));
     }
@@ -287,7 +288,7 @@ BitSet::sparse_iterator& BitSet::sparse_iterator::operator++() {
     auto i = s.p[u] & (-1ULL << next);
 
     while (true) {
-        //cout << "i = " << bin(i) << endl;
+        // cout << "i = " << bin(i) << endl;
         if (i != 0) {
             auto _c = 0U;
             if (!(i & 0x1)) {
@@ -324,16 +325,16 @@ BitSet::sparse_iterator& BitSet::sparse_iterator::operator++() {
             //      y = x << 4; if (y != 0) { n = n - 4; x = y; }
             //      y = x << 2; if (y != 0) { n = n - 2; x = y; }
             //      int _c = n - ((x << 1) >> 31);
-            //cout << "trailing zeros: " << _c << endl;
+            // cout << "trailing zeros: " << _c << endl;
             c = (u << 6) + _c;
-            //cout << "c: " << c << endl;
+            // cout << "c: " << c << endl;
             next = c + 1;
-            //cout << "next: " << next << endl;
+            // cout << "next: " << next << endl;
             return *this;
         }
         if (++u == s.wordsInUse) {
             next = s.n + 1;
-            //cout << "reached end" << endl;
+            // cout << "reached end" << endl;
             return *this;
         }
         i = s.p[u];

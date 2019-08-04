@@ -2,76 +2,45 @@
 
 #include <iostream>
 
+namespace Functional {
 struct NumEqual : public LambdaConstVisitor {
     const NumConst& lhs_;
     bool equal;
     NumEqual(const NumConst& lhs) : lhs_(lhs) {}
-    void visit(const App&) {
-        equal = false;
-    }
-    void visit(const Abs&) {
-        equal = false;
-    }
-    void visit(const NumConst& rhs) {
-        equal = rhs.val == lhs_.val;
-    }
-    void visit(const ::Var&) {
-        equal = false;
-    }
+    void visit(const App&) { equal = false; }
+    void visit(const Abs&) { equal = false; }
+    void visit(const NumConst& rhs) { equal = rhs.val == lhs_.val; }
+    void visit(const Variable&) { equal = false; }
 };
 
 struct VarEqual : public LambdaConstVisitor {
-    const ::Var& lhs_;
+    const Variable& lhs_;
     bool equal;
-    VarEqual(const ::Var& lhs) : lhs_(lhs) {}
-    void visit(const App&) {
-        equal = false;
-    }
-    void visit(const Abs&) {
-        equal = false;
-    }
-    void visit(const NumConst&) {
-        equal = false;
-    }
-    void visit(const ::Var& rhs) {
-        equal = rhs.name == lhs_.name;
-    }
+    VarEqual(const Variable& lhs) : lhs_(lhs) {}
+    void visit(const App&) { equal = false; }
+    void visit(const Abs&) { equal = false; }
+    void visit(const NumConst&) { equal = false; }
+    void visit(const Variable& rhs) { equal = rhs.name == lhs_.name; }
 };
 
 struct AbsEqual : public LambdaConstVisitor {
     const Abs& lhs_;
     bool equal;
     AbsEqual(const Abs& lhs) : lhs_(lhs) {}
-    void visit(const App&) {
-        equal = false;
-    }
-    void visit(const Abs& rhs) {
-        equal = rhs.x == lhs_.x && *rhs.body == *lhs_.body;
-    }
-    void visit(const NumConst&) {
-        equal = false;
-    }
-    void visit(const ::Var&) {
-        equal = false;
-    }
+    void visit(const App&) { equal = false; }
+    void visit(const Abs& rhs) { equal = rhs.x == lhs_.x && *rhs.body == *lhs_.body; }
+    void visit(const NumConst&) { equal = false; }
+    void visit(const Variable&) { equal = false; }
 };
 
 struct AppEqual : public LambdaConstVisitor {
     const App& lhs_;
     bool equal;
     AppEqual(const App& lhs) : lhs_(lhs) {}
-    void visit(const App& rhs) {
-        equal = *rhs.f == *lhs_.f && *rhs.x == *lhs_.x;
-    }
-    void visit(const Abs&) {
-        equal = false;
-    }
-    void visit(const NumConst&) {
-        equal = false;
-    }
-    void visit(const ::Var&) {
-        equal = false;
-    }
+    void visit(const App& rhs) { equal = *rhs.f == *lhs_.f && *rhs.x == *lhs_.x; }
+    void visit(const Abs&) { equal = false; }
+    void visit(const NumConst&) { equal = false; }
+    void visit(const Variable&) { equal = false; }
 };
 
 struct LambdaEqual : public LambdaConstVisitor {
@@ -93,7 +62,7 @@ struct LambdaEqual : public LambdaConstVisitor {
         lhs_.accept(eq);
         equal = eq.equal;
     }
-    void visit(const ::Var& rhs) {
+    void visit(const Variable& rhs) {
         VarEqual eq(rhs);
         lhs_.accept(eq);
         equal = eq.equal;
@@ -123,12 +92,8 @@ struct LambdaPrinter : public LambdaConstVisitor {
         abs.body->accept(*this);
         s << ")";
     }
-    void visit(const NumConst& num) {
-        s << num.val;
-    }
-    void visit(const ::Var& var) {
-        s << var.name;
-    }
+    void visit(const NumConst& num) { s << num.val; }
+    void visit(const Variable& var) { s << var.name; }
 };
 
 std::ostream& operator<<(std::ostream& s, const LambdaExpr& e) {
@@ -148,24 +113,16 @@ std::ostream& operator<<(std::ostream& s, const Supercombinator& sc) {
 struct AttributePrinter : public AttributeConstVisitor {
     std::ostream& s;
     AttributePrinter(std::ostream& s_) : s(s_) {}
-    void visit(const VarListAttribute&) {
-        s << "VarListAttribute";
-    }
-    void visit(const ExprAttribute&) {
-        s << "ExprAttribute";
-    }
+    void visit(const VarListAttribute&) { s << "VarListAttribute"; }
+    void visit(const ExprAttribute&) { s << "ExprAttribute"; }
     void printProgram(const Program& p) {
         for (const auto& sc : p.scs) {
             s << sc;
             s << "\n\n";
         }
     }
-    void visit(const ProgramAttribute& program) {
-        printProgram(program.p);
-    }
-    void visit(const ScAttribute&) {
-        s << "ScAttribute";
-    }
+    void visit(const ProgramAttribute& program) { printProgram(program.p); }
+    void visit(const ScAttribute&) { s << "ScAttribute"; }
 };
 
 std::ostream& operator<<(std::ostream& s, const Attribute& sc) {
@@ -210,8 +167,8 @@ Program& toProgram(Attribute* a) {
     return program->p;
 }
 
-::Var* toVar(Attribute* a) {
-    auto v = dynamic_cast<::Var*>(toExpr(a));
+Variable* toVar(Attribute* a) {
+    auto v = dynamic_cast<Variable*>(toExpr(a));
     if (!v)
         throw std::runtime_error("toVar failed");
     return v;
@@ -220,21 +177,13 @@ Program& toProgram(Attribute* a) {
 struct Copy : public LambdaConstVisitor {
     LambdaExpr* result = nullptr;
 
-    void visit(const App& app) {
-        result = new App(copy(*app.f), copy(*app.x));
-    }
+    void visit(const App& app) { result = new App(copy(*app.f), copy(*app.x)); }
 
-    void visit(const Abs& abs) {
-        result = new Abs(abs.x, copy(*abs.body));
-    }
+    void visit(const Abs& abs) { result = new Abs(abs.x, copy(*abs.body)); }
 
-    void visit(const NumConst& num) {
-        result = new NumConst(num);
-    }
+    void visit(const NumConst& num) { result = new NumConst(num); }
 
-    void visit(const ::Var& var) {
-        result = new ::Var(var);
-    }
+    void visit(const Variable& var) { result = new Variable(var); }
 };
 
 LambdaExpr* copy(const LambdaExpr& e) {
@@ -242,3 +191,4 @@ LambdaExpr* copy(const LambdaExpr& e) {
     e.accept(c);
     return c.result;
 }
+} // namespace Functional

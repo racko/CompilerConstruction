@@ -17,7 +17,7 @@ constexpr DFA<Symbol,DfaState,TokenId,MaxNodes,MaxSymbols> toDFA(const NFA<Symbo
 
     vector<DfaState,MaxNodes*MaxSymbols> T;
 
-    using States = BitSet<MaxNodes>;
+    using States = HashSet<MaxNodes>;
     //std::cout << "DFA constructor" << std::endl;
     //std::cout << "stateCount = " << nfa.stateCount << std::endl;
     //std::cout << "symbolCount = " << symbolCount << std::endl;
@@ -72,15 +72,15 @@ constexpr DFA<Symbol,DfaState,TokenId,MaxNodes,MaxSymbols> toDFA(const NFA<Symbo
                 const auto& p = idToState[q];
                 //std::cout << "Constructing delta(" << p << "," << a << ")" << std::endl;
                 U.clear();
-                //for (auto s : p) {
-                //    //std::cout << "collecting T[" << s << "][" << a << "] = " << t_ptr[s] << std::endl;
-                //    U |= t_ptr[s];
-                //}
-                const auto stop = p.end().c;
-                for (auto it = p.begin(); it.c != stop; ++it) {
+                for (auto s : p) {
                     //std::cout << "collecting T[" << s << "][" << a << "] = " << t_ptr[s] << std::endl;
-                    U |= t_ptr[it.c];
+                    U |= t_ptr[s];
                 }
+                //const auto stop = p.end().c;
+                //for (auto it = p.begin(); it.c != stop; ++it) {
+                //    //std::cout << "collecting T[" << s << "][" << a << "] = " << t_ptr[s] << std::endl;
+                //    U |= t_ptr[it.c];
+                //}
                 //std::cout << "targets: " << U << std::endl;
                 //        if (U.count() > 1)
                 //          cin.get();
@@ -135,20 +135,29 @@ constexpr DFA<Symbol,DfaState,TokenId,MaxNodes,MaxSymbols> toDFA(const NFA<Symbo
     for (DfaState q = 0; q < stateCount; q++) {
         const States& UU = idToState[q];
         //    std::cout << "checking dfa state " << q << ": " << UU << std::endl;
-        auto first_nfa_state = std::numeric_limits<NfaState>::max();
+        //auto first_nfa_state = std::numeric_limits<NfaState>::max();
         for (NfaState s : UU) {
             //std::cout << "checking nfa state " << *s << std::endl;
-            if (nfa.finals[s] != not_final && finals[q] == not_final) {
-                first_nfa_state = s;
-                finals[q] = nfa.finals[s];
-                //std::cout << "dfa.finals[" << q << "] = " << "nfa.finals[" << s << "] = " << int(nfa.finals[s]) << std::endl;
-            } else if (nfa.finals[s] != not_final && s < first_nfa_state) {
-                first_nfa_state = s;
-                finals[q] = nfa.finals[s];
-                //std::cout << "dfa.finals[" << q << "] is ambiguous. Preferring nfa.finals[" << s << "] = " << int(nfa.finals[s]) << std::endl;
-            } else if (nfa.finals[s] != not_final) {
-                //std::cout << "dfa.finals[" << q << "] is ambiguous. Ignoring nfa.finals[" << s << "] = " << int(nfa.finals[s]) << std::endl;
-            } // are there more cases?
+
+            if (nfa.finals[s] != not_final) {
+                //if (finals[q] == not_final) {
+                //    first_nfa_state = s;
+                //    finals[q] = nfa.finals[s];
+                //    //std::cout << "dfa.finals[" << q << "] = " << "nfa.finals[" << s << "] = " << int(nfa.finals[s]) << std::endl;
+                //} else if (s < first_nfa_state) { // required because UU can be an unordered set
+                //    first_nfa_state = s;
+                //    finals[q] = nfa.finals[s];
+                //    //std::cout << "dfa.finals[" << q << "] is ambiguous. Preferring nfa.finals[" << s << "] = " << int(nfa.finals[s]) << std::endl;
+                //} else {
+                //    //std::cout << "dfa.finals[" << q << "] is ambiguous. Ignoring nfa.finals[" << s << "] = " << int(nfa.finals[s]) << std::endl;
+                //} // are there more cases?
+                if (finals[q] == not_final) {
+                    finals[q] = nfa.finals[s];
+                    //std::cout << "dfa.finals[" << q << "] = " << "nfa.finals[" << s << "] = " << int(nfa.finals[s]) << std::endl;
+                } else {
+                    finals[q] = std::min(finals[q], nfa.finals[s]);
+                }
+            }
         }
     }
     auto deadState = determineDeadState(stateCount, symbolCount, T, finals);

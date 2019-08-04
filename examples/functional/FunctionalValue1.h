@@ -4,6 +4,7 @@
 #include <iostream>
 #include <sstream>
 
+namespace Functional {
 struct LambdaExpr;
 
 struct Function;
@@ -21,20 +22,33 @@ struct ConstConstVisitor {
     virtual void visit(const Value&) = 0;
 };
 
+// template<typename Visitor>
+// struct Foo {
+//    using return_type =  typename Visitor::return_type;
+//
+//    template<typename T>
+//    struct Model : Concept {
+//        return_type accept(Visitor& v) override { return v.visit(data); }
+//        T* data;
+//    };
+//    struct Concept {
+//        virtual ~Concept() = default;
+//        return_type accept(Visitor&) = 0;
+//    };
+//
+//    Concept* p;
+//};
+
 struct Const {
     virtual ~Const() = default;
     virtual void accept(ConstVisitor&) = 0;
     virtual void accept(ConstConstVisitor&) const = 0;
 };
 
-template<typename T>
+template <typename T>
 struct ConstBase : public Const {
-    void accept(ConstVisitor& v) {
-        v.visit(*static_cast<T*>(this));
-    }
-    void accept(ConstConstVisitor& v) const {
-        v.visit(*static_cast<const T*>(this));
-    }
+    void accept(ConstVisitor& v) { v.visit(*static_cast<T*>(this)); }
+    void accept(ConstConstVisitor& v) const { v.visit(*static_cast<const T*>(this)); }
 };
 
 struct Function : public ConstBase<Function> {
@@ -64,16 +78,15 @@ class Environment {
     using env_t = std::unordered_map<std::string, const Const*>;
     env_t env;
 
-public:
+  public:
     void set(std::string name, const Const* c);
 
     const Const* getOrDefine(const std::string& name);
 
     const Const* get(const std::string& name) const;
 
-    const env_t& get() const {
-        return env;
-    }
+    const env_t& get() const { return env; }
 };
 
 std::ostream& operator<<(std::ostream& s, const Environment& env_);
+} // namespace Functional

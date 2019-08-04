@@ -1,19 +1,20 @@
 #pragma once
 
-#include <ostream>
 #include <list>
+#include <ostream>
 #include <string>
 
+namespace Functional {
 struct App;
 struct Abs;
 struct NumConst;
-struct Var;
+struct Variable;
 
 struct LambdaVisitor {
     virtual void visit(App&) = 0;
     virtual void visit(Abs&) = 0;
     virtual void visit(NumConst&) = 0;
-    virtual void visit(::Var&) = 0;
+    virtual void visit(Variable&) = 0;
     virtual ~LambdaVisitor() = default;
 };
 
@@ -21,7 +22,7 @@ struct LambdaConstVisitor {
     virtual void visit(const App&) = 0;
     virtual void visit(const Abs&) = 0;
     virtual void visit(const NumConst&) = 0;
-    virtual void visit(const ::Var&) = 0;
+    virtual void visit(const Variable&) = 0;
     virtual ~LambdaConstVisitor() = default;
 };
 
@@ -31,14 +32,10 @@ struct LambdaExpr {
     virtual ~LambdaExpr() = default;
 };
 
-template<typename T>
+template <typename T>
 struct LambdaExprBase : public LambdaExpr {
-    void accept(LambdaVisitor& v) {
-        v.visit(*static_cast<T*>(this));
-    }
-    void accept(LambdaConstVisitor& v) const {
-        v.visit(*static_cast<const T*>(this));
-    }
+    void accept(LambdaVisitor& v) { v.visit(*static_cast<T*>(this)); }
+    void accept(LambdaConstVisitor& v) const { v.visit(*static_cast<const T*>(this)); }
 };
 
 struct NumConst : public LambdaExprBase<NumConst> {
@@ -47,9 +44,9 @@ struct NumConst : public LambdaExprBase<NumConst> {
     NumConst(uint64_t _val) : val(_val) {}
 };
 
-struct Var : public LambdaExprBase<::Var> {
+struct Variable : public LambdaExprBase<Variable> {
     std::string name;
-    Var(std::string _name) : name(move(_name)) {}
+    Variable(std::string _name) : name(move(_name)) {}
 };
 
 struct App : public LambdaExprBase<App> {
@@ -79,7 +76,8 @@ struct Supercombinator {
     std::string f;
     VarList params;
     const LambdaExpr* body;
-    Supercombinator(std::string f_, VarList xs_, const LambdaExpr* body_) : f(move(f_)), params(std::move(xs_)), body(body_) {}
+    Supercombinator(std::string f_, VarList xs_, const LambdaExpr* body_)
+        : f(move(f_)), params(std::move(xs_)), body(body_) {}
 };
 
 std::ostream& operator<<(std::ostream& s, const Supercombinator& sc);
@@ -116,7 +114,7 @@ struct Attribute {
     virtual void accept(AttributeConstVisitor&) const = 0;
 };
 
-template<typename T>
+template <typename T>
 struct AttributeBase : public Attribute {
     void accept(AttributeVisitor& v) { v.visit(*static_cast<T*>(this)); }
     void accept(AttributeConstVisitor& v) const { v.visit(*static_cast<const T*>(this)); }
@@ -153,6 +151,7 @@ Supercombinator& toSupercombinator(Attribute* a);
 
 Program& toProgram(Attribute* a);
 
-::Var* toVar(Attribute* a);
+Variable* toVar(Attribute* a);
 
 LambdaExpr* copy(const LambdaExpr& e);
+} // namespace Functional

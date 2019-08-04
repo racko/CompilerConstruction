@@ -8,14 +8,15 @@ struct Lexer {
     using Symbol = char;
     using State = uint16_t;
     using TokenId = uint8_t;
+    using Token = ::Token<TokenId>;
     using DFA_t = DFA<Symbol,State,TokenId>;
 
-    Lexer(DFA_t dfa, Token<TokenId> eof, TokenId whitespace) : dfa_(std::move(dfa)), eof_(eof), whitespace_(whitespace) {}
+    Lexer(DFA_t dfa, Token eof, TokenId whitespace) : dfa_(std::move(dfa)), eof_(eof), whitespace_(whitespace) {}
 
-    Token<TokenId> getToken();
+    Token getToken();
 private:
     DFA_t dfa_;
-    Token<TokenId> eof_;
+    Token eof_;
     TokenId whitespace_;
 };
 

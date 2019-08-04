@@ -5,34 +5,35 @@
 #include "TokenAttributeConversion.h"
 #include "lrParser.h"
 
-struct Parser : public LRParser<Functional::Grammar, Attribute*> {
+namespace Functional {
+struct Parser : public lr_parser::LRParser<Functional::Grammar, Attribute*> {
     using NT = Functional::NT;
 
     using LRParser<Functional::Grammar, Attribute*>::LRParser;
 
-    Attribute* reduce(NonterminalID<Functional::Grammar> A, uint32_t production, Attribute** alpha, size_t n) override {
+    Attribute* reduce(NonterminalID A, uint32_t production, Attribute** alpha, size_t) override {
         Attribute* val = nullptr;
-        switch(A) {
+        switch (A) {
         case NT::START:
             val = alpha[0];
             break;
-            //case NT::Q:
+            // case NT::Q:
             //    val = new StateAttribute(toProgram(alpha[0]), toExpr(alpha[1]));
             //    break;
         case NT::P:
-            switch(production) {
+            switch (production) {
             case 0: {
-                //auto p = new Program();
-                //p->scs.push_back(toSupercombinator(alpha[0]));
-                //val = new ProgramAttribute(p);
-                //break;
+                // auto p = new Program();
+                // p->scs.push_back(toSupercombinator(alpha[0]));
+                // val = new ProgramAttribute(p);
+                // break;
                 val = new ProgramAttribute();
                 break;
             }
             case 1:
-                //val = alpha[2];
-                //toProgram(val)->scs.push_front(toSupercombinator(alpha[0]));
-                //break;
+                // val = alpha[2];
+                // toProgram(val)->scs.push_front(toSupercombinator(alpha[0]));
+                // break;
                 val = alpha[0];
                 toProgram(val).scs.push_back(std::move(toSupercombinator(alpha[1])));
                 break;
@@ -41,19 +42,20 @@ struct Parser : public LRParser<Functional::Grammar, Attribute*> {
             }
             break;
         case NT::S:
-            switch(production) {
+            switch (production) {
             case 0:
                 val = new ScAttribute(Supercombinator(std::move(toVar(alpha[0])->name), VarList(), toExpr(alpha[2])));
                 break;
             case 1:
-                val = new ScAttribute(Supercombinator(std::move(toVar(alpha[0])->name), toVarList(alpha[1]), toExpr(alpha[3])));
+                val = new ScAttribute(
+                    Supercombinator(std::move(toVar(alpha[0])->name), toVarList(alpha[1]), toExpr(alpha[3])));
                 break;
             default:
                 throw std::runtime_error("wrong production id");
             }
             break;
         case NT::A:
-            switch(production) {
+            switch (production) {
             case 0: {
                 LambdaExpr* body = toExpr(alpha[3]);
                 const auto& names = toVarList(alpha[1]).names;
@@ -83,7 +85,7 @@ struct Parser : public LRParser<Functional::Grammar, Attribute*> {
             }
             break;
         case NT::B:
-            switch(production) {
+            switch (production) {
             case 0:
                 val = new ExprAttribute(new App(toExpr(alpha[0]), toExpr(alpha[1])));
                 break;
@@ -127,13 +129,8 @@ struct Parser : public LRParser<Functional::Grammar, Attribute*> {
         return val;
     }
 
-    Attribute* shift(const Functional::Token* t) override {
-        assert(t != nullptr);
-        auto val = toAttribute(*t);
-
-        delete t;
-        return val;
+    Attribute* shift(Functional::Grammar::Token&& t) override {
+        return toAttribute(t);
     }
 };
-
-
+} // namespace Functional

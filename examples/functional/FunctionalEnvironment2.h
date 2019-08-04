@@ -6,11 +6,12 @@
 #include <string>
 #include <unordered_map>
 
+namespace Functional {
 class Environment2 {
     using env_t = std::unordered_map<std::string, const LambdaExpr*>;
     env_t env;
 
-public:
+  public:
     void set(std::string name, const LambdaExpr* c) {
         std::cout << "set(" << name << ", " << *c << ")" << std::endl;
         if (env.find(name) == env.end())
@@ -32,7 +33,7 @@ public:
             return c->second;
         } else {
             std::cout << "Defining " << name << std::endl;
-            return env[name] = new ::Var(name);
+            return env[name] = new Variable(name);
         }
     }
 
@@ -58,9 +59,8 @@ public:
         }
     }
 
-    const env_t& get() const {
-        return env;
-    }
+    const env_t& get() const { return env; }
 };
 
 std::ostream& operator<<(std::ostream& s, const Environment2& env_);
+} // namespace Functional

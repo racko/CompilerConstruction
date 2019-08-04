@@ -1,6 +1,6 @@
 #include "Regex.h"
 
-auto Lexer::getToken() -> Token<TokenId> {
+auto Lexer::getToken() -> Token {
     if (*c == EOF) {
         return eof_;
     }

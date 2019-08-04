@@ -1,33 +1,36 @@
 #pragma once
-#include "lrParser2.h"
 
-template<typename Attributes>
-class AttributedLRParser {
-public:
+#include <lrParser2.h>
+#include <parser.h>
+
+namespace lr_parser2 {
+template <typename Attributes>
+class AttributedLRParser : public Parser<typename Attributes::type, typename Attributes::Token> {
+  public:
     AttributedLRParser(const grammar2::Grammar& grammar, Attributes a);
 
-    template<typename InputIterator>
-    typename Attributes::type parse(InputIterator a);
-private:
+    typename Attributes::type parse(TokenStream<typename Attributes::Token>& a) override;
+
+  private:
     LRParser parser_;
     Attributes attributes_;
 };
 
-template<typename Attributes>
-AttributedLRParser<Attributes>::AttributedLRParser(const grammar2::Grammar& grammar, Attributes a) : parser_(grammar), attributes_(std::move(a)) {}
+template <typename Attributes>
+AttributedLRParser<Attributes>::AttributedLRParser(const grammar2::Grammar& grammar, Attributes a)
+    : parser_(grammar), attributes_(std::move(a)) {}
 
-template<typename Attributes>
-template<typename InputIterator>
-typename Attributes::type AttributedLRParser<Attributes>::parse(InputIterator a) {
+template <typename Attributes>
+typename Attributes::type AttributedLRParser<Attributes>::parse(TokenStream<typename Attributes::Token>& a) {
     using T = typename Attributes::type;
+    parser_.reset();
     std::vector<T> attributes{T()}; // Do we need this initialization?
     do {
-        auto token = std::move(*a);
-        auto tag = attributes_.getTag(token);
+        auto tag = attributes_.getTag(a.peek());
         auto _action = parser_.step(tag); // the type name is action already, sooo ...
         if (_action.getType() == type::SHIFT) {
-            attributes.push_back(attributes_.shift(std::move(token)));
-            ++a;
+            attributes.push_back(attributes_.shift(std::move(a.peek())));
+            a.step();
         } else if (_action.getType() == type::REDUCE) {
             auto p = _action.getProduction();
             auto head = _action.getHead();
@@ -48,5 +51,6 @@ typename Attributes::type AttributedLRParser<Attributes>::parse(InputIterator a)
         } else {
             return T();
         }
-    } while(true);
+    } while (true);
 }
+} // namespace lr_parser

@@ -2,6 +2,7 @@
 
 #include "FunctionalAttribute.h"
 
+namespace Functional {
 const LambdaExpr* toValue(const Const* c) {
     auto value = dynamic_cast<const Value*>(c);
     if (!value) {
@@ -27,17 +28,16 @@ const Function::type toFunction(const Const* c) {
     return func->f;
 }
 
-std::ostream& operator<<(std::ostream& s, const Value& v) {
-    return s << *v.v;
-}
+std::ostream& operator<<(std::ostream& s, const Value& v) { return s << *v.v; }
 
 class IdGenerator {
     uint32_t id = 0;
-public:
+
+  public:
     uint32_t getNext() {
         auto v = id;
         ++id;
-        //std::cout << "IdGenerator: " << v << std::endl;
+        // std::cout << "IdGenerator: " << v << std::endl;
         return v;
     }
 };
@@ -46,7 +46,7 @@ struct VariableNameGenerator {
     IdGenerator gen;
     std::string getNext() {
         auto name = "x" + std::to_string(gen.getNext());
-        //std::cout << "VariableNameGenerator: " << name << std::endl;
+        // std::cout << "VariableNameGenerator: " << name << std::endl;
         return name;
     }
 };
@@ -55,18 +55,16 @@ struct ConstPrinter : public ConstConstVisitor {
     std::ostream& s;
     VariableNameGenerator g;
     ConstPrinter(std::ostream& s_) : s(s_) {
-        //std::cout << "new ConstPrinter" << std::endl;
+        // std::cout << "new ConstPrinter" << std::endl;
     }
     void visit(const Function& f) {
         auto x = g.getNext();
-        auto v = new Value(new ::Var(x));
+        auto v = new Value(new Variable(x));
         s << "(\\" << x << " . ";
         f.f(v)->accept(*this);
         s << ")";
     }
-    void visit(const Value& v) {
-        s << v;
-    }
+    void visit(const Value& v) { s << v; }
 };
 
 std::ostream& operator<<(std::ostream& s, const Function& f) {
@@ -110,7 +108,7 @@ const Const* Environment::getOrDefine(const std::string& name) {
         return c->second;
     } else {
         std::cout << "Defining " << name << std::endl;
-        return env[name] = new Value(new ::Var(name));
+        return env[name] = new Value(new Variable(name));
     }
 }
 
@@ -123,3 +121,4 @@ const Const* Environment::get(const std::string& name) const {
     } else
         throw std::runtime_error("Undefined: " + name);
 }
+} // namespace Functional

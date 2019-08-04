@@ -1,4 +1,5 @@
 #include "json.h"
+#include "jsonLLParser.h"
 #include "jsonLexer.h"
 #include <boost/interprocess/file_mapping.hpp>
 #include <boost/interprocess/mapped_region.hpp>
@@ -13,7 +14,7 @@ int main(int argc, char** argv) {
         throw std::runtime_error("Need one argument.");
     auto file_name = argv[1];
     {
-        JsonParser parser;
+        json::JsonParser parser{std::make_unique<jsonLL::Parser>()};
         //{
         //    std::ofstream dfa_file("json_dfa.dot");
         //    dfa_file << parser.lex->dfa;
@@ -38,7 +39,7 @@ int main(int argc, char** argv) {
         static_cast<char*>(region.get_address())[ll-1] = EOF;
         region.flush(ll-1);
         auto t1 = high_resolution_clock::now();
-        value* result;
+        json::value* result;
         for (auto i = 0; i < 100; i++) {
             result = parser.run(static_cast<char*>(region.get_address()));
         }

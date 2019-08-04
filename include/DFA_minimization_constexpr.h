@@ -29,7 +29,7 @@ template<int64_t Size1, int64_t Size2>
 constexpr BitSet<Size1>& operator|=(BitSet<Size1>& lhs, const HashSet<Size2>& rhs) {
     // TODO: Check sizes?
     const auto stop = rhs.s.stop_;
-    for (auto it = rhs.s.values; it != stop; ++it)
+    for (auto it = rhs.s.values.data; it != stop; ++it)
         lhs.set(*it);
     //for (auto i : rhs)
     //    lhs.set(i);
@@ -94,8 +94,6 @@ constexpr auto inverseTransitionTable(const vector<State,Size>& T, int64_t state
         throw std::runtime_error("stateCount > MaxNodes");
     if (symbolCount > MaxSymbols)
         throw std::runtime_error("symbolCount > MaxSymbols");
-    // workaround for clang bug in vector initialization ... could not assign to const TSet in v[0] -.-*
-    ;
     vector<vector<TSet,MaxNodes>,MaxSymbols> tI(symbolCount, vector<TSet,MaxNodes>(stateCount, TSet(stateCount, false)));
     auto tIptr = tI.data();
 

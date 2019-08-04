@@ -1,14 +1,15 @@
 #include "Functional.h"
-#include "FunctionalLexer.h"
-#include "FunctionalParser.h"
 #include "FunctionalEvaluator1.h"
 #include "FunctionalEvaluator2.h"
+#include "FunctionalLexer.h"
+#include "FunctionalParser.h"
 #include "FunctionalStrategy.h"
 
 #include <fstream>
 
-namespace evaluator = evaluator2;
 
+namespace Functional {
+namespace evaluator = evaluator2;
 // actually wanted to name it eval ... but I already have to many of those ...
 // not sure how to name them most consistently ...
 const LambdaExpr* reduce(const LambdaExpr& p) {
@@ -18,9 +19,10 @@ const LambdaExpr* reduce(const LambdaExpr& p) {
 
 const LambdaExpr* run(const char* text) {
     myLexer lex;
-    Parser parser;
+    Functional::Parser parser;
     lex.setText(text);
-    auto result = parser.parse(lex.begin());
-    //return reduce(result);
+    auto result = parser.parse(lex);
+    // return reduce(result);
     return evaluator::evalProgram(toProgram(result), make_eager(evaluator::eval));
 }
+} // namespace Functional

@@ -1,19 +1,18 @@
 #pragma once
 
-#include "Grammar.h"
-#include "Print.h"
-
+#include <Grammar.h>
+#include <Print.h>
 #include <iostream>
+#include <parser.h>
 #include <sstream>
+#include <token_stream.h>
 
-enum class type : uint32_t {
-    PRODUCTION,
-    FAIL
-};
+namespace ll_parser {
+enum class type : uint32_t { PRODUCTION, FAIL };
 
 inline uint32_t bits(type t) { return uint32_t(t) << 30; }
 
-template<class G>
+template <class G>
 struct action {
     uint32_t x;
 
@@ -21,7 +20,7 @@ struct action {
 
     action(type t) : x(bits(t)) { assert(t == type::FAIL); }
 
-    action(type t, NonterminalID<G> A, uint32_t production) : x(bits(t) | A.x << 15 | production) {
+    action(type t, typename G::NonterminalID A, uint32_t production) : x(bits(t) | A.x << 15 | production) {
         assert(A.x < (1u << 16) && production < (1u << 16) && t == type::PRODUCTION);
         auto a = getHead();
         auto p = getProduction();
@@ -30,20 +29,23 @@ struct action {
 
     type getType() const { return type(x >> 30); }
 
-    NonterminalID<G> getHead() const {
+    typename G::NonterminalID getHead() const {
         assert(getType() == type::PRODUCTION);
         auto shifted = x >> 15U;
         auto id = shifted & ((1U << 15U) - 1U);
         assert(id < G::getNumberOfNonterminals());
-        return NonterminalID<G>(static_cast<typename G::type>(id));
+        return typename G::NonterminalID(static_cast<typename G::type>(id));
     }
 
-    uint32_t getProduction() const { assert(getType() == type::PRODUCTION); return x & ((1 << 15) - 1); }
+    uint32_t getProduction() const {
+        assert(getType() == type::PRODUCTION);
+        return x & ((1 << 15) - 1);
+    }
 };
 
 template <class G>
 std::ostream& operator<<(std::ostream& s, const action<G>& a) {
-    switch(a.getType()) {
+    switch (a.getType()) {
     case type::FAIL:
         s << "fail";
         break;
@@ -56,51 +58,50 @@ std::ostream& operator<<(std::ostream& s, const action<G>& a) {
     return s;
 }
 
-template<class G, class T>
-struct LLParser {
+template <class G, class T>
+struct LLParser : Parser<T, typename G::Token> {
     LLParser();
 
-    template<class InputIterator>
-    T parse(InputIterator w);
+    T parse(TokenStream<typename G::Token>& w) override;
 
-private:
-    //virtual T action(NonterminalID<G> A, uint32_t production, T* alpha, size_t n) = 0;
-    //virtual T shift(typename G::Token_rv_reference t) = 0;
+  private:
+    // virtual T action(typename G::NonterminalID A, uint32_t production, T* alpha, size_t n) = 0;
+    // virtual T shift(typename G::Token_rv_reference t) = 0;
 
     using state = uint32_t;
     std::vector<std::vector<action<G>>> action_table;
 
-protected:
+    void setAction(typename G::NonterminalID A, typename G::TerminalID a, std::size_t p) {
+        if (action_table[A.x][a.x].getType() != type::FAIL) {
+            std::stringstream message;
+            message << "Conflict in action_table[" << A << "][" << a << "]: " << action_table[A.x][a.x] << " or "
+                    << action<G>(type::PRODUCTION, A, p);
+            throw std::runtime_error(message.str());
+        }
+        std::cout << "action_table[" << A << "][" << a << "]: " << action<G>(type::PRODUCTION, A, p) << std::endl;
+        action_table[A.x][a.x] = action<G>(type::PRODUCTION, A, p);
+    }
+
+  protected:
     ~LLParser() = default;
 };
 
-
 /// @TODO: CONFLICT HANDLING
-template<class G, class T>
-LLParser<G, T>::LLParser() : action_table(G::getNumberOfNonterminals(), std::vector<action<G>>(G::getNumberOfTerminals(), action<G>(type::FAIL))) {
+template <class G, class T>
+LLParser<G, T>::LLParser()
+    : action_table(G::getNumberOfNonterminals(),
+                   std::vector<action<G>>(G::getNumberOfTerminals(), action<G>(type::FAIL))) {
     for (auto i = 0; i < G::getNumberOfNonterminals(); ++i) {
-        NonterminalID<G> A(i);
+        typename G::NonterminalID A(i);
         const auto& productions = G::getProductions(A);
         for (auto p = 0; p < productions.size(); ++p) {
             const auto& alpha = productions[p];
-            for (auto a : first(alpha)) {
+            for (auto a : first<G>(alpha)) {
                 if (a != G::eps) {
-                    if (action_table[A.x][a.x].getType() != type::FAIL) {
-                        std::stringstream message;
-                        message << "Conflict in action_table[" << A << "][" << a << "]: " << action_table[A.x][a.x] << " or " << action<G>(type::PRODUCTION, A, p);
-                        throw std::runtime_error(message.str());
-                    }
-                    std::cout << "action_table[" << A << "][" << a << "]: " << action<G>(type::PRODUCTION, A, p) << std::endl;
-                    action_table[A.x][a.x] = action<G>(type::PRODUCTION, A, p);
+                    setAction(A, a, p);
                 } else {
-                    for (auto b : follow(A)) {
-                        if (action_table[A.x][b.x].getType() != type::FAIL) {
-                            std::stringstream message;
-                            message << "Conflict in action_table[" << A << "][" << b << "]: " << action_table[A.x][b.x] << " or " << action<G>(type::PRODUCTION, A, p);
-                            throw std::runtime_error(message.str());
-                        }
-                        std::cout << "action_table[" << A << "][" << b << "]: " << action<G>(type::PRODUCTION, A, p) << std::endl;
-                        action_table[A.x][b.x] = action<G>(type::PRODUCTION, A, p);
+                    for (auto b : follow<G>(A)) {
+                        setAction(A, b, p);
                     }
                 }
             }
@@ -108,25 +109,23 @@ LLParser<G, T>::LLParser() : action_table(G::getNumberOfNonterminals(), std::vec
     }
 }
 
-template<class G, class T>
-template<typename InputIterator>
-T LLParser<G, T>::parse(InputIterator a) {
-    std::vector<GrammarElement<G>> stack{G::eof, G::start};
-    //std::vector<T> attributes{T(), T()}; /// @TODO: this gotta be wrong ...
-    while (stack.back() != GrammarElement<G>(G::eof)) {
-        auto token = std::move(*a); /// @FIXME: only move from *a when we shift. Current implementation only works because it just copies
-        auto tag = G::getTag(token);
+template <class G, class T>
+T LLParser<G, T>::parse(TokenStream<typename G::Token>& token_stream) {
+    std::vector<typename G::GrammarElement> stack{G::eof, G::start};
+    // std::vector<T> attributes{T(), T()}; /// @TODO: this gotta be wrong ...
+    while (stack.back() != typename G::GrammarElement(G::eof)) {
+        auto tag = G::getTag(token_stream.peek());
 
-        if (stack.back() == GrammarElement<G>(tag)) {
+        if (stack.back() == typename G::GrammarElement(tag)) {
             std::cout << "match " << tag << std::endl;
             stack.pop_back();
-            ++a;
+            token_stream.step();
         } else if (G::kindOf(stack.back()) == kind::TERMINAL) {
             std::stringstream message;
             message << "Expected " << stack.back() << ", got " << tag;
             throw std::runtime_error(message.str());
         } else {
-            auto A = static_cast<NonterminalID<G>>(stack.back());
+            auto A = static_cast<typename G::NonterminalID>(stack.back());
             if (action_table[A.x][tag.x].getType() == type::FAIL) {
                 std::stringstream message;
                 message << "ACTION[" << A << "][" << tag << "] is FAIL";
@@ -136,10 +135,11 @@ T LLParser<G, T>::parse(InputIterator a) {
                 const auto& production = G::getProductions(action_.getHead())[action_.getProduction()];
                 std::cout << action_.getHead() << " -> " << production << std::endl;
                 stack.pop_back();
-                if (production[0] != GrammarElement<G>(G::eps))
+                if (production[0] != typename G::GrammarElement(G::eps))
                     stack.insert(stack.end(), production.rbegin(), production.rend());
             }
         }
     }
     return T();
 }
+} // namespace ll_parser

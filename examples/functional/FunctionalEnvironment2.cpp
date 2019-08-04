@@ -1,5 +1,6 @@
 #include "FunctionalEnvironment2.h"
 
+namespace Functional {
 std::ostream& operator<<(std::ostream& s, const Environment2& env_) {
     const auto& env = env_.get();
     s << "[";
@@ -12,3 +13,4 @@ std::ostream& operator<<(std::ostream& s, const Environment2& env_) {
     }
     return s << "]";
 }
+} // namespace Functional

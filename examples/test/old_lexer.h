@@ -17,7 +17,6 @@ using std::string;
 using std::array;
 #include <sstream>
 using std::stringstream;
-#undef NDEBUG
 #include <cassert>
 
 struct Token {

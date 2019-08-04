@@ -2,57 +2,65 @@
 
 #include "FunctionalGrammar.h"
 #include "Regex.h"
-
 #include <sstream>
+#include <token_stream.h>
 #include <vector>
 
-//struct myLexer : public Lexer<Functional::Token*> {
-struct myLexer {
+namespace Functional {
+// struct myLexer : public Lexer<Functional::Token*> {
+struct myLexer : TokenStream<std::unique_ptr<Functional::Token>> {
     using Token = Functional::Token;
-    using T= Functional::T;
+    using T = Functional::T;
 
     using DFA_t = Lexer::DFA_t;
     using Symbol = Lexer::Symbol;
     using State = Lexer::State;
     using TokenId = Lexer::TokenId;
 
-    //static const vector<unsigned int> m;
+    // static const vector<unsigned int> m;
 
     Lexer lexer;
-    Token* token = nullptr;
+    std::unique_ptr<Token> token;
 
     static DFA_t getDFA();
 
-    myLexer() : lexer(getDFA(), {nullptr, 0, static_cast<Functional::type>(T::EOI) + 1}, static_cast<Functional::type>(T::WS) + 1) {}
+    myLexer()
+        : lexer(getDFA(), {nullptr, 0, static_cast<Functional::type>(T::EOI) + 1},
+                static_cast<Functional::type>(T::WS) + 1) {}
 
-    //Token* eofToken() const override {
+    // Token* eofToken() const override {
     //    return new Token(T::EOI);
     //}
 
-    //Token* whiteSpaceToken() const override {
+    // Token* whiteSpaceToken() const override {
     //    return nullptr;
     //}
 
-    static Token* action(const char* s, size_t n, TokenId t);
-    static Token* t2t(::Token t) { return action(t.start, t.length, t.tokenId); }
+    static std::unique_ptr<Token> action(const char* s, size_t n, TokenId t);
+    static std::unique_ptr<Token> t2t(::Token<TokenId> t) { return action(t.start, t.length, t.tokenId); }
 
-    struct iterator {
-        myLexer* lex_;
+    // struct iterator {
+    //    myLexer* lex_;
 
-        iterator(myLexer* lex) : lex_(lex) {}
+    //    iterator(myLexer* lex) : lex_(lex) {}
 
-        const Token* operator*() const { return *(*lex_); }
-        Token* operator*() { return *(*lex_); }
-        iterator& operator++() { ++(*lex_); return *this; }
-    };
+    //    const Token* operator*() const { return *(*lex_); }
+    //    Token* operator*() { return *(*lex_); }
+    //    iterator& operator++() { ++(*lex_); return *this; }
+    //};
 
-    //iterator begin() { return iterator(*this); }
-    iterator begin() { return iterator(this); }
-    void setText(const char* text) { lexer.c = text; token = t2t(lexer.getToken()); }
+    // iterator begin() { return iterator(*this); }
+    // iterator begin() { return iterator(this); }
+    void setText(const char* text) {
+        lexer.c = text;
+        token = t2t(lexer.getToken());
+    }
 
-    const Token* operator*() const { return token; }
-    Token* operator*() { return token; }
-    myLexer& operator++() { token = t2t(lexer.getToken()); return *this; }
+    // const Token* operator*() const { return token; }
+    // Token* operator*() { return token; }
+    // myLexer& operator++() { token = t2t(lexer.getToken()); return *this; }
+    void step() override;
+    const std::unique_ptr<Functional::Token>& peek() const override;
+    std::unique_ptr<Functional::Token>& peek() override;
 };
-
-
+} // namespace Functional

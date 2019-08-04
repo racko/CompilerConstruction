@@ -1,9 +1,7 @@
-#include "jsonParser.h"
+#include "jsonLRParser2.h"
 
-Parser::Parser() = default;
-Parser::~Parser() = default;
-
-value* Parser::new_value() {
+namespace jsonLR2 {
+json::value* Attributes::new_value() {
     if (next_value_index == 10000) {
         next_value_index = 0U;
         values.emplace_back();
@@ -11,8 +9,9 @@ value* Parser::new_value() {
     return &values.back()[next_value_index++];
 }
 
-value* Parser::reduce(NonterminalID<json::Grammar> A, uint32_t production, value** alpha, size_t) {
-    switch(A) {
+json::value* Attributes::reduce(NonterminalID A_, uint32_t production, json::value** alpha, size_t) {
+    json::NonterminalID A(A_.x);
+    switch (A) {
     case NT::START:
         return alpha[0];
     case NT::JSON_TEXT:
@@ -20,10 +19,10 @@ value* Parser::reduce(NonterminalID<json::Grammar> A, uint32_t production, value
     case NT::VALUE:
         return alpha[0];
     case NT::OBJECT:
-        switch(production) {
+        switch (production) {
         case 0: {
             auto val = new_value();
-            *val = object(&boost::get<array>(*alpha[1]), alpha[2]);
+            *val = json::object(&boost::get<json::array>(*alpha[1]), alpha[2]);
             return val;
         }
         case 1: {
@@ -37,7 +36,7 @@ value* Parser::reduce(NonterminalID<json::Grammar> A, uint32_t production, value
         switch (production) {
         case 0: {
             auto val = new_value();
-            *val = array(alpha[1], alpha[2]);
+            *val = json::array(alpha[1], alpha[2]);
             return val;
         }
         case 1: {
@@ -48,13 +47,13 @@ value* Parser::reduce(NonterminalID<json::Grammar> A, uint32_t production, value
         }
         break;
     case NT::MEMBERS:
-        switch(production) {
+        switch (production) {
         case 0: {
             return nullptr;
         }
         case 1: {
             auto val = new_value();
-            *val = object(&boost::get<array>(*alpha[1]), alpha[2]);
+            *val = json::object(&boost::get<json::array>(*alpha[1]), alpha[2]);
             return val;
         }
         default:
@@ -68,7 +67,7 @@ value* Parser::reduce(NonterminalID<json::Grammar> A, uint32_t production, value
         }
         case 1: {
             auto val = new_value();
-            *val = array(alpha[1], alpha[2]);
+            *val = json::array(alpha[1], alpha[2]);
             return val;
         }
         default:
@@ -76,39 +75,40 @@ value* Parser::reduce(NonterminalID<json::Grammar> A, uint32_t production, value
         }
         break;
     case NT::MEMBER: {
-            auto val = new_value();
-            *val = array(alpha[0], alpha[2]);
-            return val;
-        }
+        auto val = new_value();
+        *val = json::array(alpha[0], alpha[2]);
+        return val;
+    }
     default:
         throw std::runtime_error("Unhandled reduction");
     }
 }
 
-value* Parser::shift(Token&& token) {
+json::value* Attributes::shift(Token&& token) {
     switch (token.first) {
-        case json::T::NUM: {
-            auto val = new_value();
-            *val = boost::get<json::num_view>(token.second);
-            return val;
-        }
-        case json::T::STRING: {
-            auto val = new_value();
-            *val = boost::get<boost::string_view>(token.second);
-            return val;
-        }
-        case json::T::TRUE:
-        case json::T::FALSE: {
-            auto val = new_value();
-            *val = boost::get<bool>(token.second);
-            return val;
-        }
-        case json::T::NULL: {
-            auto val = new_value();
-            *val = boost::blank();
-            return val;
-        }
-        default:
-            return nullptr;
+    case json::T::NUM: {
+        auto val = new_value();
+        *val = boost::get<num_view>(token.second);
+        return val;
+    }
+    case json::T::STRING: {
+        auto val = new_value();
+        *val = boost::get<std::string_view>(token.second);
+        return val;
+    }
+    case json::T::TRUE:
+    case json::T::FALSE: {
+        auto val = new_value();
+        *val = boost::get<bool>(token.second);
+        return val;
+    }
+    case json::T::NULL: {
+        auto val = new_value();
+        *val = boost::blank();
+        return val;
+    }
+    default:
+        return nullptr;
     }
 }
+} // namespace jsonLR2

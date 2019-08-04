@@ -1,10 +1,11 @@
 #include "HashSet.h"
 
 #include <algorithm>
+#include <array>
 #include <iomanip>
 
 HashSet& HashSet::operator|=(const HashSet& rhs) {
-    //cout << *this << ".operator|(" << rhs << ")" << std::endl;
+    // cout << *this << ".operator|(" << rhs << ")" << std::endl;
     if (n != rhs.n) {
         throw std::runtime_error("dimensions don't match: " + std::to_string(n) + " != " + std::to_string(rhs.n));
     }
@@ -14,7 +15,7 @@ HashSet& HashSet::operator|=(const HashSet& rhs) {
 }
 
 HashSet& HashSet::operator&=(const HashSet& rhs) {
-    //cout << *this << ".operator&(" << rhs << ")" << std::endl;
+    // cout << *this << ".operator&(" << rhs << ")" << std::endl;
     if (n != rhs.n) {
         throw std::runtime_error("dimensions don't match: " + std::to_string(n) + " != " + std::to_string(rhs.n));
     }
@@ -26,7 +27,7 @@ HashSet& HashSet::operator&=(const HashSet& rhs) {
 }
 
 HashSet HashSet::operator~() const {
-    //cout << *this << ".operator~()" << std::endl;
+    // cout << *this << ".operator~()" << std::endl;
     HashSet _s(n);
     for (unsigned int i = 0; i < n; i++)
         if (s.count(i) == 0)
@@ -52,8 +53,8 @@ std::ostream& operator<<(std::ostream& s, const HashSet& v) {
 }
 
 namespace {
-constexpr std::array<unsigned long long,256> make_hashtable() {
-    std::array<unsigned long long,256> out{};
+constexpr std::array<unsigned long long, 256> make_hashtable() {
+    std::array<unsigned long long, 256> out{};
     unsigned long long h = 0x544B2FBACAAF1684LL;
     for (auto j = 0U; j < 256U; j++) {
         for (auto i = 0U; i < 31U; i++) {
@@ -68,10 +69,10 @@ constexpr std::array<unsigned long long,256> make_hashtable() {
 } // namespace
 
 // @FIXME: this one is not static or in the anonymous namespace so it can be used by other code ...
-constexpr std::array<unsigned long long,256> hashfn_tab = make_hashtable();
+constexpr std::array<unsigned long long, 256> hashfn_tab = make_hashtable();
 
-size_t std::hash<HashSet>::operator()(const HashSet &s) const {
-    //cout << "hashing " << s << ": ";
+size_t std::hash<HashSet>::operator()(const HashSet& s) const {
+    // cout << "hashing " << s << ": ";
     unsigned long long h = 0xBB40E64DA205B064LL;
     for (auto v : s) {
         const unsigned char* k = (const unsigned char*)&v;
@@ -79,13 +80,11 @@ size_t std::hash<HashSet>::operator()(const HashSet &s) const {
         for (; k != last; ++k)
             h = (h * 7664345821815920749LL) ^ hashfn_tab[*k];
     }
-    //cout << h << std::endl;
+    // cout << h << std::endl;
     return h;
 }
 
-void HashSet::clear() {
-    s.clear();
-}
+void HashSet::clear() { s.clear(); }
 
 void a_and_not_b(const HashSet& a, const HashSet& b, HashSet& c) {
     c.clear();
@@ -103,7 +102,7 @@ HashSet::ref& HashSet::ref::operator=(const bool x) {
 }
 
 HashSet operator|(const HashSet& lhs, const HashSet& rhs) {
-    //cout << "operator|(" << lhs << ", " << rhs << ")" << endl;
+    // cout << "operator|(" << lhs << ", " << rhs << ")" << endl;
     if (lhs.n != rhs.n) {
         throw std::runtime_error("dimensions don't match: " + std::to_string(lhs.n) + " != " + std::to_string(rhs.n));
     }
@@ -115,7 +114,7 @@ HashSet operator|(const HashSet& lhs, const HashSet& rhs) {
 }
 
 HashSet operator&(const HashSet& lhs, const HashSet& rhs) {
-    //cout << "operator&(" << lhs << ", " << rhs << ")" << endl;
+    // cout << "operator&(" << lhs << ", " << rhs << ")" << endl;
     if (lhs.n != rhs.n) {
         throw std::runtime_error("dimensions don't match: " + std::to_string(lhs.n) + " != " + std::to_string(rhs.n));
     }
@@ -126,13 +125,9 @@ HashSet operator&(const HashSet& lhs, const HashSet& rhs) {
     return s;
 }
 
-HashSet::ref::operator bool() const {
-    return s.count(i) > 0;
-}
+HashSet::ref::operator bool() const { return s.count(i) > 0; }
 
-HashSet::const_ref::operator bool() const {
-    return s.count(i) > 0;
-}
+HashSet::const_ref::operator bool() const { return s.count(i) > 0; }
 
 bool HashSet::operator==(const HashSet& rhs) const {
     if (n != rhs.n)
@@ -149,11 +144,11 @@ unsigned long long HashSet::max() const {
 
 void HashSet::resize(unsigned int _n) {
     if (n > _n) {
-        for(auto it = s.begin(); it != s.end();) {
-          if (*it >= _n) {
-            it = s.erase(it);
-          } else
-            ++it;
+        for (auto it = s.begin(); it != s.end();) {
+            if (*it >= _n) {
+                it = s.erase(it);
+            } else
+                ++it;
         }
     }
     n = _n;

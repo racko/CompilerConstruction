@@ -11,7 +11,7 @@ int main() {
     std::cout << "parsing \"" << line << "\"" << std::endl;
     // getline appends a \0, which is included in the gcount()
     line[ll-1] = EOF;
-    run(line.data());
+    Functional::run(line.data());
 
     return 0;
 }

@@ -41,6 +41,30 @@ TEST_CASE("HashTable set + get", "[HashTable]") {
 //    return 0;
 //}();
 
+TEST_CASE("strcatsize no argument", "[strcatsize]") {
+    REQUIRE(strcatsize() == 0);
+}
+
+TEST_CASE("strcatsize empty cstr", "[strcatsize]") {
+    REQUIRE(strcatsize<charr<1>>() == 0);
+    REQUIRE(strcatsize<char[1]>() == 0);
+    REQUIRE(strcatsize<const char[1]>() == 0);
+}
+
+TEST_CASE("strcatsize singleton cstr", "[strcatsize]") {
+    REQUIRE(strcatsize<charr<2>>() == 1);
+    REQUIRE(strcatsize<char[2]>() == 1);
+    REQUIRE(strcatsize<const char[2]>() == 1);
+}
+
+TEST_CASE("strcatsize empty string", "[strcatsize]") {
+    REQUIRE(strcatsize<string<0>>() == 0);
+}
+
+TEST_CASE("strcatsize singleton string", "[strcatsize]") {
+    REQUIRE(strcatsize<string<1>>() == 1);
+}
+
 TEST_CASE("strcat no argument", "[strcat]") {
     REQUIRE(strcat() == string<0>{});
 }
@@ -74,7 +98,7 @@ TEST_CASE("strcat empty cstr + cstr", "[strcat]") {
 }
 
 TEST_CASE("strcat cstr + cstr", "[strcat]") {
-    REQUIRE(strcat("ab", "abc") == string<3>{"ababc"});
+    REQUIRE(strcat("ab", "abc") == string<5>{"ababc"});
 }
 
 TEST_CASE("strcat empty string", "[strcat]") {
@@ -106,15 +130,15 @@ TEST_CASE("strcat empty string + string", "[strcat]") {
 }
 
 TEST_CASE("strcat string + string", "[strcat]") {
-    REQUIRE(strcat(string<2>{"ab"}, string<3>{"abc"}) == string<3>{"ababc"});
+    REQUIRE(strcat(string<2>{"ab"}, string<3>{"abc"}) == string<5>{"ababc"});
 }
 
 TEST_CASE("strcat cstr + string", "[strcat]") {
-    REQUIRE(strcat("ab", string<3>{"abc"}) == string<3>{"ababc"});
+    REQUIRE(strcat("ab", string<3>{"abc"}) == string<5>{"ababc"});
 }
 
 TEST_CASE("strcat string + cstr", "[strcat]") {
-    REQUIRE(strcat(string<2>{"ab"}, "abc") == string<3>{"ababc"});
+    REQUIRE(strcat(string<2>{"ab"}, "abc") == string<5>{"ababc"});
 }
 
 TEST_CASE("vector emplace", "[vector]") {

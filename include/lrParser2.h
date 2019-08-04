@@ -1,17 +1,11 @@
 #pragma once
 
 #include "Grammar2.h"
-#include <memory>
 #include <cassert>
+#include <memory>
 
-enum class type : uint32_t {
-    SHIFT,
-    REDUCE,
-    ACCEPT,
-    FAIL
-};
-
-inline uint32_t bits(type t) { return uint32_t(t) << 30; }
+namespace lr_parser2 {
+enum class type : uint32_t { SHIFT, REDUCE, ACCEPT, FAIL };
 
 struct action {
     uint32_t x;
@@ -38,16 +32,22 @@ struct action {
         assert(getType() == type::REDUCE);
         return x & ((1U << 15) - 1U);
     }
+
+  private:
+    uint32_t bits(type t) { return uint32_t(t) << 30; }
 };
 
 class LRParser {
-public:
+  public:
     LRParser(const grammar2::Grammar& grammar);
     ~LRParser();
 
     action step(grammar2::TerminalID);
+    void reset();
     const grammar2::Grammar& grammar() const;
-private:
+
+  private:
     struct impl;
     std::unique_ptr<impl> pimpl;
 };
+} // namespace lr_parser2

@@ -11,7 +11,7 @@ struct integer_hash {
 
 template<int64_t Size, typename T = unsigned int>
 struct HashSet {
-    using internal_set = unordered_set<T,Size, integer_hash<T>>;
+    using internal_set = unordered_set<T,Size, integer_hash<T>, int16_t>;
     using value_type = T;
     struct ref {
         internal_set& s;
@@ -108,12 +108,13 @@ public:
 template<int64_t Size, typename T>
 constexpr size_t hash<HashSet<Size,T>>::operator()(const HashSet<Size,T> &s) const {
     //cout << "hashing " << s << ": ";
+    const uint64_t* const tab = ::hashfn_tab.data();
     unsigned long long h = 0xBB40E64DA205B064LL;
     for (auto v : s) {
         const unsigned char* k = (const unsigned char*)&v;
         const unsigned char* const last = (const unsigned char*)(&v + 1);
         for (; k != last; ++k)
-            h = (h * 7664345821815920749LL) ^ ::hashfn_tab[*k];
+            h = (h * 7664345821815920749LL) ^ tab[*k];
     }
     //cout << h << std::endl;
     return h;
@@ -235,7 +236,7 @@ template<int64_t Size, typename T>
 constexpr HashSet<Size,T> HashSet<Size,T>::operator~() const {
     //cout << *this << ".operator~()" << std::endl;
     HashSet<Size,T> _s(n);
-    for (T i = 9; i < n; i++)
+    for (T i = 0; i < n; i++)
         if (s.find(i) == s.end())
             _s.s.insert(i);
     return _s;
@@ -261,7 +262,7 @@ constexpr HashSet<Size,T>::const_ref::const_ref(const internal_set& _s, T _i) : 
 
 template<int64_t Size, typename T>
 constexpr auto HashSet<Size,T>::begin() const -> typename internal_set::const_iterator {
-    return s.values;
+    return s.values.data;
     //return s.begin();
 }
 

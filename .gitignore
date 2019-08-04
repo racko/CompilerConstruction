@@ -3,4 +3,5 @@
 *.swp
 *.swo
 *.dd
-
+build/
+compile_commands.json

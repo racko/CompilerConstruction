@@ -1,10 +1,10 @@
 #pragma once
 
+#include "constexpr.h"
 #include "hash_table.h"
 
-#include <iosfwd> // for std::ostream&
+//#include <iosfwd> // for std::ostream&
 #include <functional> // for std::hash
-#include <cassert>
 
 template<int64_t max_n>
 struct BitSetComplement;
@@ -227,8 +227,8 @@ constexpr void INLINE a_and_not_b(const BitSet<w1>& a, const BitSet<w2>& b, BitS
 
 // cpp
 
-#include <iomanip>
-#include <ostream>
+//#include <iomanip>
+//#include <ostream>
 
 template<int64_t max_n>
 constexpr BitSet<max_n>::BitSet(int64_t _n) : n(_n) {}
@@ -493,25 +493,25 @@ constexpr auto operator-(const BitSet<w1>& lhs, const BitSet<w2>& rhs) {
     return s;
 }
 
-template<int64_t max_n>
-std::ostream& operator<<(std::ostream& s, const BitSet<max_n>& v) {
-    s << "(" << std::hex << &v << std::dec << ":" << v.n << ")";
-    int64_t i = 0;
-
-    while (i < v.size() && !v.get(i))
-        i++;
-
-    if (i == v.size()) {
-        s << "{}";
-        return s;
-    }
-    s << "{ " << i;
-    for (i++; i < v.size(); i++)
-        if (v.get(i))
-            s << ", " << i;
-    s << " }";
-    return s;
-}
+//template<int64_t max_n>
+//std::ostream& operator<<(std::ostream& s, const BitSet<max_n>& v) {
+//    s << "(" << std::hex << &v << std::dec << ":" << v.n << ")";
+//    int64_t i = 0;
+//
+//    while (i < v.size() && !v.get(i))
+//        i++;
+//
+//    if (i == v.size()) {
+//        s << "{}";
+//        return s;
+//    }
+//    s << "{ " << i;
+//    for (i++; i < v.size(); i++)
+//        if (v.get(i))
+//            s << ", " << i;
+//    s << " }";
+//    return s;
+//}
 
 //template<int64_t max_n>
 //constexpr typename BitSet<max_n>::sparse_iterator& BitSet<max_n>::sparse_iterator::operator++() {

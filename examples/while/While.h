@@ -1,5 +1,4 @@
-#ifndef WHILE_H_
-#define WHILE_H_
+#pragma once
 
 #include "Grammar.h"
 
@@ -9,29 +8,84 @@
 #include <boost/dynamic_bitset.hpp>
 
 namespace While {
-struct Grammar;
-enum class T : uint32_t;
-enum class NT : uint32_t;
-}
-
-template<>
-struct NonterminalID<While::Grammar>;
-
-template<>
-struct TerminalID<While::Grammar>;
-
-template<>
-struct GrammarElement<While::Grammar>;
-
-namespace While {
 enum class T : uint32_t {
-    DEF, LEFTCURLY, RIGHTCURLY, SEMICOLON, BASIC, RECORD, IF, ELSE, WHILE, DO, BREAK, CONTINUE, RETURN, LEFTBR, RIGHTBR, ID, PERIOD, ASSIGN, OR, AND, EQ, NEQ, LT, LE, GE, GT, PLUS, MINUS, TIMES, DIV, NOT, LEFTPAR, RIGHTPAR, NUM, REAL, TRUE, FALSE, STRING, COMMA, WS, EOI,
+    DEF,
+    LEFTCURLY,
+    RIGHTCURLY,
+    SEMICOLON,
+    BASIC,
+    RECORD,
+    IF,
+    ELSE,
+    WHILE,
+    DO,
+    BREAK,
+    CONTINUE,
+    RETURN,
+    LEFTBR,
+    RIGHTBR,
+    ID,
+    PERIOD,
+    ASSIGN,
+    OR,
+    AND,
+    EQ,
+    NEQ,
+    LT,
+    LE,
+    GE,
+    GT,
+    PLUS,
+    MINUS,
+    TIMES,
+    DIV,
+    NOT,
+    LEFTPAR,
+    RIGHTPAR,
+    NUM,
+    REAL,
+    TRUE,
+    FALSE,
+    STRING,
+    COMMA,
+    WS,
+    EOI,
     EPS
 };
 
 enum class NT : uint32_t {
-    S, PROGRAM, FUNCS, FUNC, OPTPARAMS, PARAMS, BLOCK, DECLS, DECL, TYPE, STMTS, STMT, LOC, ASSIGN, BOOL, JOIN, EQ, REL, EXPR, TERM, UNARY, FACTOR, FUNCALL, OPTARGS, ARGS
+    S,
+    PROGRAM,
+    FUNCS,
+    FUNC,
+    OPTPARAMS,
+    PARAMS,
+    BLOCK,
+    DECLS,
+    DECL,
+    TYPE,
+    STMTS,
+    STMT,
+    LOC,
+    ASSIGN,
+    BOOL,
+    JOIN,
+    EQ,
+    REL,
+    EXPR,
+    TERM,
+    UNARY,
+    FACTOR,
+    FUNCALL,
+    OPTARGS,
+    ARGS
 };
+
+constexpr size_t getNumberOfTerminals() { return uint32_t(T::EPS) + 1; }
+
+constexpr size_t getNumberOfNonterminals() { return uint32_t(NT::ARGS) + 1; }
+
+constexpr size_t getNumberOfGrammarElements() { return getNumberOfTerminals() + getNumberOfNonterminals(); }
 
 extern const char* nt_strings[];
 extern const char* t_strings[];
@@ -43,172 +97,183 @@ struct Real;
 struct ID;
 struct String;
 
+struct TerminalID {
+    uint32_t x;
+
+    constexpr TerminalID(T _x) : x(uint32_t(_x)) {}
+
+    explicit TerminalID(uint32_t _x) : x(_x) { assert(_x < getNumberOfTerminals()); }
+
+    //  operator GrammarElement() const;
+
+    operator T() const { return T(x); }
+};
+
+struct NonterminalID {
+    uint32_t x;
+
+    constexpr NonterminalID(NT _x) : x(uint32_t(_x)) {}
+
+    explicit NonterminalID(uint32_t _x) : x(_x) { assert(_x < getNumberOfNonterminals()); }
+
+    //  operator GrammarElement() const;
+
+    operator NT() const { return NT(x); }
+};
+
+struct GrammarElement {
+    uint32_t x;
+    explicit GrammarElement(uint32_t _x) : x(_x) { assert(_x < getNumberOfGrammarElements()); }
+    GrammarElement(T _x) : x(TerminalID(_x).x) {}
+    GrammarElement(NT _x) : x(NonterminalID(_x).x + getNumberOfTerminals()) {}
+    GrammarElement(TerminalID _x) : x(_x.x) {}
+    GrammarElement(NonterminalID _x) : x(_x.x + getNumberOfTerminals()) {}
+    operator TerminalID() const { return TerminalID(x); }
+
+    operator NonterminalID() const { return NonterminalID(x - getNumberOfTerminals()); }
+};
+
+kind kindOf(GrammarElement X);
+
+inline bool operator==(const TerminalID lhs, const TerminalID rhs) { return lhs.x == rhs.x; }
+
+inline bool operator!=(const TerminalID lhs, const TerminalID rhs) { return !(lhs == rhs); }
+
+inline bool operator<(const TerminalID lhs, const TerminalID rhs) { return lhs.x < rhs.x; }
+
+inline bool operator==(const GrammarElement lhs, const GrammarElement rhs) { return lhs.x == rhs.x; }
+
+inline bool operator!=(const GrammarElement lhs, const GrammarElement rhs) { return !(lhs == rhs); }
+
+inline bool operator<(const GrammarElement lhs, const GrammarElement rhs) { return lhs.x < rhs.x; }
+
+inline bool operator==(const NonterminalID lhs, const NonterminalID rhs) { return lhs.x == rhs.x; }
+
+inline bool operator!=(const NonterminalID lhs, const NonterminalID rhs) { return !(lhs == rhs); }
+
+inline bool operator<(const NonterminalID lhs, const NonterminalID rhs) { return lhs.x < rhs.x; }
+
+std::ostream& operator<<(std::ostream& s, GrammarElement const X);
+
+} // namespace While
+
+namespace std {
+template <>
+struct hash<While::TerminalID> {
+  public:
+    size_t operator()(const While::TerminalID a) const { return std::hash<decltype(a.x)>()(a.x); }
+};
+
+template <>
+struct hash<While::NonterminalID> {
+  public:
+    size_t operator()(const While::NonterminalID A) const { return std::hash<decltype(A.x)>()(A.x); }
+};
+
+template <>
+struct hash<While::GrammarElement> {
+  public:
+    size_t operator()(const While::GrammarElement X) const { return std::hash<decltype(X.x)>()(X.x); }
+};
+} // namespace std
+
+namespace While {
+std::ostream& operator<<(std::ostream& s, const std::vector<GrammarElement>& alpha);
+std::ostream& operator<<(std::ostream& s, const std::list<GrammarElement>& alpha);
+std::ostream& operator<<(std::ostream& s, const std::unordered_set<TerminalID>& alpha);
+
 struct Grammar {
     using type = std::uint32_t; // TODO: actually use this typedef
+    using TerminalID = While::TerminalID;
+    using NonterminalID = While::NonterminalID;
+    using GrammarElement = While::GrammarElement;
 
     // order: true terminals, EOF, EPS, nonterminals. S' is just the starting symbol
 
-    using String = std::vector<GrammarElement<Grammar>>;
+    using String = std::vector<GrammarElement>;
 
-    static kind kindOf(GrammarElement<Grammar> X);
+    static kind kindOf(GrammarElement X) { return While::kindOf(X); }
 
-    static size_t getNumberOfTerminals() {
-        return numberOfTerminals;
-    }
+    static size_t getNumberOfTerminals() { return numberOfTerminals; }
 
-    static size_t getNumberOfNonterminals() {
-        return numberOfNonterminals;
-    }
+    static size_t getNumberOfNonterminals() { return numberOfNonterminals; }
 
-    static size_t getNumberOfGrammarElements() {
-        return numberOfTerminals + numberOfNonterminals;
-    }
+    static size_t getNumberOfGrammarElements() { return numberOfTerminals + numberOfNonterminals; }
 
-    static const std::unordered_map<NonterminalID<Grammar>, std::vector<String>>& getProductions() {
-        return productions;
-    }
+    static const std::unordered_map<NonterminalID, std::vector<String>>& getProductions() { return productions; }
 
-    static const std::vector<String>& getProductions(NonterminalID<Grammar> A);
+    static const std::vector<String>& getProductions(NonterminalID A);
 
-    static const std::unordered_map<GrammarElement<Grammar>, std::unordered_set<TerminalID<Grammar>>>& getFirsts() {
-        return firsts;
-    }
+    static const std::unordered_map<GrammarElement, std::unordered_set<TerminalID>>& getFirsts() { return firsts; }
 
-    static const std::unordered_set<TerminalID<Grammar>>& getFirsts(const GrammarElement<Grammar>& X) ;
+    static const std::unordered_set<TerminalID>& getFirsts(const GrammarElement& X);
 
+    // using Token_const_reference = const Token*;
+    using Token = std::unique_ptr<Token>;
 
-    //using Token_const_reference = const While::Token*;
-    using Token_rv_reference = const Token*;
+    //  static TerminalID getTag(const Token& x);
+    static TerminalID getTag(const Token& x);
 
-    //  static TerminalID<Grammar> getTag(const While::Token& x);
-    static TerminalID<Grammar> getTag(const While::Token* x);
-
-    static const NonterminalID<Grammar> start;
-    static const TerminalID<Grammar> eof;
-    static const TerminalID<Grammar> eps;
+    static const NonterminalID start;
+    static const TerminalID eof;
+    static const TerminalID eps;
     static const size_t numberOfNonterminals;
     static const size_t numberOfTerminals;
-    static const std::unordered_map<NonterminalID<Grammar>, std::vector<String>> productions;
-    static const std::unordered_map<GrammarElement<Grammar>, std::unordered_set<TerminalID<Grammar>>> firsts;
-
-};
-}
-
-template<>
-struct TerminalID<While::Grammar> {
-    uint32_t x;
-
-    constexpr TerminalID(While::T _x) : x(uint32_t(_x)) {}
-
-    explicit TerminalID(uint32_t _x) : x(_x) {
-        assert(_x < While::Grammar::getNumberOfTerminals());
-    }
-
-    //  operator GrammarElement<While::Grammar>() const;
-
-    operator While::T() const {
-        return While::T(x);
-    }
+    static const std::unordered_map<NonterminalID, std::vector<String>> productions;
+    static const std::unordered_map<GrammarElement, std::unordered_set<TerminalID>> firsts;
 };
 
-template<>
-struct NonterminalID<While::Grammar> {
-    uint32_t x;
+struct Token {
+    TerminalID tag;
 
-    constexpr NonterminalID(While::NT _x) : x(uint32_t(_x)) {}
-
-    explicit NonterminalID(uint32_t _x) : x(_x) {
-        assert(_x < While::Grammar::getNumberOfNonterminals());
-    }
-
-    //  operator GrammarElement<While::Grammar>() const;
-
-    operator While::NT() const {
-        return While::NT(x);
-    }
-};
-
-template<>
-struct GrammarElement<While::Grammar> {
-    uint32_t x;
-    explicit GrammarElement(uint32_t _x) : x(_x) {
-        assert(_x < While::Grammar::getNumberOfGrammarElements());
-    }
-    GrammarElement(While::T _x) : x(TerminalID<While::Grammar>(_x).x) {}
-    GrammarElement(While::NT _x) : x(NonterminalID<While::Grammar>(_x).x + While::Grammar::numberOfTerminals) {}
-    GrammarElement(TerminalID<While::Grammar> _x) : x(_x.x) {}
-    GrammarElement(NonterminalID<While::Grammar> _x) : x(_x.x + While::Grammar::numberOfTerminals) {}
-    operator TerminalID<While::Grammar>() const {
-        return TerminalID<While::Grammar>(x);
-    }
-
-    operator NonterminalID<While::Grammar>() const {
-        return NonterminalID<While::Grammar>(x - While::Grammar::numberOfTerminals);
-    }
-};
-
-struct While::Token {
-    TerminalID<Grammar> tag;
-
-    Token(TerminalID<Grammar> _tag) : tag(_tag) {}
+    Token(TerminalID _tag) : tag(_tag) {}
     virtual ~Token() {}
 };
 
-struct While::Basic : public While::Token {
+struct Basic : public Token {
     std::string value;
-    Basic(const std::string& _value) : While::Token(TerminalID<Grammar>(T::BASIC)), value(_value) {}
+    Basic(const std::string& _value) : Token(TerminalID(T::BASIC)), value(_value) {}
 };
 
-struct While::Num : public While::Token {
+struct Num : public Token {
     uint64_t value;
-    Num(uint64_t _value) : While::Token(TerminalID<Grammar>(T::NUM)),value(_value) {}
+    Num(uint64_t _value) : Token(TerminalID(T::NUM)), value(_value) {}
 };
 
-struct While::Real : public While::Token {
+struct Real : public Token {
     double value;
-    Real(double _value) : While::Token(TerminalID<Grammar>(T::REAL)), value(_value) {}
+    Real(double _value) : Token(TerminalID(T::REAL)), value(_value) {}
 };
 
-struct While::ID : public While::Token {
+struct ID : public Token {
     std::string value;
-    ID(const std::string& _value) : While::Token(TerminalID<Grammar>(T::ID)), value(_value) {}
+    ID(const std::string& _value) : Token(TerminalID(T::ID)), value(_value) {}
 };
 
-struct While::String : public While::Token {
+struct String : public Token {
     std::string value;
-    String(const std::string& _value) : While::Token(TerminalID<Grammar>(T::STRING)), value(_value) {}
+    String(const std::string& _value) : Token(TerminalID(T::STRING)), value(_value) {}
 };
 
-//inline TerminalID<While::Grammar> While::Grammar::getTag(const While::Token& x) {
+// inline TerminalID Grammar::getTag(const Token& x) {
 //  return x.tag;
 //}
 
-inline TerminalID<While::Grammar> While::Grammar::getTag(const While::Token* x) {
-    return x->tag;
-}
+inline TerminalID Grammar::getTag(const Grammar::Token& x) { return x->tag; }
 
-//inline TerminalID<While::Grammar>::operator GrammarElement<While::Grammar>() const {
-//  return GrammarElement<While::Grammar>(x);
+// inline TerminalID::operator GrammarElement() const {
+//  return GrammarElement(x);
 //}
 //
-//inline NonterminalID<While::Grammar>::operator GrammarElement<While::Grammar>() const {
-//  return GrammarElement<While::Grammar>(x + While::Grammar::numberOfTerminals);
+// inline NonterminalID::operator GrammarElement() const {
+//  return GrammarElement(x + Grammar::numberOfTerminals);
 //}
 
-inline std::ostream& operator<<(std::ostream& s, While::T const& a) {
-    return s << While::t_strings[uint32_t(a)];
-}
+inline std::ostream& operator<<(std::ostream& s, T const& a) { return s << t_strings[uint32_t(a)]; }
 
-inline std::ostream& operator<<(std::ostream& s, While::NT const& A) {
-    return s << While::nt_strings[uint32_t(A)];
-}
+inline std::ostream& operator<<(std::ostream& s, NT const& A) { return s << nt_strings[uint32_t(A)]; }
 
-inline std::ostream& operator<<(std::ostream& s, TerminalID<While::Grammar> const& a) {
-    return s << While::T(a);
-}
+std::ostream& operator<<(std::ostream& s, TerminalID const& a);
 
-inline std::ostream& operator<<(std::ostream& s, NonterminalID<While::Grammar> const& A) {
-    return s << While::NT(A);
-}
-
-#endif /* WHILE_H_ */
+std::ostream& operator<<(std::ostream& s, NonterminalID const& A);
+} // namespace While

@@ -2,11 +2,13 @@
 #include "nfaBuilder.h"
 #include <fstream>
 
+namespace Functional {
 auto myLexer::getDFA() -> DFA_t {
     std::stringstream in;
-    nfaBuilder<Symbol,State,TokenId> builder;
+    nfaBuilder<Symbol, State, TokenId> builder;
 
-    char alpha[] = "(a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z)";
+    char alpha[] =
+        "(a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z)";
     char digit[] = "(0|1|2|3|4|5|6|7|8|9)";
     std::stringstream varch;
     varch << "(" << alpha << "|" << digit << "|_)";
@@ -82,7 +84,7 @@ auto myLexer::getDFA() -> DFA_t {
     in << "( |\t|\n)( |\t|\n)*";
     builder.lexRegex(in, (unsigned)T::WS + 1);
 
-    NFA<Symbol,State,TokenId> nfa1(builder);
+    NFA<Symbol, State, TokenId> nfa1(builder);
     std::ofstream file1("functional_nfa.dot");
     file1 << nfa1;
     DFA_t dfa1(nfa1);
@@ -94,13 +96,13 @@ auto myLexer::getDFA() -> DFA_t {
     return dfa1;
 }
 
-auto myLexer::action(const char* s, size_t n, TokenId t) -> Token* {
+auto myLexer::action(const char* s, size_t n, TokenId t) -> std::unique_ptr<Token> {
     cout << "action(\"";
     cout.write(s, n);
     cout << "\", " << n << ", " << int(t) << ")" << endl;
-    Token* tok;
-    auto tid = TerminalID<Functional::Grammar>(t - 1);
-    switch(tid) {
+    std::unique_ptr<Token> tok;
+    auto tid = TerminalID(t - 1);
+    switch (tid) {
     case T::SEMICOLON:
     case T::ASSIGN:
     case T::PERIOD:
@@ -122,10 +124,10 @@ auto myLexer::action(const char* s, size_t n, TokenId t) -> Token* {
     case T::LET:
     case T::IN:
     case T::LETREC:
-        tok = new Token(tid);
+        tok = std::make_unique<Token>(tid);
         break;
     case T::VAR:
-        tok = new Functional::Var(string(s, n));
+        tok = std::make_unique<Functional::Var>(string(s, n));
         break;
     case T::NUM: {
         unsigned long long i;
@@ -133,21 +135,27 @@ auto myLexer::action(const char* s, size_t n, TokenId t) -> Token* {
         ss.exceptions(std::stringstream::failbit | std::stringstream::badbit);
         ss.write(s, n);
         ss >> i;
-        tok = new Functional::Num(i);
+        tok = std::make_unique<Functional::Num>(i);
         break;
     }
     case T::WS:
         tok = nullptr;
         break;
     case T::EOI:
-        tok = new Token(T::EOI);
+        tok = std::make_unique<Token>(T::EOI);
         break;
     default: {
         std::stringstream ss;
         ss << "invalid token type: " << t;
         throw std::runtime_error(ss.str());
     }
-
     }
     return tok;
 }
+
+void myLexer::step() { token = t2t(lexer.getToken()); }
+
+const std::unique_ptr<Functional::Token>& myLexer::peek() const { return token; }
+
+std::unique_ptr<Functional::Token>& myLexer::peek() { return token; }
+} // namespace Functional
