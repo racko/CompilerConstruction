@@ -13,7 +13,7 @@
 #define INLINE //__attribute__((always_inline))
 
 template <class InputIt1, class InputIt2>
-constexpr bool equal(InputIt1 first1, InputIt1 last1, InputIt2 first2) {
+constexpr bool equal(InputIt1 first1, const InputIt1 last1, const InputIt2 first2) {
     for (; first1 != last1; ++first1, ++first2) {
         if (!(*first1 == *first2)) {
             return false;
@@ -23,7 +23,7 @@ constexpr bool equal(InputIt1 first1, InputIt1 last1, InputIt2 first2) {
 }
 
 template <class ForwardIt>
-constexpr ForwardIt max_element(ForwardIt first, ForwardIt last) {
+constexpr ForwardIt max_element(ForwardIt first, const ForwardIt last) {
     if (first == last) {
         return last;
     }
@@ -38,7 +38,7 @@ constexpr ForwardIt max_element(ForwardIt first, ForwardIt last) {
 }
 
 template <class ForwardIt, class Compare>
-constexpr ForwardIt max_element(ForwardIt first, ForwardIt last, Compare cmp) {
+constexpr ForwardIt max_element(ForwardIt first, const ForwardIt last, Compare cmp) {
     if (first == last) {
         return last;
     }
@@ -53,7 +53,7 @@ constexpr ForwardIt max_element(ForwardIt first, ForwardIt last, Compare cmp) {
 }
 
 template <class InputIt, class T, class BinaryOperation>
-constexpr T accumulate(InputIt first, InputIt last, T init, BinaryOperation op) {
+constexpr T accumulate(InputIt first, const InputIt last, T init, BinaryOperation op) {
     for (; first != last; ++first) {
         init = op(init, *first);
     }
@@ -61,7 +61,7 @@ constexpr T accumulate(InputIt first, InputIt last, T init, BinaryOperation op) 
 }
 
 template <class InputIt, class UnaryPredicate>
-constexpr InputIt find_if_not(InputIt first, InputIt last, UnaryPredicate q) {
+constexpr InputIt find_if_not(InputIt first, const InputIt last, UnaryPredicate q) {
     for (; first != last; ++first) {
         if (!q(*first)) {
             return first;
@@ -71,19 +71,19 @@ constexpr InputIt find_if_not(InputIt first, InputIt last, UnaryPredicate q) {
 }
 
 template <class InputIt, class UnaryPredicate>
-constexpr bool all_of(InputIt first, InputIt last, UnaryPredicate p) {
+constexpr bool all_of(const InputIt first, const InputIt last, UnaryPredicate p) {
     return find_if_not(first, last, p) == last;
 }
 
 template <class ForwardIt, class T>
-constexpr void fill(ForwardIt first, ForwardIt last, const T& value) {
+constexpr void fill(ForwardIt first, const ForwardIt last, const T& value) {
     for (; first != last; ++first) {
         *first = value;
     }
 }
 
 template <class OutputIt, class Size, class T>
-constexpr OutputIt fill_n(OutputIt first, Size count, const T& value) {
+constexpr OutputIt fill_n(OutputIt first, const Size count, const T& value) {
     for (Size i = 0; i < count; i++) {
         *first++ = value;
     }
@@ -91,7 +91,7 @@ constexpr OutputIt fill_n(OutputIt first, Size count, const T& value) {
 }
 
 template <class ForwardIt, class T>
-constexpr void uninitialized_fill(ForwardIt first, ForwardIt last, const T& value) {
+constexpr void uninitialized_fill(const ForwardIt first, const ForwardIt last, const T& value) {
     // typedef typename std::iterator_traits<ForwardIt>::value_type Value;
     for (auto current = first; current != last; ++current) {
         // ::new (static_cast<void*>(std::addressof(*current))) Value(value); // illegal in constexpr
@@ -101,7 +101,7 @@ constexpr void uninitialized_fill(ForwardIt first, ForwardIt last, const T& valu
 }
 
 template <class ForwardIt, class Size, class T>
-constexpr ForwardIt uninitialized_fill_n(ForwardIt first, Size count, const T& value) {
+constexpr ForwardIt uninitialized_fill_n(const ForwardIt first, Size count, const T& value) {
     // typedef typename std::iterator_traits<ForwardIt>::value_type Value;
     ForwardIt current = first;
     for (; count > 0; ++current, --count) {
@@ -113,7 +113,7 @@ constexpr ForwardIt uninitialized_fill_n(ForwardIt first, Size count, const T& v
 }
 
 template <class ForwardIt>
-constexpr void uninitialized_value_construct(ForwardIt first, ForwardIt last) {
+constexpr void uninitialized_value_construct(const ForwardIt first, const ForwardIt last) {
     typedef typename std::iterator_traits<ForwardIt>::value_type Value;
     for (ForwardIt current = first; current != last; ++current) {
         // ::new (static_cast<void*>(std::addressof(*current))) Value(); // illegal in constexpr
@@ -123,7 +123,7 @@ constexpr void uninitialized_value_construct(ForwardIt first, ForwardIt last) {
 }
 
 template <class ForwardIt, class Size>
-constexpr ForwardIt uninitialized_value_construct_n(ForwardIt first, Size n) {
+constexpr ForwardIt uninitialized_value_construct_n(const ForwardIt first, Size n) {
     typedef typename std::iterator_traits<ForwardIt>::value_type Value;
     ForwardIt current = first;
     for (; n > 0; ++current, --n) {
@@ -135,7 +135,7 @@ constexpr ForwardIt uninitialized_value_construct_n(ForwardIt first, Size n) {
 }
 
 template <class InputIt, class UnaryPredicate>
-constexpr InputIt find_if(InputIt first, InputIt last, UnaryPredicate p) {
+constexpr InputIt find_if(InputIt first, const InputIt last, UnaryPredicate p) {
     for (; first != last; ++first) {
         if (p(*first)) {
             return first;
@@ -145,7 +145,7 @@ constexpr InputIt find_if(InputIt first, InputIt last, UnaryPredicate p) {
 }
 
 template <class InputIt, class T>
-constexpr InputIt find(InputIt first, InputIt last, const T& value) {
+constexpr InputIt find(InputIt first, const InputIt last, const T& value) {
     for (; first != last; ++first) {
         if (*first == value) {
             return first;
@@ -155,7 +155,7 @@ constexpr InputIt find(InputIt first, InputIt last, const T& value) {
 }
 
 template <class ForwardIt, class T>
-constexpr ForwardIt remove(ForwardIt first, ForwardIt last, const T& value) {
+constexpr ForwardIt remove(ForwardIt first, const ForwardIt last, const T& value) {
     first = find(first, last, value);
     if (first != last)
         for (ForwardIt i = first; ++i != last;)
@@ -173,12 +173,12 @@ swap(T& a, T& b) noexcept(std::is_nothrow_move_constructible<T>::value&& std::is
 }
 
 template <class ForwardIt1, class ForwardIt2>
-constexpr void iter_swap(ForwardIt1 a, ForwardIt2 b) {
+constexpr void iter_swap(const ForwardIt1 a, const ForwardIt2 b) {
     swap(*a, *b);
 }
 
 template <class ForwardIt>
-constexpr ForwardIt rotate(ForwardIt first, ForwardIt n_first, ForwardIt last) {
+constexpr ForwardIt rotate(ForwardIt first, ForwardIt n_first, const ForwardIt last) {
     if (first == n_first)
         return last;
     if (n_first == last)
@@ -206,7 +206,7 @@ constexpr ForwardIt rotate(ForwardIt first, ForwardIt n_first, ForwardIt last) {
 }
 
 template <class InputIt, class OutputIt>
-constexpr OutputIt copy(InputIt first, InputIt last, OutputIt d_first) {
+constexpr OutputIt copy(InputIt first, const InputIt last, OutputIt d_first) {
     while (first != last) {
         *d_first++ = *first++;
     }
@@ -214,7 +214,7 @@ constexpr OutputIt copy(InputIt first, InputIt last, OutputIt d_first) {
 }
 
 template <class InputIt, class Size, class OutputIt>
-constexpr OutputIt copy_n(InputIt first, Size count, OutputIt result) {
+constexpr OutputIt copy_n(InputIt first, const Size count, OutputIt result) {
     if (count > 0) {
         *result++ = *first;
         for (Size i = 1; i < count; ++i) {
@@ -225,7 +225,8 @@ constexpr OutputIt copy_n(InputIt first, Size count, OutputIt result) {
 }
 
 template <class InputIt, class T>
-constexpr typename std::iterator_traits<InputIt>::difference_type count(InputIt first, InputIt last, const T& value) {
+constexpr typename std::iterator_traits<InputIt>::difference_type
+count(InputIt first, const InputIt last, const T& value) {
     typename std::iterator_traits<InputIt>::difference_type ret = 0;
     for (; first != last; ++first) {
         if (*first == value) {
@@ -236,7 +237,7 @@ constexpr typename std::iterator_traits<InputIt>::difference_type count(InputIt 
 }
 
 template <class OutputIt, class Size, class Generator>
-constexpr OutputIt generate_n(OutputIt first, Size count, Generator g) {
+constexpr OutputIt generate_n(OutputIt first, const Size count, Generator g) {
     for (Size i = 0; i < count; i++) {
         *first++ = g();
     }
@@ -244,7 +245,7 @@ constexpr OutputIt generate_n(OutputIt first, Size count, Generator g) {
 }
 
 template <class ForwardIt, class T>
-constexpr ForwardIt lower_bound(ForwardIt first, ForwardIt last, const T& value) {
+constexpr ForwardIt lower_bound(ForwardIt first, const ForwardIt last, const T& value) {
     ForwardIt it;
     typename std::iterator_traits<ForwardIt>::difference_type count, step;
     count = std::distance(first, last);
@@ -263,7 +264,8 @@ constexpr ForwardIt lower_bound(ForwardIt first, ForwardIt last, const T& value)
 }
 
 template <class InputIt1, class InputIt2, class OutputIt>
-constexpr OutputIt set_difference(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2, OutputIt d_first) {
+constexpr OutputIt
+set_difference(InputIt1 first1, const InputIt1 last1, InputIt2 first2, const InputIt2 last2, OutputIt d_first) {
     while (first1 != last1) {
         if (first2 == last2)
             return copy(first1, last1, d_first);
@@ -281,8 +283,8 @@ constexpr OutputIt set_difference(InputIt1 first1, InputIt1 last1, InputIt2 firs
 }
 
 template <class InputIt1, class InputIt2, class OutputIt>
-constexpr OutputIt set_intersection(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2,
-                                    OutputIt d_first) {
+constexpr OutputIt
+set_intersection(InputIt1 first1, const InputIt1 last1, InputIt2 first2, const InputIt2 last2, OutputIt d_first) {
     while (first1 != last1 && first2 != last2) {
         if (*first1 < *first2) {
             ++first1;
@@ -297,7 +299,8 @@ constexpr OutputIt set_intersection(InputIt1 first1, InputIt1 last1, InputIt2 fi
 }
 
 template <class InputIt1, class InputIt2, class OutputIt>
-constexpr OutputIt set_union(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2, OutputIt d_first) {
+constexpr OutputIt
+set_union(InputIt1 first1, const InputIt1 last1, InputIt2 first2, const InputIt2 last2, OutputIt d_first) {
     for (; first1 != last1; ++d_first) {
         if (first2 == last2)
             return copy(first1, last1, d_first);
@@ -324,12 +327,16 @@ struct pair {
 
     template <class... Args1, class... Args2>
     constexpr INLINE pair(std::piecewise_construct_t, std::tuple<Args1...> first_args, std::tuple<Args2...> second_args)
-        : pair(first_args, second_args, std::make_index_sequence<sizeof...(Args1)>{},
+        : pair(first_args,
+               second_args,
+               std::make_index_sequence<sizeof...(Args1)>{},
                std::make_index_sequence<sizeof...(Args2)>{}) {}
 
     template <class... Args1, class... Args2, size_t... Indexes1, size_t... Indexes2>
-    constexpr INLINE pair(std::tuple<Args1...>& first_args, std::tuple<Args2...>& second_args,
-                          std::index_sequence<Indexes1...>, std::index_sequence<Indexes2...>)
+    constexpr INLINE pair(std::tuple<Args1...>& first_args,
+                          std::tuple<Args2...>& second_args,
+                          std::index_sequence<Indexes1...>,
+                          std::index_sequence<Indexes2...>)
         : first(std::forward<Args1>(std::get<Indexes1>(first_args))...),
           second(std::forward<Args2>(std::get<Indexes2>(second_args))...) {}
 };
@@ -1585,7 +1592,10 @@ struct HashTable {
     }
 };
 
-template <typename Key, typename Value, int64_t MaxElementCount, typename Hash = std::hash<Key>,
+template <typename Key,
+          typename Value,
+          int64_t MaxElementCount,
+          typename Hash = std::hash<Key>,
           typename Index = int32_t>
 struct HashMap : private HashTable<Key, MaxElementCount, Hash, Index> {
     // using storage = vector<pair<const key,value>,size>; // not possible with constexpr due to missing placement-new

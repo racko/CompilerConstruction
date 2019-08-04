@@ -111,8 +111,8 @@ constexpr size_t hash<HashSet<Size,T>>::operator()(const HashSet<Size,T> &s) con
     const uint64_t* const tab = ::hashfn_tab.data();
     unsigned long long h = 0xBB40E64DA205B064LL;
     for (auto v : s) {
-        const unsigned char* k = (const unsigned char*)&v;
-        const unsigned char* const last = (const unsigned char*)(&v + 1);
+        const unsigned char* k = reinterpret_cast<const unsigned char*>(&v);
+        const unsigned char* const last = reinterpret_cast<const unsigned char*>(&v + 1);
         for (; k != last; ++k)
             h = (h * 7664345821815920749LL) ^ tab[*k];
     }

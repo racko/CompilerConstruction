@@ -113,7 +113,7 @@ public:
 
     constexpr State addState() {
         if (ns_.size() > std::numeric_limits<State>::max())
-            throw std::range_error("TransitionCountingGraph::addState");
+            throw std::range_error("ResultingStateCountingGraph::addState");
         auto id = static_cast<State>(ns_.size());
         ns_.emplace_back();
         return id;
@@ -144,7 +144,7 @@ class Graph {
 public:
     constexpr State addState() {
         if (ns_.size() > std::numeric_limits<State>::max())
-            throw std::range_error("TransitionCountingGraph::addState");
+            throw std::range_error("Graph::addState");
         auto id = static_cast<State>(ns_.size());
         ns_.emplace_back();
         return id;

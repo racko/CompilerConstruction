@@ -8,8 +8,13 @@
 
 #include <iostream>
 
-template <typename Symbol, typename State, typename TokenId, int64_t MaxNodes, int64_t MaxSymbols,
-          int64_t MaxTransitions, int64_t MaxResultStates>
+template <typename Symbol,
+          typename State,
+          typename TokenId,
+          int64_t MaxNodes,
+          int64_t MaxSymbols,
+          int64_t MaxTransitions,
+          int64_t MaxResultStates>
 struct NFA {
     // using Set = HashSet<MaxResultStates>;
     using Set = BitSet<MaxNodes>;
@@ -24,14 +29,15 @@ struct NFA {
     vector<Set, MaxNodes> closures;
 
     // constexpr NFA(int64_t _symbolCount, int64_t _stateCount, Symbol _eps, State _start, vector<TokenId,MaxNodes>
-    // _final) : eps(_eps), symbolCount(_symbolCount), stateCount(_stateCount), start(_start), finals(std::move(_final)),
-    // symbols(symbolCount) {
+    // _final) : eps(_eps), symbolCount(_symbolCount), stateCount(_stateCount), start(_start),
+    // finals(std::move(_final)), symbols(symbolCount) {
     //    for (auto i = Symbol(); i < symbolCount; i++)
     //        symbols[i] = i;
     //};
 
-    constexpr NFA(const nfaBuilder<Symbol, State, MaxSymbols,
-                                   Graph<State, TokenId, MaxNodes, MaxTransitions, MaxResultStates>>& nfa);
+    constexpr NFA(
+        const nfaBuilder<Symbol, State, MaxSymbols, Graph<State, TokenId, MaxNodes, MaxTransitions, MaxResultStates>>&
+            nfa);
     template <typename SetIn, typename SetOut>
     constexpr void getClosure(const SetIn& s, SetOut& out) const;
 
@@ -41,11 +47,19 @@ struct NFA {
                               vector<typename Set::value_type, MaxNodes>& stack) const;
 };
 
-template <typename Symbol, typename State, typename TokenId, int64_t MaxNodes, int64_t MaxSymbols,
-          int64_t MaxTransitions, int64_t MaxResultStates>
+template <typename Symbol,
+          typename State,
+          typename TokenId,
+          int64_t MaxNodes,
+          int64_t MaxSymbols,
+          int64_t MaxTransitions,
+          int64_t MaxResultStates>
 constexpr NFA<Symbol, State, TokenId, MaxNodes, MaxSymbols, MaxTransitions, MaxResultStates>::NFA(
     const nfaBuilder<Symbol, State, MaxSymbols, Graph<State, TokenId, MaxNodes, MaxTransitions, MaxResultStates>>& nfa)
-    : eps(nfa.eps), symbolCount(nfa.symbolToId.size()), stateCount(nfa.ns.getStateCount()), start(nfa.start),
+    : eps(nfa.eps),
+      symbolCount(nfa.symbolToId.size()),
+      stateCount(nfa.ns.getStateCount()),
+      start(nfa.start),
       finals(stateCount),
       table(symbolCount, vector<internal_set, MaxNodes>(stateCount, internal_set(stateCount, false))),
       symbols(nfa.idToSymbol) {
@@ -80,8 +94,13 @@ constexpr NFA<Symbol, State, TokenId, MaxNodes, MaxSymbols, MaxTransitions, MaxR
     }
 }
 
-template <typename Symbol, typename State, typename TokenId, int64_t MaxNodes, int64_t MaxSymbols,
-          int64_t MaxTransitions, int64_t MaxResultStates>
+template <typename Symbol,
+          typename State,
+          typename TokenId,
+          int64_t MaxNodes,
+          int64_t MaxSymbols,
+          int64_t MaxTransitions,
+          int64_t MaxResultStates>
 template <typename SetIn, typename SetOut>
 constexpr void
 NFA<Symbol, State, TokenId, MaxNodes, MaxSymbols, MaxTransitions, MaxResultStates>::getClosure(const SetIn& S,
@@ -149,8 +168,13 @@ constexpr void NFA<Symbol, State, TokenId, MaxNodes, MaxSymbols, MaxTransitions,
     //}
 }
 
-template <typename Symbol, typename State, typename TokenId, int64_t MaxNodes, int64_t MaxSymbols,
-          int64_t MaxTransitions, int64_t MaxResultStates>
+template <typename Symbol,
+          typename State,
+          typename TokenId,
+          int64_t MaxNodes,
+          int64_t MaxSymbols,
+          int64_t MaxTransitions,
+          int64_t MaxResultStates>
 std::ostream&
 operator<<(std::ostream& s,
            const NFA<Symbol, State, TokenId, MaxNodes, MaxSymbols, MaxTransitions, MaxResultStates>& nfa) {
