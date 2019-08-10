@@ -1,10 +1,11 @@
 #pragma once
 
-#include "FunctionalAttribute.h"
-
-#include <iostream>
-#include <string>
-#include <unordered_map>
+#include "FunctionalAttribute.h" // for operator<<, Variable
+#include <iostream>              // for operator<<, basic_ostream, ostream
+#include <stdexcept>             // for runtime_error
+#include <string>                // for operator<<, string, char_traits
+#include <unordered_map>         // for operator!=, _Node_const_iterator
+#include <utility>               // for move
 
 namespace Functional {
 class Environment2 {

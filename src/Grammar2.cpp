@@ -1,5 +1,7 @@
 #include "Grammar2.h"
 
+#include <utility>  // for move
+
 namespace grammar2 {
 Grammar::Grammar(uint32_t numberOfTerminals, uint32_t numberOfNonterminals, NonterminalID start, TerminalID eps,
                  TerminalID eoi, std::vector<const char*> terminalStrings, std::vector<const char*> nonTerminalStrings,

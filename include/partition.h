@@ -1,18 +1,21 @@
 #pragma once
-#include "constexpr.h"
+
+#include "constexpr.h" // for pair, make_pair, vector, swap, fill_n
+#include <cstdint>     // for int64_t
+#include <stdexcept>   // for runtime_error
 
 template <typename State, typename Class, int64_t MaxNodes>
 struct partition {
     using Position = int64_t;
     using PositionRange = pair<Position, Position>;
 
-    vector<State,MaxNodes> p;
-    vector<Position,MaxNodes> pI;
-    vector<PositionRange,MaxNodes> c_i;
-    vector<Class,MaxNodes> c;
+    vector<State, MaxNodes> p;
+    vector<Position, MaxNodes> pI;
+    vector<PositionRange, MaxNodes> c_i;
+    vector<Class, MaxNodes> c;
 
-    template<typename TokenId>
-    constexpr partition(const vector<TokenId,MaxNodes>& finals);
+    template <typename TokenId>
+    constexpr partition(const vector<TokenId, MaxNodes>& finals);
 
     template <typename Set>
     constexpr bool swapToFront(Position l, Position h, const Set& tmp);
@@ -29,11 +32,13 @@ struct partition {
     constexpr void split(const Set& tmp);
 };
 
-template<typename State, typename Class, int64_t MaxNodes>
-template<typename TokenId>
-constexpr partition<State,Class,MaxNodes>::partition(const vector<TokenId,MaxNodes>& finals) : p(finals.size()), pI(finals.size()), c(finals.size()) {
+template <typename State, typename Class, int64_t MaxNodes>
+template <typename TokenId>
+constexpr partition<State, Class, MaxNodes>::partition(const vector<TokenId, MaxNodes>& finals)
+    : p(finals.size()), pI(finals.size()), c(finals.size()) {
     auto stateCount = finals.size();
-    vector<vector<State,MaxNodes>,MaxNodes> kinds; // given TokenId k, kinds[k] is vector<State> containing states of kind k
+    vector<vector<State, MaxNodes>, MaxNodes>
+        kinds; // given TokenId k, kinds[k] is vector<State> containing states of kind k
 
     for (State i = 0; i < stateCount; i++) {
         if (kinds.size() <= finals[i])

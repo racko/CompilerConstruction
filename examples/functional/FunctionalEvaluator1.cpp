@@ -1,7 +1,11 @@
 #include "FunctionalEvaluator1.h"
 
-#include "FunctionalAttribute.h"
-#include "FunctionalValue1.h"
+#include "FunctionalAttribute.h" // for operator<<, Abs, LambdaExpr, NumConst
+#include "FunctionalValue1.h"    // for Value, toValue, Environment, Function
+#include <iostream>              // for operator<<, endl, ostream, basic_os...
+#include <string>                // for string, allocator, operator<<, char...
+#include <unordered_map>         // for unordered_map
+#include <utility>               // for move
 
 namespace Functional {
 namespace evaluator1 {

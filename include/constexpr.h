@@ -1,19 +1,24 @@
 #pragma once
 
-#include "NumRange.h"
-
-#include <array>
-#include <cassert>
-#include <functional>
-#include <ostream>
-#include <tuple>
-#include <utility>
+#include <cstddef>     // for size_t
+#include <cstdint>     // for int64_t, uint64_t, int32_t, int8_t, uint32_t
+#include <cassert>      // for assert
+#include <functional>   // for hash, function
+#include <iterator>     // for begin, end, iterator_traits, distance
+#include <limits>       // for numeric_limits, numeric_limits<>::digits
+#include <new>          // for bad_alloc
+#include <ostream>      // for operator<<, ostream
+#include <stdexcept>    // for range_error
+#include <tuple>        // for tuple, forward_as_tuple
+#include <type_traits>  // for is_nothrow_move_assignable, is_nothrow_move_c...
+#include <utility>      // for move, forward, index_sequence, make_index_seq...
+#include "NumRange.h"   // for NumIterator
 
 // this only benefits Debug mode runtime, not constexpr evaluation
 #define INLINE //__attribute__((always_inline))
 
 template <class InputIt1, class InputIt2>
-constexpr bool equal(InputIt1 first1, const InputIt1 last1, const InputIt2 first2) {
+constexpr bool equal(InputIt1 first1, const InputIt1 last1, InputIt2 first2) {
     for (; first1 != last1; ++first1, ++first2) {
         if (!(*first1 == *first2)) {
             return false;

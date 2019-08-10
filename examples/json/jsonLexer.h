@@ -1,10 +1,10 @@
 #pragma once
 
-#include <memory>
-#include <token_stream.h>
+#include "json_token.h"   // for Token
+#include <memory>         // for unique_ptr
+#include <token_stream.h> // for TokenStream
 
 namespace json {
-struct Token;
 struct myLexer : public TokenStream<Token> {
 
     myLexer();

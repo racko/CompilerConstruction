@@ -1,11 +1,21 @@
 #pragma once
 
-#include "Grammar.h"
+#include "Grammar.h"     // for kind
+#include <cassert>       // for assert
+#include <cstddef>       // for size_t
+#include <cstdint>       // for uint32_t, uint64_t
+#include <functional>    // for hash
+#include <list>          // for list
+#include <memory>        // for unique_ptr
+#include <ostream>       // for ostream, operator<<, size_t
+#include <string>        // for string
+#include <unordered_map> // for unordered_map
+#include <unordered_set> // for unordered_set
+#include <vector>        // for vector
 
-#include <cstdint>
-#include <vector>
-
-#include <boost/dynamic_bitset.hpp>
+namespace While {
+struct Token;
+} // namespace While
 
 namespace While {
 enum class T : uint32_t {
@@ -89,13 +99,6 @@ constexpr size_t getNumberOfGrammarElements() { return getNumberOfTerminals() + 
 
 extern const char* nt_strings[];
 extern const char* t_strings[];
-
-struct Token;
-struct Basic;
-struct Num;
-struct Real;
-struct ID;
-struct String;
 
 struct TerminalID {
     uint32_t x;
@@ -209,7 +212,7 @@ struct Grammar {
     static const std::unordered_set<TerminalID>& getFirsts(const GrammarElement& X);
 
     // using Token_const_reference = const Token*;
-    using Token = std::unique_ptr<Token>;
+    using Token = std::unique_ptr<While::Token>;
 
     //  static TerminalID getTag(const Token& x);
     static TerminalID getTag(const Token& x);

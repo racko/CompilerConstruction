@@ -1,9 +1,19 @@
 #include "lrParser2.h"
-#include <iostream>
-#include <list>
-#include <map>
-#include <set>
+
+#include <cstdint>            // for uint32_t
+#include <ext/alloc_traits.h> // for __alloc_traits<>::value_type
+#include <iostream>           // for operator<<, endl, basic_ostream, ostream
+#include <iterator>           // for advance
+#include <limits>             // for numeric_limits
+#include <list>               // for _List_const_iterator, operator!=, oper...
+#include <map>                // for map, _Rb_tree_iterator, operator!=
+#include <set>                // for set
 #include <sstream>
+#include <stddef.h>      // for ptrdiff_t
+#include <stdexcept>     // for runtime_error, logic_error
+#include <unordered_set> // for unordered_set
+#include <utility>       // for move, pair
+#include <vector>        // for vector, vector<>::const_iterator
 
 namespace lr_parser2 {
 namespace {
@@ -19,8 +29,8 @@ struct item {
     item(grammar2::NonterminalID _A, String const& _l, String const& _r, grammar2::TerminalID _a, uint32_t _production);
 };
 
-item::item(grammar2::NonterminalID _A, String const& _l, String const& _r, grammar2::TerminalID _a,
-           uint32_t _production)
+item::item(
+    grammar2::NonterminalID _A, String const& _l, String const& _r, grammar2::TerminalID _a, uint32_t _production)
     : A(_A), l(_l), r(_r), a(_a), production(_production) {}
 
 bool operator<(const item& lhs, const item& rhs) {
@@ -129,12 +139,14 @@ SetOfItems closure(const grammar2::Grammar& grammar, SetOfItems&& I) {
                     //          if (![b])
                     //            continue;
                     //          std::cout << "b = " << T(b) << std::endl;
-                    auto res = I.emplace(B, item::String{},
+                    auto res = I.emplace(B,
+                                         item::String{},
                                          item::String{gamma.front() != grammar.toGrammarElement(grammar.getEps())
                                                           ? gamma.begin()
                                                           : gamma.end(),
                                                       gamma.end()},
-                                         b, k);
+                                         b,
+                                         k);
 
                     //          if (res.second) {
                     //            std::cout << "Adding ";
@@ -198,10 +210,12 @@ struct LRParser::impl {
 };
 
 LRParser::impl::impl(const grammar2::Grammar& grammar) : grammar_(grammar) {
-    SetOfItems init{item(grammar.getStart(), item::String(),
+    SetOfItems init{item(grammar.getStart(),
+                         item::String(),
                          item::String{grammar.getProductions(grammar.getStart())[0].begin(),
                                       grammar.getProductions(grammar.getStart())[0].end()},
-                         grammar.getEoi(), 0)};
+                         grammar.getEoi(),
+                         0)};
     std::cout << "Starting with ";
     print(std::cout, grammar, init);
     std::cout << std::endl;
@@ -365,7 +379,6 @@ LRParser::impl::impl(const grammar2::Grammar& grammar) : grammar_(grammar) {
     items = std::move(C);
 }
 
-// action LRParser_::step(grammar2::TerminalID tag) {
 action LRParser::impl::step(grammar2::TerminalID tag) {
     assert(!stack_.empty());
     auto s = stack_.back();

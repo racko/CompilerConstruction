@@ -9,7 +9,10 @@
 // using null = std::monostate;
 // using std::get;
 
+#include <boost/blank.hpp> // for blank
 #include <boost/variant.hpp>
+#include <boost/variant/get.hpp> // for get
+
 template <typename... T>
 using variant = boost::variant<T...>;
 using null = boost::blank;

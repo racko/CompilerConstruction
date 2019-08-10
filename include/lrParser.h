@@ -1,18 +1,20 @@
 #pragma once
 
-#include <Grammar.h>
-#include <Print.h>
-#include <cassert>
-#include <iomanip>
-#include <iostream>
-#include <list>
-#include <map>
-#include <parser.h>
-#include <set>
-#include <sstream>
-#include <token_stream.h>
-#include <unordered_map>
-#include <vector>
+#include <Grammar.h> // for kind, kind::EOI, kind::NONTERMINAL, kind::TERMINAL
+#include <cassert>   // for assert
+#include <cstddef>   // for ptrdiff_t, size_t
+#include <cstdint>   // for uint32_t
+#include <iostream>  // for operator<<, endl, ostream, cout, basic_ostream
+#include <limits>    // for numeric_limits
+#include <list>      // for list
+#include <map>       // for map
+#include <parser.h>  // for Parser
+#include <set>       // for set
+#include <stdexcept> // for logic_error, runtime_error
+#include <vector>    // for vector
+
+template <typename TokenType>
+class TokenStream;
 
 namespace lr_parser {
 enum class type : uint32_t { SHIFT, REDUCE, ACCEPT, FAIL };
@@ -60,7 +62,10 @@ struct item {
     typename G::TerminalID a;
     uint32_t production;
 
-    item(typename G::NonterminalID _A, String const& _l, String const& _r, typename G::TerminalID _a,
+    item(typename G::NonterminalID _A,
+         String const& _l,
+         String const& _r,
+         typename G::TerminalID _a,
          uint32_t _production)
         : A(_A), l(_l), r(_r), a(_a), production(_production) {}
 };
@@ -205,11 +210,13 @@ SetOfItems<G> closure(SetOfItems<G>&& I) {
                     //            continue;
                     //          std::cout << "b = " << T(b) << std::endl;
                     auto res =
-                        I.emplace(B, typename item<G>::String{},
+                        I.emplace(B,
+                                  typename item<G>::String{},
                                   typename item<G>::String{
                                       gamma.front() != typename G::GrammarElement(G::eps) ? gamma.begin() : gamma.end(),
                                       gamma.end()},
-                                  b, k);
+                                  b,
+                                  k);
 
                     //          if (res.second) {
                     //            std::cout << "Adding ";
@@ -260,9 +267,11 @@ SetOfItems<G> GOTO(const SetOfItems<G>& I, typename G::GrammarElement X) {
 template <class G, class T>
 LRParser<G, T>::LRParser() {
     SetOfItems<G> init{
-        item<G>(G::start, typename item<G>::String(),
+        item<G>(G::start,
+                typename item<G>::String(),
                 typename item<G>::String{G::getProductions(G::start)[0].begin(), G::getProductions(G::start)[0].end()},
-                G::eof, 0)};
+                G::eof,
+                0)};
     std::cout << "Starting with " << init << std::endl;
     auto C = std::vector<SetOfItems<G>>{closure(std::move(init))};
     std::map<SetOfItems<G>, state> ids{{C[0], 0}};

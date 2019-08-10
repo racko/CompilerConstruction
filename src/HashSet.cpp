@@ -1,8 +1,9 @@
 #include "HashSet.h"
 
-#include <algorithm>
-#include <array>
-#include <iomanip>
+#include <algorithm> // for max_element
+#include <array>     // for array
+#include <ostream>   // for operator<<, basic_ostream, basic_ostream<>::__o...
+#include <string>    // for operator+, to_string, allocator, char_traits
 
 HashSet& HashSet::operator|=(const HashSet& rhs) {
     // cout << *this << ".operator|(" << rhs << ")" << std::endl;

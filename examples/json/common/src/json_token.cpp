@@ -1,11 +1,28 @@
 #include <json_token.h>
 
+#include "Grammar.h" // for kind, kind::EOI, kind::EPS, kind::NONTERMINAL
+#include <algorithm> // for copy
+#include <iterator>  // for ostream_iterator
+#include <ostream>   // for operator<<
+#include <stdexcept> // for logic_error
+
 namespace json {
 const char* nt_strings[] = {"start", "json-text", "value", "object", "member", "members", "array", "values"};
 
-const char* t_strings[] = {"begin-array",     "begin-object", "end-array", "end-object", "name-separator",
-                           "value-separator", "false",        "null",      "true",       "number",
-                           "string",          "ws",           "EOF",       "EPS"};
+const char* t_strings[] = {"begin-array",
+                           "begin-object",
+                           "end-array",
+                           "end-object",
+                           "name-separator",
+                           "value-separator",
+                           "false",
+                           "null",
+                           "true",
+                           "number",
+                           "string",
+                           "ws",
+                           "EOF",
+                           "EPS"};
 
 std::ostream& operator<<(std::ostream& s, T const& a) { return s << t_strings[type(a)]; }
 
@@ -57,4 +74,4 @@ std::ostream& operator<<(std::ostream& s, const std::unordered_set<TerminalID>& 
     std::copy(alpha.begin(), alpha.end(), std::ostream_iterator<TerminalID>(s, " "));
     return s;
 }
-}
+} // namespace json

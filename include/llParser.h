@@ -1,11 +1,16 @@
 #pragma once
 
-#include <Grammar.h>
-#include <Print.h>
-#include <iostream>
-#include <parser.h>
+#include <Grammar.h> // for first, follow, kind, kind::TERMINAL
+#include <assert.h>  // for assert
+#include <cstdint>   // for uint32_t
+#include <iostream>  // for operator<<, stringstream, ostream, basic_ostream
+#include <parser.h>  // for Parser
 #include <sstream>
-#include <token_stream.h>
+#include <stdexcept> // for runtime_error, logic_error
+#include <vector>    // for vector
+
+template <typename TokenType>
+class TokenStream;
 
 namespace ll_parser {
 enum class type : uint32_t { PRODUCTION, FAIL };

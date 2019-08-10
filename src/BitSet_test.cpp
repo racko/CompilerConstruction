@@ -1,7 +1,5 @@
-#include <catch.hpp>
-#include <iostream>
-
 #include "BitSet.h"
+#include <catch.hpp> // for AssertionHandler, operator""_catch_sr, SourceLi...
 
 TEST_CASE("BitSet_TestHash0", "[BitSet]") {
     BitSet a(10);

@@ -1,10 +1,13 @@
 #include "FunctionalEvaluator2.h"
 
-#include "FunctionalAttribute.h"
-
-#include <iostream>
+#include "FunctionalAttribute.h" // for Abs, Variable, App, NumConst, opera...
+#include <iostream>              // for operator<<, endl, ostream, char_traits
 #include <sstream>
-#include <unordered_set>
+#include <stdexcept>     // for runtime_error
+#include <string>        // for string, allocator, operator+, opera...
+#include <unordered_map> // for unordered_map, unordered_map<>::con...
+#include <unordered_set> // for unordered_set<>::iterator, unordere...
+#include <utility>       // for move
 
 namespace Functional {
 namespace evaluator2 {
@@ -25,8 +28,8 @@ bool isWHNF(const LambdaExpr* e) {
     return whnf.result;
 }
 
-const LambdaExpr* canonym(const LambdaExpr& e, const std::unordered_map<std::string, std::string>& m,
-                          const std::string& prefix);
+const LambdaExpr*
+canonym(const LambdaExpr& e, const std::unordered_map<std::string, std::string>& m, const std::string& prefix);
 
 struct Canonym : public LambdaConstVisitor {
     LambdaExpr* result = nullptr;
@@ -55,8 +58,8 @@ struct Canonym : public LambdaConstVisitor {
     }
 };
 
-const LambdaExpr* canonym(const LambdaExpr& e, const std::unordered_map<std::string, std::string>& m,
-                          const std::string& prefix) {
+const LambdaExpr*
+canonym(const LambdaExpr& e, const std::unordered_map<std::string, std::string>& m, const std::string& prefix) {
     Canonym c(m, prefix);
     e.accept(c);
     return c.result;

@@ -1,6 +1,11 @@
 #include "FunctionalValue1.h"
 
-#include "FunctionalAttribute.h"
+#include "FunctionalAttribute.h" // for Variable, operator<<
+#include <cstdint>               // for uint32_t
+#include <iostream>
+#include <sstream>
+#include <stdexcept> // for runtime_error
+#include <utility>   // for pair, move
 
 namespace Functional {
 const LambdaExpr* toValue(const Const* c) {

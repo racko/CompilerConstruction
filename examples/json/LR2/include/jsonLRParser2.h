@@ -1,11 +1,14 @@
 #pragma once
 
-#include <array>
-#include <attributed_lrparser.h>
-#include <jsonLRGrammar2.h>
-#include <jsonValue.h>
-#include <json_token.h>
-#include <list>
+#include "Grammar2.h"            // for operator==, NonterminalID, TerminalID
+#include <array>                 // for array
+#include <attributed_lrparser.h> // for AttributedLRParser
+#include <cstddef>               // for size_t
+#include <cstdint>               // for uint32_t
+#include <jsonLRGrammar2.h>      // for grammar
+#include <jsonValue.h>           // for value
+#include <json_token.h>          // for NT, T, TerminalID, Token
+#include <list>                  // for list
 
 namespace jsonLR2 {
 struct Attributes {

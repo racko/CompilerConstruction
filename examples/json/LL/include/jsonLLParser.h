@@ -1,12 +1,12 @@
 #pragma once
-#include "llParser.h"
-#include "jsonLLGrammar.h"
-#include "jsonValue.h"
 
-#include <array>
-#include <list>
+#include "jsonLLGrammar.h" // for Grammar
+#include "llParser.h"      // for LLParser
+
+namespace json {
+struct value;
+}
 
 namespace jsonLL {
-struct Parser : public ll_parser::LLParser<Grammar, json::value*> {
-};
-}
+struct Parser : public ll_parser::LLParser<Grammar, json::value*> {};
+} // namespace jsonLL

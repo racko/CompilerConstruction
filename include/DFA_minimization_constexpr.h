@@ -1,8 +1,12 @@
 #pragma once
-#include "BitSet_constexpr.h"
-#include "DFA_constexpr.h"
-#include "HashSet_constexpr.h"
-#include "partition.h"
+
+#include "BitSet_constexpr.h"  // for BitSet
+#include "DFA_constexpr.h"     // for DFA, PositionRange, determineDeadState
+#include "HashSet_constexpr.h" // for HashSet
+#include "constexpr.h"         // for vector, back_inserter, generate_n
+#include "partition.h"         // for partition
+#include <cstdint>             // for int64_t
+#include <stdexcept>           // for runtime_error
 
 template <typename T>
 constexpr void assign(T& lhs, const T& rhs) {
@@ -90,15 +94,16 @@ splitterSet(const PositionRange& t1, Symbol a, Set& tmp, const Partition& part, 
     detail::splitterSet(p + t1.first, p + t1.second, tmp, tI[a]);
 }
 
-template<int64_t MaxNodes, int64_t MaxSymbols, typename Symbol, typename State, int64_t Size>
-constexpr auto inverseTransitionTable(const vector<State,Size>& T, int64_t stateCount, int64_t symbolCount) {
-    //using TSet = HashSet<MaxNodes>;
+template <int64_t MaxNodes, int64_t MaxSymbols, typename Symbol, typename State, int64_t Size>
+constexpr auto inverseTransitionTable(const vector<State, Size>& T, int64_t stateCount, int64_t symbolCount) {
+    // using TSet = HashSet<MaxNodes>;
     using TSet = BitSet<MaxNodes>;
     if (stateCount > MaxNodes)
         throw std::runtime_error("stateCount > MaxNodes");
     if (symbolCount > MaxSymbols)
         throw std::runtime_error("symbolCount > MaxSymbols");
-    vector<vector<TSet,MaxNodes>,MaxSymbols> tI(symbolCount, vector<TSet,MaxNodes>(stateCount, TSet(stateCount, false)));
+    vector<vector<TSet, MaxNodes>, MaxSymbols> tI(symbolCount,
+                                                  vector<TSet, MaxNodes>(stateCount, TSet(stateCount, false)));
     auto tIptr = tI.data();
 
     for (State i = 0; i < stateCount; i++) {
@@ -110,21 +115,20 @@ constexpr auto inverseTransitionTable(const vector<State,Size>& T, int64_t state
     return tI;
 }
 
-template<typename Symbol, typename State, typename Class, typename TokenId, int64_t MaxNodes, int64_t MaxSymbols>
-constexpr DFA<Symbol,Class,TokenId,MaxNodes,MaxSymbols>
-generateFromMinimizationResults(
-        const partition<State,Class,MaxNodes>& part,
-        State start,
-        int64_t symbolCount,
-        const vector<State,MaxNodes*MaxSymbols>& T,
-        const vector<TokenId,MaxNodes>& finals,
-        const vector<int64_t,MaxSymbols>& symbolToId,
-        const vector<Symbol,MaxSymbols>& idToSymbol) {
+template <typename Symbol, typename State, typename Class, typename TokenId, int64_t MaxNodes, int64_t MaxSymbols>
+constexpr DFA<Symbol, Class, TokenId, MaxNodes, MaxSymbols>
+generateFromMinimizationResults(const partition<State, Class, MaxNodes>& part,
+                                State start,
+                                int64_t symbolCount,
+                                const vector<State, MaxNodes * MaxSymbols>& T,
+                                const vector<TokenId, MaxNodes>& finals,
+                                const vector<int64_t, MaxSymbols>& symbolToId,
+                                const vector<Symbol, MaxSymbols>& idToSymbol) {
     auto newStateCount = part.c_i.size();
-    //std::cout << "new state count: " << newStateCount << std::endl;
-    vector<Class,MaxNodes*MaxSymbols> newT(newStateCount * symbolCount);
-    vector<TokenId,MaxNodes> newFinals(newStateCount);
-    for(Class q = 0; q < newStateCount; q++) {
+    // std::cout << "new state count: " << newStateCount << std::endl;
+    vector<Class, MaxNodes * MaxSymbols> newT(newStateCount * symbolCount);
+    vector<TokenId, MaxNodes> newFinals(newStateCount);
+    for (Class q = 0; q < newStateCount; q++) {
         auto t1 = part.c_i[q];
         auto s = t1.first;
         const auto ptr1 = T.data() + part.p[s] * symbolCount;
@@ -161,7 +165,7 @@ minimize(const DFA<Symbol, State, TokenId, MaxNodes, MaxSymbols>& dfa) {
 
     partition<State, Class, MaxNodes> part(finals);
 
-    vector<Class,MaxNodes> stack;
+    vector<Class, MaxNodes> stack;
     stack.reserve(part.c_i.size());
     // std::generate_n(std::back_inserter(stack), kinds.size(), [i = kinds.size()-1] () mutable { return i--;});
     generate_n(back_inserter(stack), part.c_i.size(), [i = 0]() mutable { return i++; });

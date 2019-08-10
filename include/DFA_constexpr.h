@@ -1,53 +1,51 @@
 #pragma once
 
-#include "NumRange.h"
-#include "constexpr.h"
-#include "Print.h"
-
-#include <ostream>
+#include "NumRange.h"  // for NumRange
+#include "Print.h"     // for showCharEscaped
+#include "constexpr.h" // for vector, all_of, find_if, pair
+#include <cstdint>     // for int64_t
+#include <ostream>     // for operator<<, ostream, basic_ostream, basic_ost...
+#include <stdexcept>   // for runtime_error
 
 using Position = int64_t;
-using PositionRange = pair<Position,Position>;
+using PositionRange = pair<Position, Position>;
 
-template<typename State, typename TokenId, int64_t Size1, int64_t Size2>
-constexpr State determineDeadState(
-        int64_t stateCount,
-        int64_t symbolCount,
-        const vector<State,Size1>& T,
-        const vector<TokenId,Size2>& finals) {
+template <typename State, typename TokenId, int64_t Size1, int64_t Size2>
+constexpr State determineDeadState(int64_t stateCount,
+                                   int64_t symbolCount,
+                                   const vector<State, Size1>& T,
+                                   const vector<TokenId, Size2>& finals) {
     //  std::cout << "determineDeadState" << std::endl;
-    auto idempotent = [&] (State q) {
+    auto idempotent = [&](State q) {
         const auto ptr = T.data() + q * symbolCount;
-        return all_of(ptr, ptr + symbolCount, [&] (State q_) { return q_ == q; });
+        return all_of(ptr, ptr + symbolCount, [&](State q_) { return q_ == q; });
     };
-    auto isDeadState = [&] (State q) {
-        return !finals[q] && idempotent(q);
-    };
+    auto isDeadState = [&](State q) { return !finals[q] && idempotent(q); };
     NumRange<State> r(0, stateCount);
     auto it = find_if(r.begin(), r.end(), isDeadState);
     if (it != r.end()) {
         return *it;
-        //std::cout << deadState << " is the dead state" << std::endl;
+        // std::cout << deadState << " is the dead state" << std::endl;
     } else {
-        //std::cout << "there is no dead state" << std::endl;
+        // std::cout << "there is no dead state" << std::endl;
         throw std::runtime_error("there is no dead state");
     }
 }
 
-template<typename Symbol, typename State, typename TokenId, int64_t MaxNodes, int64_t MaxSymbols>
+template <typename Symbol, typename State, typename TokenId, int64_t MaxNodes, int64_t MaxSymbols>
 struct DFA {
-    int64_t stateCount; //TODO change to State lastState for safe comparisions
-    int64_t symbolCount; //TODO change to Symbol lastSymbol ...
+    int64_t stateCount;  // TODO change to State lastState for safe comparisions
+    int64_t symbolCount; // TODO change to Symbol lastSymbol ...
     State start;
     State deadState;
-    vector<TokenId,MaxNodes> finals;
-    vector<State,MaxNodes*MaxSymbols> T;
-    vector<int64_t,MaxSymbols> symbolToId;
-    vector<Symbol,MaxSymbols> idToSymbol;
+    vector<TokenId, MaxNodes> finals;
+    vector<State, MaxNodes * MaxSymbols> T;
+    vector<int64_t, MaxSymbols> symbolToId;
+    vector<Symbol, MaxSymbols> idToSymbol;
 
-    //constexpr DFA() = default;
+    // constexpr DFA() = default;
 
-    //constexpr DFA(
+    // constexpr DFA(
     //    int64_t stateCount,
     //    int64_t symbolCount,
     //    State start,
@@ -56,19 +54,18 @@ struct DFA {
     //    vector<State,MaxNodes*MaxSymbols> T,
     //    vector<int64_t,MaxSymbols> symbolToId,
     //    vector<Symbol,MaxSymbols> idToSymbol);
-    constexpr DFA(
-        int64_t stateCount,
-        int64_t symbolCount,
-        State start,
-        State deadState,
-        const vector<TokenId,MaxNodes>& finals,
-        const vector<State,MaxNodes*MaxSymbols>& T,
-        const vector<int64_t,MaxSymbols>& symbolToId,
-        const vector<Symbol,MaxSymbols>& idToSymbol);
+    constexpr DFA(int64_t stateCount,
+                  int64_t symbolCount,
+                  State start,
+                  State deadState,
+                  const vector<TokenId, MaxNodes>& finals,
+                  const vector<State, MaxNodes * MaxSymbols>& T,
+                  const vector<int64_t, MaxSymbols>& symbolToId,
+                  const vector<Symbol, MaxSymbols>& idToSymbol);
 };
 
-//template<typename Symbol, typename State, typename TokenId, int64_t MaxNodes, int64_t MaxSymbols>
-//constexpr DFA<Symbol,State,TokenId,MaxNodes,MaxSymbols>::DFA(
+// template<typename Symbol, typename State, typename TokenId, int64_t MaxNodes, int64_t MaxSymbols>
+// constexpr DFA<Symbol,State,TokenId,MaxNodes,MaxSymbols>::DFA(
 //        int64_t stateCount_,
 //        int64_t symbolCount_,
 //        State start_,
@@ -88,16 +85,15 @@ struct DFA {
 //{
 //}
 
-template<typename Symbol, typename State, typename TokenId, int64_t MaxNodes, int64_t MaxSymbols>
-constexpr DFA<Symbol,State,TokenId,MaxNodes,MaxSymbols>::DFA(
-        int64_t stateCount_,
-        int64_t symbolCount_,
-        State start_,
-        State deadState_,
-        const vector<TokenId,MaxNodes>& finals_,
-        const vector<State,MaxNodes*MaxSymbols>& T_,
-        const vector<int64_t,MaxSymbols>& symbolToId_,
-        const vector<Symbol,MaxSymbols>& idToSymbol_)
+template <typename Symbol, typename State, typename TokenId, int64_t MaxNodes, int64_t MaxSymbols>
+constexpr DFA<Symbol, State, TokenId, MaxNodes, MaxSymbols>::DFA(int64_t stateCount_,
+                                                                 int64_t symbolCount_,
+                                                                 State start_,
+                                                                 State deadState_,
+                                                                 const vector<TokenId, MaxNodes>& finals_,
+                                                                 const vector<State, MaxNodes * MaxSymbols>& T_,
+                                                                 const vector<int64_t, MaxSymbols>& symbolToId_,
+                                                                 const vector<Symbol, MaxSymbols>& idToSymbol_)
     : stateCount(stateCount_),
       symbolCount(symbolCount_),
       start(start_),
@@ -105,12 +101,10 @@ constexpr DFA<Symbol,State,TokenId,MaxNodes,MaxSymbols>::DFA(
       finals(finals_),
       T(T_),
       symbolToId(symbolToId_),
-      idToSymbol(idToSymbol_)
-{
-}
+      idToSymbol(idToSymbol_) {}
 
-template<typename Symbol, typename State, typename TokenId, int64_t MaxNodes, int64_t MaxSymbols>
-std::ostream& operator<<(std::ostream& s, const DFA<Symbol,State,TokenId,MaxNodes,MaxSymbols>& dfa) {
+template <typename Symbol, typename State, typename TokenId, int64_t MaxNodes, int64_t MaxSymbols>
+std::ostream& operator<<(std::ostream& s, const DFA<Symbol, State, TokenId, MaxNodes, MaxSymbols>& dfa) {
     s << "digraph G {\n";
     for (unsigned int p = 0; p < dfa.stateCount; p++) {
         if (p == dfa.deadState)
@@ -121,7 +115,8 @@ std::ostream& operator<<(std::ostream& s, const DFA<Symbol,State,TokenId,MaxNode
         const auto ptr = dfa.T.data() + p * dfa.symbolCount;
         for (auto a = 0u; a < dfa.symbolCount; ++a)
             if (ptr[a] != dfa.deadState)
-                s << "  " << p << " -> " << int(ptr[a]) << " [label = \"" << showCharEscaped(dfa.idToSymbol[a]) << "\"];\n";
+                s << "  " << p << " -> " << int(ptr[a]) << " [label = \"" << showCharEscaped(dfa.idToSymbol[a])
+                  << "\"];\n";
     }
     s << "}\n";
     return s;

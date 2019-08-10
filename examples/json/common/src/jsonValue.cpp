@@ -1,5 +1,12 @@
 #include "jsonValue.h"
 
+#include "num_view.h"                                   // for num_view
+#include "variant.h"                                    // for null
+#include <boost/variant/detail/apply_visitor_unary.hpp> // for apply_visitor
+#include <boost/variant/get.hpp>                        // for get
+#include <boost/variant/static_visitor.hpp>             // for static_visitor
+#include <ostream>                                      // for operator<<
+
 namespace json {
 namespace {
 struct BlankEqual : public boost::static_visitor<bool> {

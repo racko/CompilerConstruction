@@ -3,7 +3,7 @@ project(Regex)
 
 include(CTest)
 
-find_package(Boost REQUIRED COMPONENTS filesystem)
+find_package(Boost REQUIRED COMPONENTS filesystem serialization)
 find_library(JSONCPP jsoncpp)
 
 if(NOT JSONCPP)
@@ -55,13 +55,6 @@ add_library(util
     src/NFA_to_DFA_constexpr.cpp
     src/constexpr_jsonLexer.cpp
 )
-
-#add_executable(poker.exe
-#    examples/poker/pokerMain.cpp
-#)
-
-#target_link_libraries(poker.exe
-#)
 
 if(BUILD_TESTING)
     add_library(fitnesse STATIC IMPORTED)

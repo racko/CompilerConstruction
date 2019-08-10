@@ -1,8 +1,9 @@
 #pragma once
 
-#include <functional>
-#include <iostream>
-#include <sstream>
+#include <functional>    // for function
+#include <ostream>       // for ostream
+#include <string>        // for string
+#include <unordered_map> // for unordered_map
 
 namespace Functional {
 struct LambdaExpr;

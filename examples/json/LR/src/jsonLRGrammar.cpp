@@ -1,5 +1,8 @@
 #include "jsonLRGrammar.h"
 
+#include "Grammar.h"           // for allFirsts, allFollows
+#include "json_token.h"        // for T, NT, NT::VALUE, NonterminalID, opera...
+
 namespace jsonLR {
 using namespace json;
 const NonterminalID Grammar::start = NonterminalID(NT::START);

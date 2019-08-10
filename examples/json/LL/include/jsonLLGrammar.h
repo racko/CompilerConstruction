@@ -1,13 +1,12 @@
 #pragma once
 
-#include <Grammar.h>
-#include <cstdint>
-#include <iosfwd>
-#include <json_token.h>
-#include <num_view.h>
-#include <string_view>
-#include <variant.h>
-#include <vector>
+#include <Grammar.h>     // for kind
+#include <cstddef>       // for size_t
+#include <json_token.h>  // for kindOf, GrammarElement, NT, NT::VALUES, Non...
+#include <limits>        // for numeric_limits
+#include <unordered_map> // for unordered_map
+#include <unordered_set> // for unordered_set
+#include <vector>        // for vector
 
 namespace jsonLL {
 struct Grammar {

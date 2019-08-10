@@ -1,11 +1,22 @@
-#include "NFA.h"
-#include "Regex.h"
-#include "While.h"
-#include "lrParser.h"
-#include "nfaBuilder.h"
-#include <cassert>
-#include <fstream>
-#include <iostream>
+#include "Grammar.h"      // for kind, kind::EOI, kind::EPS, kind::NONTERMINAL
+#include "NFA.h"          // for NFA
+#include "Regex.h"        // for Lexer, Lexer::Token, Lexer::DFA_t, Lexer::...
+#include "While.h"        // for Token, T, Grammar, operator<<, GrammarElement
+#include "lrParser.h"     // for LRParser
+#include "nfaBuilder.h"   // for nfaBuilder, istream
+#include "token_stream.h" // for TokenStream
+#include <cassert>        // for assert
+#include <cstdint>        // for uint32_t, uint64_t
+#include <cstdio>         // for size_t, EOF
+#include <functional>     // for function
+#include <iostream>       // for operator<<, stringstream, basic_ostream
+#include <map>            // for map
+#include <memory>         // for make_unique, unique_ptr, allocator, operat...
+#include <sstream>        // for basic_stringstream<>::__stringbuf_type
+#include <stdexcept>      // for logic_error, runtime_error
+#include <string>         // for string, operator<<
+#include <unordered_map>  // for unordered_map
+#include <utility>        // for move, forward, pair
 
 namespace While {
 struct LambdaExpr {
@@ -376,9 +387,9 @@ auto myLexer::getDFA() -> DFA_t {
 }
 
 std::unique_ptr<Token> myLexer::action(const char* s, size_t n, TokenId t) {
-    cout << "action(\"";
-    cout.write(s, n);
-    cout << "\", " << n << ", " << t << ")" << std::endl;
+    std::cout << "action(\"";
+    std::cout.write(s, n);
+    std::cout << "\", " << n << ", " << t << ")" << std::endl;
     std::unique_ptr<Token> tok;
 
     switch (TerminalID(t - 1)) {
@@ -484,7 +495,7 @@ std::unique_ptr<Token> myLexer::action(const char* s, size_t n, TokenId t) {
     case T::NUM: {
         uint64_t i;
         std::stringstream ss;
-        ss.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+        ss.exceptions(std::stringstream::failbit | std::stringstream::badbit);
         ss.write(s, n);
         ss >> i;
         tok = std::make_unique<Num>(i);
@@ -493,7 +504,7 @@ std::unique_ptr<Token> myLexer::action(const char* s, size_t n, TokenId t) {
     case T::REAL: {
         double d;
         std::stringstream ss;
-        ss.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+        ss.exceptions(std::stringstream::failbit | std::stringstream::badbit);
         ss.write(s, n);
         ss >> d;
         tok = std::make_unique<Real>(d);

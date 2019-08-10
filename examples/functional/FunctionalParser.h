@@ -1,9 +1,13 @@
 #pragma once
 
-#include "FunctionalAttribute.h"
-#include "FunctionalGrammar.h"
-#include "TokenAttributeConversion.h"
-#include "lrParser.h"
+#include "FunctionalAttribute.h"      // for toExpr, Supercombinator, toVar
+#include "FunctionalGrammar.h"        // for Grammar, string, operator<<
+#include "TokenAttributeConversion.h" // for toAttribute
+#include "lrParser.h"                 // for LRParser
+#include <cstddef>                    // for size_t
+#include <cstdint>                    // for uint32_t
+#include <stdexcept>                  // for runtime_error
+#include <utility>                    // for move
 
 namespace Functional {
 struct Parser : public lr_parser::LRParser<Functional::Grammar, Attribute*> {
@@ -129,8 +133,6 @@ struct Parser : public lr_parser::LRParser<Functional::Grammar, Attribute*> {
         return val;
     }
 
-    Attribute* shift(Functional::Grammar::Token&& t) override {
-        return toAttribute(t);
-    }
+    Attribute* shift(Functional::Grammar::Token&& t) override { return toAttribute(t); }
 };
 } // namespace Functional

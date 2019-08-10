@@ -1,9 +1,6 @@
-#include "Slim.h"
-#include "SlimConnectionHandler.h"
-#include "SocketServer.h"
-#include "TcpComLink.h"
-#include <stdlib.h>
-#include <string.h>
+#include "Slim.h"         // for Slim_Create, Slim_Destroy, Slim_HandleConn...
+#include "SocketServer.h" // for SocketServer_Create, SocketServer_Destroy
+#include "TcpComLink.h"   // for TcpComLink_Create, TcpComLink_Destroy, Tcp...
 
 Slim* slim;
 

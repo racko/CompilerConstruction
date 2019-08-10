@@ -1,6 +1,7 @@
 #include "FunctionalAttribute.h"
 
-#include <iostream>
+#include <iostream>  // for cout
+#include <stdexcept> // for runtime_error
 
 namespace Functional {
 struct NumEqual : public LambdaConstVisitor {

@@ -1,8 +1,9 @@
 #include "json.h"
 
-#include "jsonLexer.h"
-#include <jsonLRParser.h>
-#include <jsonValue.h>
+#include "jsonLexer.h"    // for myLexer
+#include "parser.h"       // for Parser
+#include <jsonLRParser.h> // for Parser
+#include <utility>        // for move
 
 namespace json {
 JsonParser::JsonParser() : lex_(std::make_unique<json::myLexer>()), parser_(std::make_unique<jsonLR::Parser>()) {}

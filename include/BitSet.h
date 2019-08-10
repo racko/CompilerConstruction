@@ -1,13 +1,14 @@
 #pragma once
 
-#include <iosfwd> // for std::ostream&
-#include <functional> // for std::hash
+#include <cstdint>    // for uint64_t
+#include <functional> // for hash
+#include <iosfwd>     // for ostream, size_t
 
 struct BitSetComplement;
 
 struct BitSet {
     struct ref {
-        uint64_t *p;
+        uint64_t* p;
         uint64_t m;
 
         ref(uint64_t* _p, unsigned int i);
@@ -23,7 +24,7 @@ struct BitSet {
     };
 
     struct const_ref {
-        const uint64_t *p;
+        const uint64_t* p;
         uint64_t m;
 
         const_ref(const uint64_t* _p, unsigned int i);
@@ -103,33 +104,23 @@ struct BitSet {
     int nextSetBit(unsigned int fromIndex) const;
 };
 
-inline void swap(BitSet& lhs, BitSet& rhs) noexcept {
-    lhs.swap(rhs);
-}
+inline void swap(BitSet& lhs, BitSet& rhs) noexcept { lhs.swap(rhs); }
 
 namespace std {
-template<>
+template <>
 class hash<BitSet> {
-public:
-    size_t operator()(const BitSet &s) const noexcept;
+  public:
+    size_t operator()(const BitSet& s) const noexcept;
 };
-}
+} // namespace std
 
-inline BitSet::ref BitSet::operator[](unsigned int i) {
-    return BitSet::ref(p, i);
-}
+inline BitSet::ref BitSet::operator[](unsigned int i) { return BitSet::ref(p, i); }
 
-inline BitSet::const_ref BitSet::operator[](unsigned int i) const {
-    return BitSet::const_ref(p, i);
-}
+inline BitSet::const_ref BitSet::operator[](unsigned int i) const { return BitSet::const_ref(p, i); }
 
-inline unsigned int BitSet::size() const {
-    return n;
-}
+inline unsigned int BitSet::size() const { return n; }
 
-inline BitSet::~BitSet() {
-    delete[] p;
-}
+inline BitSet::~BitSet() { delete[] p; }
 
 BitSet operator|(const BitSet& lhs, const BitSet& rhs);
 
@@ -137,26 +128,22 @@ BitSet operator&(const BitSet& lhs, const BitSet& rhs);
 
 std::ostream& operator<<(std::ostream&, const BitSet&);
 
-//inline BitSet::ref::ref(uint64_t* _p, unsigned int i) : p(_p), w(i >> 6), m(0x1ULL << i) {}
+// inline BitSet::ref::ref(uint64_t* _p, unsigned int i) : p(_p), w(i >> 6), m(0x1ULL << i) {}
 inline BitSet::ref::ref(uint64_t* _p, unsigned int i) : p(_p + (i >> 6)), m(0x1ULL << (i & 63)) {}
 
-inline BitSet::ref::operator bool() const {
-    return *p & m;
-}
+inline BitSet::ref::operator bool() const { return *p & m; }
 
-//inline BitSet::const_ref::const_ref(const uint64_t* _p, unsigned int i) : p(_p), w(i >> 6), m(0x1ULL << i) {}
+// inline BitSet::const_ref::const_ref(const uint64_t* _p, unsigned int i) : p(_p), w(i >> 6), m(0x1ULL << i) {}
 inline BitSet::const_ref::const_ref(const uint64_t* _p, unsigned int i) : p(_p + (i >> 6)), m(0x1ULL << (i & 63)) {}
 
-inline BitSet::const_ref::operator bool() const {
-    return *p & m;
-}
+inline BitSet::const_ref::operator bool() const { return *p & m; }
 
 inline BitSet::ref& BitSet::ref::operator=(const bool x) {
     *p = (*p & ~m) | (-static_cast<uint64_t>(x) & m);
     return *this;
 }
 
-//inline BitSet::ref& BitSet::ref::operator= (const BitSet::ref& _x) {
+// inline BitSet::ref& BitSet::ref::operator= (const BitSet::ref& _x) {
 //    bool x = _x;
 //    //p[w] = (p[w] & ~m) | (-x & m);
 //    *p = (*p & ~m) | (-x & m);
@@ -169,31 +156,25 @@ inline BitSet::sparse_iterator::sparse_iterator(const BitSet& _s, unsigned int n
 }
 
 inline bool BitSet::sparse_iterator::operator!=(const BitSet::sparse_iterator& it) const {
-    //cout << "next != it.next: " << next << " != " << it.next << endl;
+    // cout << "next != it.next: " << next << " != " << it.next << endl;
     return next != it.next;
 }
 
-inline unsigned int BitSet::sparse_iterator::operator*() const {
-    return c;
-}
+inline unsigned int BitSet::sparse_iterator::operator*() const { return c; }
 
-//template<class T>
-//function<ostream&(ostream&)> bin(T x);
+// template<class T>
+// function<ostream&(ostream&)> bin(T x);
 //
-//ostream& operator<<(ostream&, const function<ostream&(ostream&)>&);
+// ostream& operator<<(ostream&, const function<ostream&(ostream&)>&);
 
 struct BitSetComplement {
     const BitSet& s;
-    BitSetComplement(const BitSet&_s) : s(_s) {}
+    BitSetComplement(const BitSet& _s) : s(_s) {}
 };
 
-inline BitSet::sparse_iterator BitSet::begin() const {
-    return BitSet::sparse_iterator(*this);
-}
+inline BitSet::sparse_iterator BitSet::begin() const { return BitSet::sparse_iterator(*this); }
 
-inline BitSet::sparse_iterator BitSet::end() const {
-    return BitSet::sparse_iterator(*this, n + 1);
-}
+inline BitSet::sparse_iterator BitSet::end() const { return BitSet::sparse_iterator(*this, n + 1); }
 
 inline void a_and_not_b(const BitSet& a, const BitSet& b, BitSet& c) {
     c = BitSetComplement(b);

@@ -1,7 +1,10 @@
 #pragma once
 
-#include <iosfwd>
-#include <unordered_set>
+#include <cstddef>       // for size_t
+#include <functional>     // for hash
+#include <iosfwd>         // for ostream, size_t
+#include <stdexcept>      // for runtime_error
+#include <unordered_set>  // for unordered_set, unordered_set<>::const_iterator
 
 struct HashSet {
     struct ref {

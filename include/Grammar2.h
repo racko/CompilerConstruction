@@ -1,10 +1,14 @@
 #pragma once
 
-#include <cassert>
-#include <ostream>
-#include <unordered_map>
-#include <unordered_set>
-#include <vector>
+#include <cassert>       // for assert
+#include <cstddef>       // for size_t
+#include <cstdint>       // for uint32_t
+#include <functional>    // for hash
+#include <ostream>       // for operator<<, ostream, size_t
+#include <stdexcept>     // for logic_error
+#include <unordered_map> // for unordered_map
+#include <unordered_set> // for unordered_set
+#include <vector>        // for vector
 
 namespace grammar2 {
 
@@ -89,8 +93,13 @@ class Grammar {
     std::unordered_map<GrammarElement, std::unordered_set<TerminalID>> firsts_;
 
   public:
-    Grammar(uint32_t numberOfTerminals, uint32_t numberOfNonterminals, NonterminalID start, TerminalID eps,
-            TerminalID eoi, std::vector<const char*> terminalStrings, std::vector<const char*> nonTerminalStrings,
+    Grammar(uint32_t numberOfTerminals,
+            uint32_t numberOfNonterminals,
+            NonterminalID start,
+            TerminalID eps,
+            TerminalID eoi,
+            std::vector<const char*> terminalStrings,
+            std::vector<const char*> nonTerminalStrings,
             Productions productions);
     uint32_t getNumberOfTerminals() const { return numberOfTerminals_; }
     uint32_t getNumberOfNonterminals() const { return numberOfNonterminals_; }
@@ -169,7 +178,8 @@ void print(std::ostream& s, const Grammar& grammar, const Range& r) {
     print(s, grammar, std::begin(r), std::end(r));
 }
 
-void first(TerminalID eps, const std::vector<GrammarElement>& alpha,
+void first(TerminalID eps,
+           const std::vector<GrammarElement>& alpha,
            const std::unordered_map<GrammarElement, std::unordered_set<TerminalID>>& fs,
            std::unordered_set<TerminalID>& out);
 

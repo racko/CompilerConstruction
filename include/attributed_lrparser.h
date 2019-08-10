@@ -1,7 +1,17 @@
 #pragma once
 
-#include <lrParser2.h>
-#include <parser.h>
+#include <cassert>     // for assert
+#include <cstddef>     // for ptrdiff_t
+#include <limits>      // for numeric_limits
+#include <lrParser2.h> // for LRParser, type, type::ACCEPT, type::REDUCE
+#include <parser.h>    // for Parser
+#include <vector>      // for vector
+
+namespace grammar2 {
+class Grammar;
+}
+template <typename TokenType>
+class TokenStream;
 
 namespace lr_parser2 {
 template <typename Attributes>
@@ -53,4 +63,4 @@ typename Attributes::type AttributedLRParser<Attributes>::parse(TokenStream<type
         }
     } while (true);
 }
-} // namespace lr_parser
+} // namespace lr_parser2

@@ -1,9 +1,12 @@
 #include "BitSet.h"
 
-#include <array>
-#include <cstring>
-#include <iomanip>
-#include <ostream>
+#include <algorithm> // for copy_n, fill, copy, fill_n, max
+#include <array>     // for array
+#include <cstddef>   // for size_t
+#include <ostream>   // for operator<<, basic_ostream, basic_ostream<>::__o...
+#include <stdexcept> // for runtime_error
+#include <string>    // for operator+, to_string, allocator, char_traits
+#include <utility>   // for swap
 
 BitSet::BitSet(unsigned int _n) : n(_n), w((n + 63) >> 6), wordsInUse(w), p(new uint64_t[w]) {}
 

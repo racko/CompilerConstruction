@@ -1,7 +1,5 @@
-#include <catch.hpp>
-#include <iostream>
-
 #include "HashSet.h"
+#include <catch.hpp>  // for AssertionHandler, SourceLineInfo, StringRef
 
 TEST_CASE("HashSet_TestHash0", "[HashSet]") {
     HashSet a(10);

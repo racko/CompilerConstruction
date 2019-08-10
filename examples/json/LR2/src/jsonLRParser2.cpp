@@ -1,5 +1,12 @@
 #include "jsonLRParser2.h"
 
+#include "jsonValue.h"  // for value, array, object
+#include "json_token.h" // for T, NonterminalID, TerminalID, T::FALSE
+#include <stdexcept>    // for runtime_error
+#include <string_view>  // for string_view
+
+struct num_view;
+
 namespace jsonLR2 {
 json::value* Attributes::new_value() {
     if (next_value_index == 10000) {

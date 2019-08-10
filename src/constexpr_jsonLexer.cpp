@@ -1,11 +1,16 @@
 #include "constexpr_jsonLexer.h"
 
-#include "DFA_constexpr.h"
-#include "DFA_minimization_constexpr.h"
-#include "NFA_constexpr.h"
-#include "NFA_to_DFA_constexpr.h"
-#include "Regex_constexpr.h"
-#include "nfaBuilder_constexpr.h"
+#include "BitSet_constexpr.h"           // for BitSet
+#include "DFA_minimization_constexpr.h" // for operator|=, minimize, a_and_...
+#include "HashSet_constexpr.h"          // for HashSet
+#include "NFA_constexpr.h"              // for NFA
+#include "NFA_to_DFA_constexpr.h"       // for toDFA, States
+#include "Regex_constexpr.h"            // for Lexer
+#include "constexpr.h"                  // for strcat, string, vector, vect...
+#include "nfaBuilder_constexpr.h"       // for nfaBuilder, CountingGraph
+#include <algorithm>                    // for max, min
+#include <cstdint>                      // for uint8_t, int64_t, int16_t
+#include <iostream>                     // for endl, cout, ostream
 
 static constexpr int64_t MaxSymbols = 128;
 using Symbol = char;
@@ -72,11 +77,11 @@ static constexpr const auto MaxNodes = [] {
 }();
 
 static constexpr const auto MaxTransitions = [] {
-    using G = TransitionCountingGraph<State,TokenId,MaxNodes>;
+    using G = TransitionCountingGraph<State, TokenId, MaxNodes>;
     auto builder = make_nfaBuilder<G>();
     const auto& transitionCounts = builder.ns.getTransitionCounts();
     return *max_element(transitionCounts.begin(), transitionCounts.end());
-    //return *max_element(transitionCounts.begin(), transitionCounts.begin() + MaxNodes);
+    // return *max_element(transitionCounts.begin(), transitionCounts.begin() + MaxNodes);
 }();
 
 static constexpr const auto MaxResultStates = [] {

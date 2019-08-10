@@ -1,12 +1,18 @@
 #pragma once
 
-#include <Grammar.h>
-#include <cstdint>
-#include <iosfwd>
+#include <Grammar.h>                 // for kind
+#include <assert.h>                  // for assert
+#include <boost/variant/variant.hpp> // for variant
+#include <cstdint>                   // for uint8_t
+#include <functional>                // for hash
+#include <iosfwd>                    // for ostream, size_t
+#include <list>                      // for list
 #include <num_view.h>
-#include <string_view>
-#include <utility>
-#include <variant.h>
+#include <string_view>   // for string_view
+#include <unordered_set> // for unordered_set
+#include <utility>       // for pair, pair<>::first, pair<>::pair
+#include <variant.h>     // for null
+#include <vector>        // for vector
 
 #undef NULL
 

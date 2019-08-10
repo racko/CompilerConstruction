@@ -1,69 +1,77 @@
 #pragma once
 
 #include "Print.h"
-#include <NFA.h>
 #include <BitSet.h>
 #include <HashSet.h>
+#include <NFA.h>
 
-#include <vector>
-using std::vector;
 #include <ostream>
+#include <vector>
 
-#include <tuple>
-#include <utility>
-#include <unordered_map>
-#include <functional>
-#include <iostream>
-#include <iomanip>
-#include <exception>
 #include <algorithm>
+#include <exception>
+#include <functional>
+#include <iomanip>
+#include <iostream>
 #include <numeric>
-using std::unordered_map;
-using std::hash;
-using std::pair;
-using std::make_pair;
-using std::sort;
-using std::move;
-using std::tie;
+#include <tuple>
+#include <unordered_map>
+#include <utility>
 
+#ifndef NULL
+#define NULL 0
+#endif
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/serialization/serialization.hpp>
+#include <boost/serialization/vector.hpp>
+#undef NULL
+
+namespace detail {
 using Set = BitSet;
 
 using Position = size_t;
-using PositionRange = std::pair<Position,Position>;
+using PositionRange = std::pair<Position, Position>;
+} // namespace detail
 
-template<typename State>
+template <typename State>
 struct partition;
 
-template<typename Symbol, typename State, typename TokenId>
+template <typename Symbol, typename State, typename TokenId>
 struct DFA {
+  private:
+    using Set = detail::Set;
+
+  public:
     using Class = State;
-    size_t stateCount; //TODO change to State lastState for safe comparisions
-    size_t symbolCount; //TODO change to Symbol lastSymbol ...
+    size_t stateCount;  // TODO change to State lastState for safe comparisions
+    size_t symbolCount; // TODO change to Symbol lastSymbol ...
     State start, deadState;
-    vector<TokenId> final;
-    vector<State> T;
-    vector<size_t> symbolToId;
-    vector<Symbol> idToSymbol;
+    std::vector<TokenId> final;
+    std::vector<State> T;
+    std::vector<size_t> symbolToId;
+    std::vector<Symbol> idToSymbol;
     DFA() = default;
-    DFA(const NFA<Symbol,State,TokenId>& nfa);
+    DFA(const NFA<Symbol, State, TokenId>& nfa);
     void generateFromMinimizationResults(const partition<State>& part);
     void determineDeadState();
     void minimize();
 };
 
-template<typename Symbol, typename State, typename TokenId>
-DFA<Symbol,Position,TokenId> minimize(const DFA<Symbol,State,TokenId>& dfa);
+// template <typename Symbol, typename State, typename TokenId>
+// DFA<Symbol, detail::Position, TokenId> minimize(const DFA<Symbol, State, TokenId>& dfa);
 
-template<typename Symbol, typename State, typename TokenId>
-std::ostream& operator<<(std::ostream&, const DFA<Symbol,State,TokenId>&);
+template <typename Symbol, typename State, typename TokenId>
+std::ostream& operator<<(std::ostream&, const DFA<Symbol, State, TokenId>&);
 
-template<typename Symbol, typename State, typename TokenId>
-DFA<Symbol,State,TokenId>::DFA(const NFA<Symbol,State,TokenId>& nfa) : symbolCount(nfa.symbolCount - 1), symbolToId(128,symbolCount), idToSymbol(128,symbolCount) {
+template <typename Symbol, typename State, typename TokenId>
+DFA<Symbol, State, TokenId>::DFA(const NFA<Symbol, State, TokenId>& nfa)
+    : symbolCount(nfa.symbolCount - 1), symbolToId(128, symbolCount), idToSymbol(128, symbolCount) {
     using BitSet = HashSet;
-    cout << "DFA constructor" << std::endl;
-    cout << "stateCount = " << nfa.stateCount << std::endl;
-    cout << "symbolCount = " << symbolCount << std::endl;
-    vector<size_t> symbolMap(nfa.symbolCount);
+    std::cout << "DFA constructor" << std::endl;
+    std::cout << "stateCount = " << nfa.stateCount << std::endl;
+    std::cout << "symbolCount = " << symbolCount << std::endl;
+    std::vector<size_t> symbolMap(nfa.symbolCount);
     size_t nonEpsSymbol = 0;
     for (auto i = Symbol(); i < nfa.symbolCount; i++)
         if (i != nfa.eps) {
@@ -75,105 +83,108 @@ DFA<Symbol,State,TokenId>::DFA(const NFA<Symbol,State,TokenId>& nfa) : symbolCou
 
     unsigned int n = nfa.stateCount;
     unsigned int id = 0;
-    vector<unsigned int> stack;
-    vector<BitSet> idToState;
-    unordered_map<BitSet,unsigned int> stateToId;
+    std::vector<unsigned int> stack;
+    std::vector<BitSet> idToState;
+    std::unordered_map<BitSet, unsigned int> stateToId;
     idToState.emplace_back(n, false);
     BitSet& S = idToState.back();
     S[nfa.start] = true;
-    //  cout << "nfa.start: " << nfa.start << std::endl;
-    //  cout << "nfa.final" << show(nfa.final) << std::endl;
-    //  cout << "s0: " << S << std::endl;
+    //  std::cout << "nfa.start: " << nfa.start << std::endl;
+    //  std::cout << "nfa.final" << show(nfa.final) << std::endl;
+    //  std::cout << "s0: " << S << std::endl;
     nfa.getClosure(S);
-    //  cout << "closure(s0): " << S << std::endl;
+    //  std::cout << "closure(s0): " << S << std::endl;
     stateToId[S] = id;
     stack.push_back(id);
     start = id;
     id++;
 
-    while(!stack.empty()) {
-        //cout << "stack: " << show(stack) << std::endl;
+    while (!stack.empty()) {
+        // std::cout << "stack: " << show(stack) << std::endl;
         unsigned int q = stack.back();
         stack.pop_back();
-        //auto& _p = idToState[q];
-        //cout << "state: " << _p << std::endl;
+        // auto& _p = idToState[q];
+        // std::cout << "state: " << _p << std::endl;
         if (T.size() < (q + 1) * symbolCount)
             T.resize((q + 1) * symbolCount);
         for (unsigned int a = 0; a < nfa.symbolCount; a++) {
             if (a != nfa.eps) {
                 const auto& p = idToState[q];
-                //cout << "Constructing delta(" << p << "," << a << ")" << std::endl;
+                // std::cout << "Constructing delta(" << p << "," << a << ")" << std::endl;
                 BitSet U(nfa.stateCount, false);
                 for (auto s : p) {
-                    //cout << "collecting T[" << *s << "][" << a << "] = " << nfa.table[*s][a] << std::endl;
+                    // std::cout << "collecting T[" << *s << "][" << a << "] = " << nfa.table[*s][a] << std::endl;
                     U |= nfa.table[s][a];
                 }
-                //cout << "targets: " << U << std::endl;
+                // std::cout << "targets: " << U << std::endl;
                 //        if (U.count() > 1)
                 //          cin.get();
                 nfa.getClosure(U);
-                //cout << "closure: " << U << std::endl;
+                // std::cout << "closure: " << U << std::endl;
                 //        if (U.count() > 1)
                 //          cin.get();
-                //        cout << "idToState: " << std::endl;
+                //        std::cout << "idToState: " << std::endl;
                 //        for (auto& i: idToState) {
                 //          auto it = stateToId.find(i);
-                //          cout << i << " (";
+                //          std::cout << i << " (";
                 //          if (it != stateToId.end())
-                //            cout << it->first << ": " << it->second;
+                //            std::cout << it->first << ": " << it->second;
                 //          else
-                //            cout << "not found";
-                //          cout << ")" << std::endl;
+                //            std::cout << "not found";
+                //          std::cout << ")" << std::endl;
                 //        }
-                //        cout << "stateToId: " << std::endl;
+                //        std::cout << "stateToId: " << std::endl;
                 //        for (auto& i: stateToId) {
                 //          BitSet localCopy(i.first);
-                //          cout
+                //          std::cout
                 //            << i.second << ": "
                 //            << localCopy << std::endl;
                 //        }
-                //cout << "stateToId.find(U);" << std::endl;
+                // std::cout << "stateToId.find(U);" << std::endl;
                 auto it = stateToId.find(U);
                 if (it == stateToId.end()) {
-                    //cout << "idToState.emplace_back(std::move(U));" << std::endl;
+                    // std::cout << "idToState.emplace_back(std::move(U));" << std::endl;
                     idToState.emplace_back(std::move(U));
-                    //cout << "auto& UU = idToState.back();" << std::endl;
+                    // std::cout << "auto& UU = idToState.back();" << std::endl;
                     auto& UU = idToState.back();
-                    //cout << "stateToId[UU] = id;" << std::endl;
+                    // std::cout << "stateToId[UU] = id;" << std::endl;
                     stateToId[UU] = id;
-                    //cout << "stack.push_back(id);" << std::endl;
+                    // std::cout << "stack.push_back(id);" << std::endl;
                     stack.push_back(id);
-                    //cout << "T[q][symbolMap[a]] = id;" << std::endl;
+                    // std::cout << "T[q][symbolMap[a]] = id;" << std::endl;
                     T[q * symbolCount + symbolMap[a]] = id;
-                    //cout << "new state; id = " << id << std::endl;
+                    // std::cout << "new state; id = " << id << std::endl;
                     id++;
                 } else {
-                    //cout << "seen before; id = " << it->second << std::endl;
+                    // std::cout << "seen before; id = " << it->second << std::endl;
                     T[q * symbolCount + symbolMap[a]] = it->second;
                 }
             }
         }
     }
     stateCount = id;
-    cout << "final state count: " << stateCount << std::endl;
-    //  cout << "checking for terminal states" << std::endl;
+    std::cout << "final state count: " << stateCount << std::endl;
+    //  std::cout << "checking for terminal states" << std::endl;
     final.resize(stateCount, 0);
     for (unsigned int q = 0; q < stateCount; q++) {
         const BitSet& U = idToState[q];
-        //    cout << "checking dfa state " << q << ": " << U << std::endl;
+        //    std::cout << "checking dfa state " << q << ": " << U << std::endl;
         size_t first_nfa_state = SIZE_MAX;
         for (auto s : U) {
-            //cout << "checking nfa state " << *s << std::endl;
+            // std::cout << "checking nfa state " << *s << std::endl;
             if (nfa.final[s] != 0 && final[q] == 0) {
                 first_nfa_state = s;
                 final[q] = nfa.final[s];
-                //cout << "dfa.final[" << q << "] = " << "nfa.final[" << s << "] = " << int(nfa.final[s]) << std::endl;
+                // std::cout << "dfa.final[" << q << "] = " << "nfa.final[" << s << "] = " << int(nfa.final[s]) <<
+                // std::endl;
             } else if (nfa.final[s] != 0 && s < first_nfa_state) {
                 first_nfa_state = s;
                 final[q] = nfa.final[s];
-                //cout << "dfa.final[" << q << "] is ambiguous. Preferring nfa.final[" << s << "] = " << int(nfa.final[s]) << std::endl;
+                // std::cout << "dfa.final[" << q << "] is ambiguous. Preferring nfa.final[" << s << "] = " <<
+                // int(nfa.final[s]) << std::endl;
             } else if (nfa.final[s] != 0) {
-                //cout << "dfa.final[" << q << "] is ambiguous. Ignoring nfa.final[" << s << "] = " << int(nfa.final[s]) << std::endl;
+                // std::cout << "dfa.final[" << q << "] is ambiguous. Ignoring nfa.final[" << s << "] = " <<
+                // int(nfa.final[s]) << std::endl;
             }
         }
     }
@@ -181,16 +192,22 @@ DFA<Symbol,State,TokenId>::DFA(const NFA<Symbol,State,TokenId>& nfa) : symbolCou
     determineDeadState();
 }
 
-template<typename State>
+template <typename State>
 struct partition {
-    using Class = State;
-    vector<State> p;
-    vector<Position> pI;
-    vector<PositionRange> c_i;
-    vector<Class> c;
+  private:
+    using Set = detail::Set;
+    using Position = detail::Position;
+    using PositionRange = detail::PositionRange;
 
-    template<typename TokenId>
-    partition(const vector<TokenId>& final);
+  public:
+    using Class = State;
+    std::vector<State> p;
+    std::vector<Position> pI;
+    std::vector<PositionRange> c_i;
+    std::vector<Class> c;
+
+    template <typename TokenId>
+    partition(const std::vector<TokenId>& final);
 
     bool swapToFront(Position l, Position h, const Set& tmp);
 
@@ -198,16 +215,17 @@ struct partition {
 
     Position swapRest(Position l, Position h, const Set& tmp);
 
-    void update(Position l, Position h, Position j, Class b, vector<Class>& stack);
+    void update(Position l, Position h, Position j, Class b, std::vector<Class>& stack);
 
-    void split(const Set& tmp, vector<Class>& stack);
+    void split(const Set& tmp, std::vector<Class>& stack);
 };
 
-template<typename State>
-template<typename TokenId>
-partition<State>::partition(const vector<TokenId>& final) : p(final.size()), pI(final.size()), c(final.size()) {
+template <typename State>
+template <typename TokenId>
+partition<State>::partition(const std::vector<TokenId>& final) : p(final.size()), pI(final.size()), c(final.size()) {
     auto stateCount = final.size();
-    vector<vector<State>> kinds; // given TokenId k, kinds[k] is vector<State> containing states of kind k
+    std::vector<std::vector<State>>
+        kinds; // given TokenId k, kinds[k] is std::vector<State> containing states of kind k
 
     for (State i = 0; i < stateCount; i++) {
         if (kinds.size() <= final[i])
@@ -215,12 +233,13 @@ partition<State>::partition(const vector<TokenId>& final) : p(final.size()), pI(
         kinds[final[i]].push_back(i);
     }
 
-    //  cout << "count of kinds: ";
-    //  for (auto& it: kinds)
-    //    cout << show(it);
-    //  cout << std::endl;
+    //std::cout << "kinds: ";
+    //int i = 0;
+    //for (auto& it : kinds) {
+    //    std::cout << i++ << ' ' << show(it) << '\n';
+    //}
 
-    sort(kinds.begin(), kinds.end(), [] (const auto& a, const auto& b) { return a.size() < b.size(); });
+    std::sort(kinds.begin(), kinds.end(), [](const auto& a, const auto& b) { return a.size() < b.size(); });
 
     c_i.reserve(kinds.size());
 
@@ -238,35 +257,36 @@ partition<State>::partition(const vector<TokenId>& final) : p(final.size()), pI(
             }
             j++;
         } else
-            throw std::runtime_error("Empty kind sets are invalid.");
+            throw std::runtime_error("Empty kind sets are invalid: " + std::to_string(j));
     }
 
-    //  cout << "c: " << show(c) << std::endl;
-    //  cout << "c_i: " << show(c_i) << std::endl;
-    //  cout << "p: " << show(p) << std::endl;
-    //  cout << "pI: " << show(pI) << std::endl;
+    //  std::cout << "c: " << show(c) << std::endl;
+    //  std::cout << "c_i: " << show(c_i) << std::endl;
+    //  std::cout << "p: " << show(p) << std::endl;
+    //  std::cout << "pI: " << show(pI) << std::endl;
 }
 
-template<typename State>
+template <typename State>
 bool partition<State>::swapToFront(Position l, Position h, const Set& tmp) {
-    //cout << "swapping in-splitter to front" << std::endl;
-    //for (auto i = l; i <= h; i++) {
+    // std::cout << "swapping in-splitter to front" << std::endl;
+    // for (auto i = l; i <= h; i++) {
     //    if (tmp[p[i]]) {
     //        std::swap(p[l], p[i]);
-    //        //cout << "swapping " << l << " and " << i << ": " << show(p) << std::endl;
+    //        //std::cout << "swapping " << l << " and " << i << ": " << show(p) << std::endl;
     //        pI[p[l]] = l;
     //        pI[p[i]] = i;
     //        return true;
     //    }
     //}
 
-    // the below is more efficient when the compiler reloads p.begin() and tmp.p from memory in every iteration in the implementation above
+    // the below is more efficient when the compiler reloads p.begin() and tmp.p from memory in every iteration in the
+    // implementation above
     const auto stop = p.begin() + h;
     const auto _p = tmp.p;
     for (auto i = p.begin() + l; i != stop; ++i) {
         if (*(_p + (*i >> 6)) & (0x1LL << *i)) {
             std::swap(p[l], *i);
-            //cout << "swapping " << l << " and " << i << ": " << show(p) << std::endl;
+            // std::cout << "swapping " << l << " and " << i << ": " << show(p) << std::endl;
             pI[p[l]] = l;
             pI[*i] = std::distance(p.begin(), i);
             return true;
@@ -275,14 +295,14 @@ bool partition<State>::swapToFront(Position l, Position h, const Set& tmp) {
     return false;
 }
 
-template<typename State>
+template <typename State>
 bool partition<State>::swapToBack(Position l, Position h, const Set& tmp) {
-    //cout << "swapping not-in-splitter to end" << std::endl;
-    auto last = h-1;
+    // std::cout << "swapping not-in-splitter to end" << std::endl;
+    auto last = h - 1;
     for (auto i = static_cast<int>(last); i >= int(l); i--) {
         if (!tmp[p[i]]) {
             std::swap(p[i], p[last]);
-            //cout << "swapping " << i << " and " << h << ": " << show(p) << std::endl;
+            // std::cout << "swapping " << i << " and " << h << ": " << show(p) << std::endl;
             pI[p[last]] = last;
             pI[p[i]] = i;
             return true;
@@ -291,55 +311,60 @@ bool partition<State>::swapToBack(Position l, Position h, const Set& tmp) {
     return false;
 }
 
-template<typename State>
-Position partition<State>::swapRest(Position l, Position h, const Set& tmp) {
-    //cout << "swapping all others" << std::endl;
+template <typename State>
+auto partition<State>::swapRest(Position l, Position h, const Set& tmp) -> Position {
+    // std::cout << "swapping all others" << std::endl;
     auto j = l;
-    auto k = h-1;
+    auto k = h - 1;
     for (;;) {
-        do j++; while (tmp[p[j]]);
-        do k--; while (!tmp[p[k]]);
-        if (k < j) break;
+        do
+            j++;
+        while (tmp[p[j]]);
+        do
+            k--;
+        while (!tmp[p[k]]);
+        if (k < j)
+            break;
         std::swap(p[j], p[k]);
-        //cout << "swapping " << j << " and " << k << ": " << show(p) << std::endl;
+        // std::cout << "swapping " << j << " and " << k << ": " << show(p) << std::endl;
         pI[p[j]] = j;
         pI[p[k]] = k;
     }
     return j;
 }
 
-template<typename State>
-void partition<State>::update(Position l, Position h, Position j, Class b, vector<State>& stack) {
-    auto A = make_pair(l,j);
-    auto B = make_pair(j,h);
+template <typename State>
+void partition<State>::update(Position l, Position h, Position j, Class b, std::vector<State>& stack) {
+    auto A = std::make_pair(l, j);
+    auto B = std::make_pair(j, h);
 
-    //cout << "B': (" << A.first << "-" << A.second << ")" << std::endl;
-    //cout << "B'': (" << B.first << "-" << B.second << ")" << std::endl;
+    // std::cout << "B': (" << A.first << "-" << A.second << ")" << std::endl;
+    // std::cout << "B'': (" << B.first << "-" << B.second << ")" << std::endl;
 
     auto A_size = A.second - A.first;
     auto B_size = B.second - B.first;
     auto newIx = c_i.size();
 
-    //auto newSize = std::min(A_size, B_size);
-    //auto it = std::upper_bound(stack.begin(), stack.end(), newSize, [&] (auto n, const auto& i) { const auto& p = c_i[i]; return n < p.second - p.first + 1; });
-    //stack.insert(it, newIx);
+    // auto newSize = std::min(A_size, B_size);
+    // auto it = std::upper_bound(stack.begin(), stack.end(), newSize, [&] (auto n, const auto& i) { const auto& p =
+    // c_i[i]; return n < p.second - p.first + 1; }); stack.insert(it, newIx);
 
     stack.push_back(newIx);
     if (A_size > B_size) {
         c_i[b] = A;
         c_i.push_back(B);
         std::fill_n(c.begin() + B.first, B_size, newIx);
-        //cout << "Pushing B'' on the stack. Index: " << newIx << std::endl;
+        // std::cout << "Pushing B'' on the stack. Index: " << newIx << std::endl;
     } else {
         c_i[b] = B;
         c_i.push_back(A);
         std::fill_n(c.begin() + A.first, A_size, newIx);
-        //cout << "Pushing B' on the stack. Index: " << newIx << std::endl;
+        // std::cout << "Pushing B' on the stack. Index: " << newIx << std::endl;
     }
 }
 
-template<typename State>
-void partition<State>::split(const Set& tmp, vector<Class>& stack) {
+template <typename State>
+void partition<State>::split(const Set& tmp, std::vector<Class>& stack) {
     const auto groupCount = c_i.size();
     for (Class b = 0; b < groupCount; b++) {
         const auto indices = c_i[b];
@@ -348,9 +373,9 @@ void partition<State>::split(const Set& tmp, vector<Class>& stack) {
         // We check whether the set is a singleton because in this case we cannot split it further.
         // Much cheaper than figuring it out later in the loop.
         // Especially useful if we have lots of these.
-        if (l+1 == h)
+        if (l + 1 == h)
             continue;
-        //cout << "B: " << b << " (" << l << "-" << h << ")\n";
+        // std::cout << "B: " << b << " (" << l << "-" << h << ")\n";
         if (!swapToFront(l, h, tmp))
             continue;
         if (!swapToBack(l, h, tmp))
@@ -360,7 +385,7 @@ void partition<State>::split(const Set& tmp, vector<Class>& stack) {
     }
 }
 
-template<typename T>
+template <typename T>
 void assign(T& lhs, const T& rhs) {
     lhs = rhs;
 }
@@ -377,27 +402,31 @@ inline void assign(BitSet& lhs, const HashSet& rhs) {
 }
 
 namespace detail {
-template<typename State>
-void splitterSet(const State* s, const State* stop, BitSet& tmp, const vector<HashSet>& tIa) {
+template <typename State>
+void splitterSet(const State* s, const State* stop, BitSet& tmp, const std::vector<HashSet>& tIa) {
     assign(tmp, tIa[*s]);
     ++s;
     for (; s != stop; ++s) {
-        //cout << "collecting tI[" << a << "][" << p[q] << "]: " << tI[a][p[q]] << std::endl;
+        // std::cout << "collecting tI[" << a << "][" << p[q] << "]: " << tI[a][p[q]] << std::endl;
         tmp |= tIa[*s];
     }
 }
-}
+} // namespace detail
 
-template<typename Symbol, typename State>
-void splitterSet(const PositionRange& t1, Symbol a, BitSet& tmp, const partition<State>& part, const vector<vector<HashSet>>& tI) {
+template <typename Symbol, typename State>
+void splitterSet(const detail::PositionRange& t1,
+                 Symbol a,
+                 BitSet& tmp,
+                 const partition<State>& part,
+                 const std::vector<std::vector<HashSet>>& tI) {
     const auto p = part.p.data();
     detail::splitterSet(p + t1.first, p + t1.second, tmp, tI[a]);
 }
 
-template<typename Symbol, typename State>
-auto inverseTransitionTable(const vector<State>& T, size_t stateCount, size_t symbolCount) {
+template <typename Symbol, typename State>
+auto inverseTransitionTable(const std::vector<State>& T, size_t stateCount, size_t symbolCount) {
     using TSet = HashSet;
-    vector<vector<TSet>> tI(symbolCount, vector<TSet>(stateCount, TSet(stateCount, false)));
+    std::vector<std::vector<TSet>> tI(symbolCount, std::vector<TSet>(stateCount, TSet(stateCount, false)));
 
     for (State i = 0; i < stateCount; i++) {
         const auto ptr = T.data() + i * symbolCount;
@@ -408,13 +437,13 @@ auto inverseTransitionTable(const vector<State>& T, size_t stateCount, size_t sy
     return tI;
 }
 
-template<typename Symbol, typename State, typename TokenId>
-void DFA<Symbol,State,TokenId>::generateFromMinimizationResults(const partition<State>& part) {
+template <typename Symbol, typename State, typename TokenId>
+void DFA<Symbol, State, TokenId>::generateFromMinimizationResults(const partition<State>& part) {
     auto newStateCount = part.c_i.size();
-    cout << "new state count: " << newStateCount << std::endl;
-    vector<Class> newT(newStateCount * symbolCount);
-    vector<TokenId> newFinal(newStateCount);
-    for(Class q = 0; q < newStateCount; q++) {
+    std::cout << "new state count: " << newStateCount << std::endl;
+    std::vector<Class> newT(newStateCount * symbolCount);
+    std::vector<TokenId> newFinal(newStateCount);
+    for (Class q = 0; q < newStateCount; q++) {
         auto t1 = part.c_i[q];
         auto s = t1.first;
         const auto ptr1 = T.data() + part.p[s] * symbolCount;
@@ -423,57 +452,58 @@ void DFA<Symbol,State,TokenId>::generateFromMinimizationResults(const partition<
             ptr2[a] = part.c[part.pI[ptr1[a]]];
         newFinal[q] = final[part.p[s]];
     }
-    start = part.c[part.pI[start]]; // bad: State start gets assigned a Class => This should be a free function that generates a DFA<Class> from DFA<State>
-    final = move(newFinal);
+    start = part.c[part.pI[start]]; // bad: State start gets assigned a Class => This should be a free function that
+                                    // generates a DFA<Class> from DFA<State>
+    final = std::move(newFinal);
     stateCount = newStateCount;
-    T = move(newT);
+    T = std::move(newT);
     determineDeadState();
 }
 
-template<typename Symbol, typename State, typename TokenId>
-void DFA<Symbol,State,TokenId>::minimize() {
-    cout << "minimize" << std::endl;
+template <typename Symbol, typename State, typename TokenId>
+void DFA<Symbol, State, TokenId>::minimize() {
+    std::cout << "minimize" << std::endl;
 
     auto tI = inverseTransitionTable<Symbol>(T, stateCount, symbolCount);
 
     partition<State> part(final);
 
-    vector<Class> stack;
+    std::vector<Class> stack;
     stack.reserve(part.c_i.size());
-    //std::generate_n(std::back_inserter(stack), kinds.size(), [i = kinds.size()-1] () mutable { return i--;});
-    std::generate_n(std::back_inserter(stack), part.c_i.size(), [i = 0] () mutable { return i++;});
+    // std::generate_n(std::back_inserter(stack), kinds.size(), [i = kinds.size()-1] () mutable { return i--;});
+    std::generate_n(std::back_inserter(stack), part.c_i.size(), [i = 0]() mutable { return i++; });
 
     Set tmp(stateCount, false);
     while (!stack.empty()) {
-        //cout << "stack: " << show(stack) << std::endl;
+        // std::cout << "stack: " << show(stack) << std::endl;
         auto splitter = stack.back();
         stack.pop_back();
-        //auto splitter = stack.front();
-        //stack.erase(stack.begin());
+        // auto splitter = stack.front();
+        // stack.erase(stack.begin());
         auto t1 = part.c_i[splitter];
-        //cout << "splitter: " << splitter << " (" << t1.first << "-" << t1.second << ")" << std::endl;
+        // std::cout << "splitter: " << splitter << " (" << t1.first << "-" << t1.second << ")" << std::endl;
         for (Symbol a = 0; a < symbolCount; a++) {
-            //cout << "considering symbol " << showChar(a) << std::endl;
+            // std::cout << "considering symbol " << showChar(a) << std::endl;
 
             splitterSet(t1, a, tmp, part, tI);
 
             if (tmp.count() == 0)
                 continue;
-            //cout << "splitter set: " << tmp << '\n';
+            // std::cout << "splitter set: " << tmp << '\n';
             part.split(tmp, stack);
         }
     }
 
-    cout << "Done. Generating new table." << std::endl;
-    //  cout << "c_i: " << show(c_i) << std::endl;
-    //  cout << "p: " << show(p) << std::endl;
-    //  cout << "pI: " << show(pI) << std::endl;
-    //  cout << "c: " << show(c) << std::endl;
+    std::cout << "Done. Generating new table." << std::endl;
+    //  std::cout << "c_i: " << show(c_i) << std::endl;
+    //  std::cout << "p: " << show(p) << std::endl;
+    //  std::cout << "pI: " << show(pI) << std::endl;
+    //  std::cout << "c: " << show(c) << std::endl;
 
     generateFromMinimizationResults(part);
 }
 
-template<typename T>
+template <typename T>
 struct NumIterator {
     using difference_type = std::ptrdiff_t;
     using value_type = const T;
@@ -487,12 +517,15 @@ struct NumIterator {
     NumIterator(T x) : x_(x) {}
 
     T operator*() { return x_; }
-    NumIterator& operator++() { ++x_; return *this; }
+    NumIterator& operator++() {
+        ++x_;
+        return *this;
+    }
     bool operator!=(const NumIterator& other) { return x_ != other.x_; }
     difference_type operator-(const NumIterator& other) { return x_ - other.x_; }
 };
 
-template<typename T>
+template <typename T>
 struct NumRange {
     T a_, b_;
     NumRange(T a, T b) : a_(a), b_(b) {}
@@ -501,41 +534,70 @@ struct NumRange {
     NumIterator<T> end() const { return b_; }
 };
 
-template<typename Symbol, typename State, typename TokenId>
-void DFA<Symbol,State,TokenId>::determineDeadState() {
-    //  cout << "determineDeadState" << std::endl;
-    auto idempotent = [&] (State q) {
+template <typename Symbol, typename State, typename TokenId>
+void DFA<Symbol, State, TokenId>::determineDeadState() {
+    //  std::cout << "determineDeadState" << std::endl;
+    auto idempotent = [&](State q) {
         const auto ptr = T.data() + q * symbolCount;
-        return std::all_of(ptr, ptr + symbolCount, [&] (State q_) { return q_ == q; });
+        return std::all_of(ptr, ptr + symbolCount, [&](State q_) { return q_ == q; });
     };
-    auto isDeadState = [&] (State q) {
-        return !final[q] && idempotent(q);
-    };
+    auto isDeadState = [&](State q) { return !final[q] && idempotent(q); };
     auto stop = NumIterator<State>(stateCount);
     auto it = std::find_if(NumIterator<State>(0u), stop, isDeadState);
     if (it != stop) {
         deadState = *it;
-        cout << deadState << " is the dead state" << std::endl;
+        std::cout << deadState << " is the dead state" << std::endl;
     } else {
-        cout << "there is no dead state" << std::endl;
+        std::cout << "there is no dead state" << std::endl;
         deadState = stateCount;
     }
 }
 
-template<typename Symbol, typename State, typename TokenId>
-std::ostream& operator<<(std::ostream& s, const DFA<Symbol,State,TokenId>& dfa) {
+template <typename Symbol, typename State, typename TokenId>
+bool operator==(const DFA<Symbol, State, TokenId>& lhs, const DFA<Symbol, State, TokenId>& rhs) {
+    return lhs.stateCount == rhs.stateCount && lhs.symbolCount == rhs.symbolCount && lhs.start == rhs.start &&
+           lhs.deadState == rhs.deadState && lhs.final == rhs.final && lhs.T == rhs.T &&
+           lhs.symbolToId == rhs.symbolToId && lhs.idToSymbol == rhs.idToSymbol;
+}
+
+template <typename Symbol, typename State, typename TokenId>
+std::ostream& operator<<(std::ostream& s, const DFA<Symbol, State, TokenId>& dfa) {
     s << "digraph G {\n";
     for (unsigned int p = 0; p < dfa.stateCount; p++) {
-        if (p == dfa.deadState)
+        if (p == dfa.deadState) {
             continue;
+        }
 
-        if (dfa.final[p])
+        if (dfa.final[p]) {
             s << "  " << p << "[shape = doublecircle];\n";
+        }
         const auto ptr = dfa.T.data() + p * dfa.symbolCount;
-        for (auto a = 0u; a < dfa.symbolCount; ++a)
-            if (ptr[a] != dfa.deadState)
-                s << "  " << p << " -> " << ptr[a] << " [label = \"" << showCharEscaped(dfa.idToSymbol[a]) << "\"];\n";
+        for (auto a = 0u; a < dfa.symbolCount; ++a) {
+            if (ptr[a] != dfa.deadState) {
+                // s << "  " << p << " -> " << ptr[a] << " [label = \"" << showCharEscaped(dfa.idToSymbol[a]) <<
+                // "\"];\n";
+                s << "  " << p << " -> " << ptr[a] << " [label = \"" << int(dfa.idToSymbol[a]) << "\"];\n";
+            }
+        }
     }
     s << "}\n";
     return s;
 }
+
+namespace boost {
+namespace serialization {
+
+template <class Archive, typename Symbol, typename State, typename TokenId>
+void serialize(Archive& ar, DFA<Symbol, State, TokenId>& dfa, unsigned int) {
+    ar& dfa.stateCount;
+    ar& dfa.symbolCount;
+    ar& dfa.start;
+    ar& dfa.deadState;
+    ar& dfa.final;
+    ar& dfa.T;
+    ar& dfa.symbolToId;
+    ar& dfa.idToSymbol;
+}
+
+} // namespace serialization
+} // namespace boost

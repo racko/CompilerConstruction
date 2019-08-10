@@ -1,7 +1,7 @@
-#include <catch.hpp>
-
-#include "Functional.h"
-#include "FunctionalAttribute.h"
+#include "Functional.h"          // for run
+#include "FunctionalAttribute.h" // for operator==, NumConst, Variable, App
+#include <catch.hpp>             // for AssertionHandler, SourceLineInfo
+#include <string>                // for allocator, string
 
 namespace Functional {
 TEST_CASE("Test0", "[Functional]") {

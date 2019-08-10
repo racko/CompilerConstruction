@@ -1,12 +1,16 @@
 #pragma once
 
-#include "BitSet_constexpr.h"
-#include "HashSet_constexpr.h"
-#include "Print.h"
-#include "constexpr.h"
-#include "nfaBuilder_constexpr.h"
+#include "BitSet_constexpr.h"  // for BitSet
+#include "HashSet_constexpr.h" // for HashSet
+#include "Print.h"             // for showCharEscaped
+#include "constexpr.h"         // for vector
+#include <cstdint>             // for int64_t
+#include <iostream>            // for operator<<, ostream, basic_ostream
 
-#include <iostream>
+template <typename State, typename TokenId, int64_t MaxNodes, int64_t MaxTransitions, int64_t MaxResultStates>
+class Graph;
+template <typename Symbol, typename State, int64_t MaxSymbols, typename Graph>
+struct nfaBuilder;
 
 template <typename Symbol,
           typename State,
@@ -43,8 +47,8 @@ struct NFA {
 
     // constexpr void getClosure(Set& s) const;
   private: // only made private to find remaing call sites
-    constexpr void getClosure(Set& s, HashSet<MaxTransitions>& newStates,
-                              vector<typename Set::value_type, MaxNodes>& stack) const;
+    constexpr void
+    getClosure(Set& s, HashSet<MaxTransitions>& newStates, vector<typename Set::value_type, MaxNodes>& stack) const;
 };
 
 template <typename Symbol,
@@ -115,8 +119,13 @@ NFA<Symbol, State, TokenId, MaxNodes, MaxSymbols, MaxTransitions, MaxResultState
     // std::cout << "final result: " << out << std::endl;
 }
 
-template <typename Symbol, typename State, typename TokenId, int64_t MaxNodes, int64_t MaxSymbols,
-          int64_t MaxTransitions, int64_t MaxResultStates>
+template <typename Symbol,
+          typename State,
+          typename TokenId,
+          int64_t MaxNodes,
+          int64_t MaxSymbols,
+          int64_t MaxTransitions,
+          int64_t MaxResultStates>
 constexpr void NFA<Symbol, State, TokenId, MaxNodes, MaxSymbols, MaxTransitions, MaxResultStates>::getClosure(
     Set& S, HashSet<MaxTransitions>& newStates, vector<typename Set::value_type, MaxNodes>& stack) const {
     // cout << "getClosure(" << S << ")" << std::endl;

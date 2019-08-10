@@ -1,5 +1,9 @@
 #include "While.h"
 
+#include <algorithm> // for copy
+#include <iterator>  // for ostream_iterator
+#include <stdexcept> // for logic_error
+
 namespace While {
 std::unordered_map<NonterminalID, std::vector<Grammar::String>> makeProductions();
 

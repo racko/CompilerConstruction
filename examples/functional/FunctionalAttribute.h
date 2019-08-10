@@ -1,8 +1,10 @@
 #pragma once
 
-#include <list>
-#include <ostream>
-#include <string>
+#include <cstdint> // for uint64_t
+#include <list>    // for list
+#include <ostream> // for ostream
+#include <string>  // for string
+#include <utility> // for move
 
 namespace Functional {
 struct App;
@@ -86,7 +88,6 @@ struct Program {
     std::list<Supercombinator> scs;
 };
 
-struct Attribute;
 struct VarListAttribute;
 struct ExprAttribute;
 struct ProgramAttribute;

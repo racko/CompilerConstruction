@@ -1,7 +1,9 @@
 #pragma once
 
-#include "DFA.h"
-#include "Token.h"
+#include "DFA.h"   // for DFA
+#include "Token.h" // for Token
+#include <cstdint> // for uint16_t, uint8_t
+#include <utility> // for move
 
 struct Lexer {
     const char* c;
@@ -9,19 +11,20 @@ struct Lexer {
     using State = uint16_t;
     using TokenId = uint8_t;
     using Token = ::Token<TokenId>;
-    using DFA_t = DFA<Symbol,State,TokenId>;
+    using DFA_t = DFA<Symbol, State, TokenId>;
 
     Lexer(DFA_t dfa, Token eof, TokenId whitespace) : dfa_(std::move(dfa)), eof_(eof), whitespace_(whitespace) {}
 
     Token getToken();
-private:
+
+  private:
     DFA_t dfa_;
     Token eof_;
     TokenId whitespace_;
 };
 
-//template<class T>
-//struct Lexer {
+// template<class T>
+// struct Lexer {
 //    const char* c;
 //    using Symbol = char;
 //    using State = uint16_t;
@@ -45,18 +48,18 @@ private:
 //
 //    iterator begin() { return iterator(*this); }
 //
-//private:
+// private:
 //    DFA_t dfa;
 //    virtual T action(const char*, size_t, TokenId) = 0;
 //    virtual T eofToken() const = 0;
 //    virtual T whiteSpaceToken() const = 0;
 //    T getToken();
-//protected:
+// protected:
 //    ~Lexer() = default;
 //};
 //
-//template<class T>
-//T Lexer<T>::getToken() {
+// template<class T>
+// T Lexer<T>::getToken() {
 //    if (*c == EOF) {
 //        return eofToken();
 //    }

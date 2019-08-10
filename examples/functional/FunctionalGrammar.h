@@ -2,12 +2,11 @@
 #define FUNCTIONAL_H_
 
 #include "Grammar.h"
-
 #include <cstdint>
-#include <vector>
-
-#include <boost/dynamic_bitset.hpp>
 #include <iostream>
+#include <list>
+#include <memory>
+#include <vector>
 
 namespace Functional {
 using type = uint32_t;

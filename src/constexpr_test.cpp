@@ -1,10 +1,7 @@
+#include "Token.h" // for Token
 #include "constexpr.h"
-#include "constexpr_jsonLexer.h"
-
-#include <iostream>
-#include <iterator>
-
-#include <catch.hpp>
+#include "constexpr_jsonLexer.h" // for bla, eof_terminalid
+#include <catch.hpp>             // for operator""_catch_sr, AssertionHandler
 
 TEST_CASE("HashTable get fails if empty", "[HashTable]") {
     HashTable<int, 1> t;
@@ -28,8 +25,7 @@ TEST_CASE("HashTable set + get", "[HashTable]") {
     REQUIRE(t.get(3) == -1);
 }
 
-
-//static constexpr const int x = [] {
+// static constexpr const int x = [] {
 //    using Alloc = stack_allocator<int,1024>;
 //    Alloc stack_alloc;
 //    allocator<int,Alloc> alloc(&stack_alloc);
@@ -41,9 +37,7 @@ TEST_CASE("HashTable set + get", "[HashTable]") {
 //    return 0;
 //}();
 
-TEST_CASE("strcatsize no argument", "[strcatsize]") {
-    REQUIRE(strcatsize() == 0);
-}
+TEST_CASE("strcatsize no argument", "[strcatsize]") { REQUIRE(strcatsize() == 0); }
 
 TEST_CASE("strcatsize empty cstr", "[strcatsize]") {
     REQUIRE(strcatsize<charr<1>>() == 0);
@@ -57,65 +51,37 @@ TEST_CASE("strcatsize singleton cstr", "[strcatsize]") {
     REQUIRE(strcatsize<const char[2]>() == 1);
 }
 
-TEST_CASE("strcatsize empty string", "[strcatsize]") {
-    REQUIRE(strcatsize<string<0>>() == 0);
-}
+TEST_CASE("strcatsize empty string", "[strcatsize]") { REQUIRE(strcatsize<string<0>>() == 0); }
 
-TEST_CASE("strcatsize singleton string", "[strcatsize]") {
-    REQUIRE(strcatsize<string<1>>() == 1);
-}
+TEST_CASE("strcatsize singleton string", "[strcatsize]") { REQUIRE(strcatsize<string<1>>() == 1); }
 
-TEST_CASE("strcat no argument", "[strcat]") {
-    REQUIRE(strcat() == string<0>{});
-}
+TEST_CASE("strcat no argument", "[strcat]") { REQUIRE(strcat() == string<0>{}); }
 
-TEST_CASE("strcat empty cstr", "[strcat]") {
-    REQUIRE(strcat("") == string<0>{});
-}
+TEST_CASE("strcat empty cstr", "[strcat]") { REQUIRE(strcat("") == string<0>{}); }
 
-TEST_CASE("strcat empty cstr + empty cstr", "[strcat]") {
-    REQUIRE(strcat("", "") == string<0>{});
-}
+TEST_CASE("strcat empty cstr + empty cstr", "[strcat]") { REQUIRE(strcat("", "") == string<0>{}); }
 
-TEST_CASE("strcat singleton cstr", "[strcat]") {
-    REQUIRE(strcat("a") == string<1>{"a"});
-}
+TEST_CASE("strcat singleton cstr", "[strcat]") { REQUIRE(strcat("a") == string<1>{"a"}); }
 
-TEST_CASE("strcat single cstr", "[strcat]") {
-    REQUIRE(strcat("abc") == string<3>{"abc"});
-}
+TEST_CASE("strcat single cstr", "[strcat]") { REQUIRE(strcat("abc") == string<3>{"abc"}); }
 
-TEST_CASE("strcat empty cstr + singleton cstr", "[strcat]") {
-    REQUIRE(strcat("", "a") == string<1>{"a"});
-}
+TEST_CASE("strcat empty cstr + singleton cstr", "[strcat]") { REQUIRE(strcat("", "a") == string<1>{"a"}); }
 
-TEST_CASE("strcat singleton cstr + singleton cstr", "[strcat]") {
-    REQUIRE(strcat("a", "b") == string<2>{"ab"});
-}
+TEST_CASE("strcat singleton cstr + singleton cstr", "[strcat]") { REQUIRE(strcat("a", "b") == string<2>{"ab"}); }
 
-TEST_CASE("strcat empty cstr + cstr", "[strcat]") {
-    REQUIRE(strcat("", "abc") == string<3>{"abc"});
-}
+TEST_CASE("strcat empty cstr + cstr", "[strcat]") { REQUIRE(strcat("", "abc") == string<3>{"abc"}); }
 
-TEST_CASE("strcat cstr + cstr", "[strcat]") {
-    REQUIRE(strcat("ab", "abc") == string<5>{"ababc"});
-}
+TEST_CASE("strcat cstr + cstr", "[strcat]") { REQUIRE(strcat("ab", "abc") == string<5>{"ababc"}); }
 
-TEST_CASE("strcat empty string", "[strcat]") {
-    REQUIRE(strcat(string<0>{}) == string<0>{});
-}
+TEST_CASE("strcat empty string", "[strcat]") { REQUIRE(strcat(string<0>{}) == string<0>{}); }
 
 TEST_CASE("strcat empty string + empty string", "[strcat]") {
     REQUIRE(strcat(string<0>{}, string<0>{}) == string<0>{});
 }
 
-TEST_CASE("strcat singleton string", "[strcat]") {
-    REQUIRE(strcat(string<1>{"a"}) == string<1>{"a"});
-}
+TEST_CASE("strcat singleton string", "[strcat]") { REQUIRE(strcat(string<1>{"a"}) == string<1>{"a"}); }
 
-TEST_CASE("strcat single string", "[strcat]") {
-    REQUIRE(strcat(string<3>{"abc"}) == string<3>{"abc"});
-}
+TEST_CASE("strcat single string", "[strcat]") { REQUIRE(strcat(string<3>{"abc"}) == string<3>{"abc"}); }
 
 TEST_CASE("strcat empty string + singleton string", "[strcat]") {
     REQUIRE(strcat(string<0>{}, string<1>{"a"}) == string<1>{"a"});
@@ -133,16 +99,12 @@ TEST_CASE("strcat string + string", "[strcat]") {
     REQUIRE(strcat(string<2>{"ab"}, string<3>{"abc"}) == string<5>{"ababc"});
 }
 
-TEST_CASE("strcat cstr + string", "[strcat]") {
-    REQUIRE(strcat("ab", string<3>{"abc"}) == string<5>{"ababc"});
-}
+TEST_CASE("strcat cstr + string", "[strcat]") { REQUIRE(strcat("ab", string<3>{"abc"}) == string<5>{"ababc"}); }
 
-TEST_CASE("strcat string + cstr", "[strcat]") {
-    REQUIRE(strcat(string<2>{"ab"}, "abc") == string<5>{"ababc"});
-}
+TEST_CASE("strcat string + cstr", "[strcat]") { REQUIRE(strcat(string<2>{"ab"}, "abc") == string<5>{"ababc"}); }
 
 TEST_CASE("vector emplace", "[vector]") {
-    vector<int,10> v;
+    vector<int, 10> v;
     v.emplace_back();
     v.emplace_back();
     v.emplace_back();
@@ -151,15 +113,15 @@ TEST_CASE("vector emplace", "[vector]") {
     REQUIRE(v.begin() < v.end());
 }
 
-//static constexpr size_t MaxSymbols = 128;
-//static constexpr auto eof_terminalid = 11;
-//static constexpr auto ws_terminalid = 12;
-//using Symbol = char;
-//using State = uint16_t;
-//using TokenId = uint8_t;
+// static constexpr size_t MaxSymbols = 128;
+// static constexpr auto eof_terminalid = 11;
+// static constexpr auto ws_terminalid = 12;
+// using Symbol = char;
+// using State = uint16_t;
+// using TokenId = uint8_t;
 //
-//template<typename G>
-//constexpr nfaBuilder<Symbol,State,MaxSymbols,G> make_nfaBuilder(int) {
+// template<typename G>
+// constexpr nfaBuilder<Symbol,State,MaxSymbols,G> make_nfaBuilder(int) {
 //    nfaBuilder<Symbol,State,MaxSymbols,G> builder;
 //    builder.lexRegex("false", 1);
 //    builder.lexRegex("true", 2);
@@ -190,7 +152,8 @@ TEST_CASE("vector emplace", "[vector]") {
 //    for (char i = 0x5D; i <= 0x7B; ++i)
 //        (unescaped += '|') += i;
 //    unescaped += "|\\|";
-//    for (int i = 0x7D; i <= 0x7F; ++i) // int + static_cast because i <= 0x7F is always true for "char i" (infinite loop)
+//    for (int i = 0x7D; i <= 0x7F; ++i) // int + static_cast because i <= 0x7F is always true for "char i" (infinite
+//    loop)
 //        (unescaped += '|') += static_cast<char>(i);
 //    // only ascii for now ...
 //    unescaped += ')';
@@ -209,44 +172,45 @@ TEST_CASE("vector emplace", "[vector]") {
 //    return builder;
 //}
 //
-//static constexpr const auto MaxNodes = [] {
+// static constexpr const auto MaxNodes = [] {
 //    using G = CountingGraph<State,Symbol,TokenId>;
 //    auto builder = make_nfaBuilder<G>(0);
 //    return builder.ns.getStateCount();
 //}();
 //
-//static constexpr const auto MaxTransitions = [] {
+// static constexpr const auto MaxTransitions = [] {
 //    using G = TransitionCountingGraph<State,Symbol,TokenId,MaxNodes>;
 //    auto builder = make_nfaBuilder<G>(0);
 //    const auto& transitionCounts = builder.ns.getTransitionCounts();
 //    return *max_element(transitionCounts.begin(), transitionCounts.end());
 //}();
 //
-//static constexpr const auto MaxResultStates = [] {
+// static constexpr const auto MaxResultStates = [] {
 //    using G = ResultingStateCountingGraph<State,Symbol,TokenId,MaxNodes,MaxTransitions>;
 //    auto builder = make_nfaBuilder<G>(0);
 //    const auto& transitionCounts = builder.ns.getResultingStateCounts();
-//    auto maxResultingStates = [] (const auto& a) {return max_element(a.begin(), a.end(), [] (auto c, auto d) { return c.second < d.second; })->second; };
-//    return accumulate(transitionCounts.begin(), transitionCounts.end(), 0, [&] (auto a, const auto& b) { auto c = maxResultingStates(b); return std::max<size_t>(a, c); });
+//    auto maxResultingStates = [] (const auto& a) {return max_element(a.begin(), a.end(), [] (auto c, auto d) { return
+//    c.second < d.second; })->second; }; return accumulate(transitionCounts.begin(), transitionCounts.end(), 0, [&]
+//    (auto a, const auto& b) { auto c = maxResultingStates(b); return std::max<size_t>(a, c); });
 //}();
 
-//static constexpr const auto nfa = [] {
+// static constexpr const auto nfa = [] {
 //    using G = Graph<State,Symbol,TokenId,MaxNodes,MaxTransitions,MaxResultStates>;
 //    auto builder = make_nfaBuilder<G>();
 //    return NFA<Symbol,State,TokenId,MaxNodes,MaxSymbols,MaxTransitions,MaxResultStates>(builder);
 //}();
 //
-//static constexpr const auto dfa = toDFA(nfa);
-//static constexpr const auto min_dfa = minimize<State>(dfa);
+// static constexpr const auto dfa = toDFA(nfa);
+// static constexpr const auto min_dfa = minimize<State>(dfa);
 //
-//constexpr Token bla(const char* text) {
+// constexpr Token bla(const char* text) {
 //    Lexer<MaxNodes,MaxSymbols> lexer(min_dfa, {nullptr, 0, eof_terminalid}, ws_terminalid);
 //    lexer.c = text;
 //    return lexer.getToken();
 //}
 
 TEST_CASE("constexpr", "constexpr") {
-    //const auto nfa = [] {
+    // const auto nfa = [] {
     //    using G = Graph<State,Symbol,TokenId,MaxNodes,MaxTransitions,MaxResultStates>;
     //    int i;
     //    std::cin >> i;
@@ -254,71 +218,71 @@ TEST_CASE("constexpr", "constexpr") {
     //    return NFA<Symbol,State,TokenId,MaxNodes,MaxSymbols,MaxTransitions,MaxResultStates>(builder);
     //}();
 
-    //const auto dfa = toDFA(nfa);
-    //const auto min_dfa = minimize<State>(dfa);
+    // const auto dfa = toDFA(nfa);
+    // const auto min_dfa = minimize<State>(dfa);
 
-    //auto bla = [&min_dfa] (const char* text) {
+    // auto bla = [&min_dfa] (const char* text) {
     //    Lexer<MaxNodes,MaxSymbols> lexer(min_dfa, {nullptr, 0, eof_terminalid}, ws_terminalid);
     //    lexer.c = text;
     //    return lexer.getToken();
     //};
 
-    //std::cout << "state count: " << nfa.stateCount << std::endl;
-    //std::cout << "symbol count: " << nfa.symbolCount << std::endl;
-    //std::cout << "start: " << nfa.start << std::endl;
-    //std::cout << "T: \n";
-    //for (const auto& t : nfa.table) {
+    // std::cout << "state count: " << nfa.stateCount << std::endl;
+    // std::cout << "symbol count: " << nfa.symbolCount << std::endl;
+    // std::cout << "start: " << nfa.start << std::endl;
+    // std::cout << "T: \n";
+    // for (const auto& t : nfa.table) {
     //    std::copy(t.begin(), t.end(), std::ostream_iterator<HashSet<MaxNodes>>(std::cout, ", "));
     //    std::cout << std::endl;
     //}
-    //std::cout << std::endl;
-    //std::cout << "finals: ";
-    //std::copy(nfa.finals.begin(), nfa.finals.end(), std::ostream_iterator<int>(std::cout, ", "));
-    //std::cout << std::endl;
-    //std::cout << "symbols: ";
-    //std::copy(nfa.symbols.begin(), nfa.symbols.end(), std::ostream_iterator<int>(std::cout, ", "));
-    //std::cout << std::endl;
-    //std::cout << nfa << std::endl;
-    //std::cout << std::endl;
+    // std::cout << std::endl;
+    // std::cout << "finals: ";
+    // std::copy(nfa.finals.begin(), nfa.finals.end(), std::ostream_iterator<int>(std::cout, ", "));
+    // std::cout << std::endl;
+    // std::cout << "symbols: ";
+    // std::copy(nfa.symbols.begin(), nfa.symbols.end(), std::ostream_iterator<int>(std::cout, ", "));
+    // std::cout << std::endl;
+    // std::cout << nfa << std::endl;
+    // std::cout << std::endl;
 
-    //std::cout << "state count: " << dfa.stateCount << std::endl;
-    //std::cout << "symbol count: " << dfa.symbolCount << std::endl;
-    //std::cout << "start: " << dfa.start << std::endl;
-    //std::cout << "dead state: " << dfa.deadState << std::endl;
-    //std::cout << "T: \n";
-    //for (auto i = 0; i < dfa.stateCount; ++i) {
-    //    std::copy(dfa.T.begin() + i * dfa.symbolCount, dfa.T.begin() + (i+1)*dfa.symbolCount, std::ostream_iterator<uint16_t>(std::cout, ", "));
-    //    std::cout << std::endl;
+    // std::cout << "state count: " << dfa.stateCount << std::endl;
+    // std::cout << "symbol count: " << dfa.symbolCount << std::endl;
+    // std::cout << "start: " << dfa.start << std::endl;
+    // std::cout << "dead state: " << dfa.deadState << std::endl;
+    // std::cout << "T: \n";
+    // for (auto i = 0; i < dfa.stateCount; ++i) {
+    //    std::copy(dfa.T.begin() + i * dfa.symbolCount, dfa.T.begin() + (i+1)*dfa.symbolCount,
+    //    std::ostream_iterator<uint16_t>(std::cout, ", ")); std::cout << std::endl;
     //}
-    //std::cout << "finals: ";
-    //std::copy(dfa.finals.begin(), dfa.finals.end(), std::ostream_iterator<int>(std::cout, ", "));
-    //std::cout << std::endl;
-    //std::cout << "symbols: ";
-    //std::copy(dfa.symbolToId.begin(), dfa.symbolToId.end(), std::ostream_iterator<int>(std::cout, ", "));
-    //std::cout << std::endl;
-    //std::cout << dfa << std::endl;
+    // std::cout << "finals: ";
+    // std::copy(dfa.finals.begin(), dfa.finals.end(), std::ostream_iterator<int>(std::cout, ", "));
+    // std::cout << std::endl;
+    // std::cout << "symbols: ";
+    // std::copy(dfa.symbolToId.begin(), dfa.symbolToId.end(), std::ostream_iterator<int>(std::cout, ", "));
+    // std::cout << std::endl;
+    // std::cout << dfa << std::endl;
 
-    //std::cout << "state count: " << min_dfa.stateCount << std::endl;
-    //std::cout << "symbol count: " << min_dfa.symbolCount << std::endl;
-    //std::cout << "start: " << min_dfa.start << std::endl;
-    //std::cout << "dead state: " << min_dfa.deadState << std::endl;
-    //std::cout << "T: \n";
-    //for (auto i = 0; i < min_dfa.stateCount; ++i) {
-    //    std::copy(min_dfa.T.begin() + i * min_dfa.symbolCount, min_dfa.T.begin() + (i+1)*min_dfa.symbolCount, std::ostream_iterator<uint16_t>(std::cout, ", "));
-    //    std::cout << std::endl;
+    // std::cout << "state count: " << min_dfa.stateCount << std::endl;
+    // std::cout << "symbol count: " << min_dfa.symbolCount << std::endl;
+    // std::cout << "start: " << min_dfa.start << std::endl;
+    // std::cout << "dead state: " << min_dfa.deadState << std::endl;
+    // std::cout << "T: \n";
+    // for (auto i = 0; i < min_dfa.stateCount; ++i) {
+    //    std::copy(min_dfa.T.begin() + i * min_dfa.symbolCount, min_dfa.T.begin() + (i+1)*min_dfa.symbolCount,
+    //    std::ostream_iterator<uint16_t>(std::cout, ", ")); std::cout << std::endl;
     //}
-    //std::cout << "finals: ";
-    //std::copy(min_dfa.finals.begin(), min_dfa.finals.end(), std::ostream_iterator<int>(std::cout, ", "));
-    //std::cout << std::endl;
-    //std::cout << "symbols: ";
-    //std::copy(min_dfa.symbolToId.begin(), min_dfa.symbolToId.end(), std::ostream_iterator<int>(std::cout, ", "));
-    //std::cout << std::endl;
-    //std::cout << min_dfa << std::endl;
-//
-//    static_assert(bla("false").tokenId == 1);
-//    static_assert(bla("true").tokenId == 2);
-//    static_assert(bla("null").tokenId == 4);
-//
+    // std::cout << "finals: ";
+    // std::copy(min_dfa.finals.begin(), min_dfa.finals.end(), std::ostream_iterator<int>(std::cout, ", "));
+    // std::cout << std::endl;
+    // std::cout << "symbols: ";
+    // std::copy(min_dfa.symbolToId.begin(), min_dfa.symbolToId.end(), std::ostream_iterator<int>(std::cout, ", "));
+    // std::cout << std::endl;
+    // std::cout << min_dfa << std::endl;
+    //
+    //    static_assert(bla("false").tokenId == 1);
+    //    static_assert(bla("true").tokenId == 2);
+    //    static_assert(bla("null").tokenId == 4);
+    //
 
     REQUIRE(bla("false").tokenId == 1);
     REQUIRE(bla("true").tokenId == 2);
@@ -343,22 +307,22 @@ TEST_CASE("constexpr", "constexpr") {
     REQUIRE(bla("1e+0").tokenId == 10);
 
     {
-    // this one's tricky: "01" is not a valid number, but that doesn't mean that the lexer will throw.
-    // Instead, the lexer returns the longest valid token: "0"
-    auto token = bla("01");
-    REQUIRE(token.tokenId == 10);
-    REQUIRE(token.start != nullptr);
-    REQUIRE(*token.start == '0');
-    REQUIRE(token.length == 1);
+        // this one's tricky: "01" is not a valid number, but that doesn't mean that the lexer will throw.
+        // Instead, the lexer returns the longest valid token: "0"
+        auto token = bla("01");
+        REQUIRE(token.tokenId == 10);
+        REQUIRE(token.start != nullptr);
+        REQUIRE(*token.start == '0');
+        REQUIRE(token.length == 1);
     }
 
     {
-    // same here
-    auto token = bla("1.");
-    REQUIRE(token.tokenId == 10);
-    REQUIRE(token.start != nullptr);
-    REQUIRE(*token.start == '1');
-    REQUIRE(token.length == 1);
+        // same here
+        auto token = bla("1.");
+        REQUIRE(token.tokenId == 10);
+        REQUIRE(token.start != nullptr);
+        REQUIRE(*token.start == '1');
+        REQUIRE(token.length == 1);
     }
 
     REQUIRE_THROWS(bla("-"));

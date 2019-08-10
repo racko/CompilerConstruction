@@ -1,17 +1,43 @@
 #include <catch.hpp>
 
 #include "json.h"
+#include "json_token.h"                                 // for operator<<
+#include "num_view.h"                                   // for num_view
+#include "variant.h"                                    // for null
+#include <boost/blank.hpp>                              // for blank
+#include <boost/variant/detail/apply_visitor_unary.hpp> // for apply_visitor
+#include <boost/variant/get.hpp>                        // for get
+#include <boost/variant/recursive_variant.hpp>          // for make_recursi...
+#include <boost/variant/static_visitor.hpp>             // for static_visit...
+#include <boost/variant/variant.hpp>                    // for variant
+#include <catch.hpp>                                    // for AssertionHan...
+#include <jsonValue.h>                                  // for array, object
+#include <ostream>                                      // for operator<<
+#include <string>                                       // for string, char...
+#include <string_view>                                  // for string_view
+#include <type_traits>                                  // for is_base_of_v
+#include <unordered_map>                                // for unordered_map
+#include <unordered_set>                                // for unordered_set
+#include <utility>                                      // for pair
+#include <vector>                                       // for vector
+namespace boost {
+struct recursive_variant_;
+}
+
+//#include "json.h"
 #include <jsonLLParser.h>
 #include <jsonLRParser.h>
 #include <jsonLRParser2.h>
-#include <jsonValue.h>
-
+//#include <jsonValue.h>
 
 namespace json {
 static_assert(std::is_base_of_v<JsonParser::Parser, jsonLR2::Parser>);
-using test_value_ =
-    boost::make_recursive_variant<null, bool, num_view, std::string_view, std::vector<boost::recursive_variant_>,
-                                  std::unordered_map<std::string, boost::recursive_variant_>>::type;
+using test_value_ = boost::make_recursive_variant<null,
+                                                  bool,
+                                                  num_view,
+                                                  std::string_view,
+                                                  std::vector<boost::recursive_variant_>,
+                                                  std::unordered_map<std::string, boost::recursive_variant_>>::type;
 
 using arr = std::vector<test_value_>;
 using obj = std::unordered_map<std::string, test_value_>;
@@ -185,32 +211,33 @@ TEMPLATE_TEST_CASE("Json", "[json][!mayfail]", jsonLL::Parser, jsonLR::Parser, j
         auto expected = test_value(obj({
             {"totalCount_str", str("177895")},
             {"pageCount", num("18")},
-            {"items", arr({obj({
-                               {"buy", false},
-                               {"issued", str("2016-04-02T01:40:43")},
-                               {"price", num("3000")},
-                               {"volumeEntered", num("833")},
-                               {"stationID", num("60006484")},
-                               {"volume", num("833")},
-                               {"range", str("region")},
-                               {"minVolume", num("1")},
-                               {"duration", num("365")},
-                               {"type", num("366699")},
-                               {"id", num("4020240384")},
-                           }),
-                           obj({
-                               {"buy", false},
-                               {"issued", str("2016-04-02T01:50:24")},
-                               {"price", num("3000")},
-                               {"volumeEntered", num("833")},
-                               {"stationID", num("60006487")},
-                               {"volume", num("833")},
-                               {"range", str("region")},
-                               {"minVolume", num("1")},
-                               {"duration", num("365")},
-                               {"type", num("366699")},
-                               {"id", num("4020240385")},
-                           })})},
+            {"items",
+             arr({obj({
+                      {"buy", false},
+                      {"issued", str("2016-04-02T01:40:43")},
+                      {"price", num("3000")},
+                      {"volumeEntered", num("833")},
+                      {"stationID", num("60006484")},
+                      {"volume", num("833")},
+                      {"range", str("region")},
+                      {"minVolume", num("1")},
+                      {"duration", num("365")},
+                      {"type", num("366699")},
+                      {"id", num("4020240384")},
+                  }),
+                  obj({
+                      {"buy", false},
+                      {"issued", str("2016-04-02T01:50:24")},
+                      {"price", num("3000")},
+                      {"volumeEntered", num("833")},
+                      {"stationID", num("60006487")},
+                      {"volume", num("833")},
+                      {"range", str("region")},
+                      {"minVolume", num("1")},
+                      {"duration", num("365")},
+                      {"type", num("366699")},
+                      {"id", num("4020240385")},
+                  })})},
             {"next", obj({{"href", str("https://api-sisi.testeveonline.com/market/10000001/orders/all/?page=2")}})},
             {"totalCount", num("177895")},
             {"pageCount_str", str("18")},
