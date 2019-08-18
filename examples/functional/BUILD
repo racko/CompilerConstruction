@@ -57,5 +57,8 @@ cc_binary(
 sh_test(
     name = "functional_fitnesse_test",
     srcs = ["run_fitnesse_tests.sh"],
-    data = ["pages/FunctionalTest/content.txt"],
+    data = [
+        "pages/FunctionalTest/content.txt",
+        ":functional_fitnesse.exe",
+    ],
 )
