@@ -73,6 +73,11 @@ add_library(util
     src/variant.cpp
 )
 
+target_link_libraries(util
+  PUBLIC
+    ranges
+)
+
 if(BUILD_TESTING)
     add_library(fitnesse STATIC IMPORTED)
     set_property(TARGET fitnesse PROPERTY IMPORTED_LOCATION

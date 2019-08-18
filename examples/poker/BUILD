@@ -1,4 +1,11 @@
 cc_library(
+    name = "ranges",
+    srcs = ["ranges.h"],
+    visibility = ["//visibility:public"],
+    includes = ["."],
+)
+
+cc_library(
     name = "poker",
     srcs = [
         "bits.h",
@@ -12,7 +19,6 @@ cc_library(
         "poker_dfa.h",
         "poker_dfa_serialization.cpp",
         "poker_dfa_serialization.h",
-        "ranges.h",
         "rank_count.cpp",
         "rank_count.h",
         "rank_set.cpp",
@@ -40,6 +46,7 @@ cc_library(
         "@boost//:filesystem",
         #"@boost//:iterator",
         "@boost//:serialization",
+        ":ranges",
     ],
 )
 

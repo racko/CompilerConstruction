@@ -2,6 +2,7 @@
 
 #include "DFA_fwd.h"
 
+#include <ranges.h>
 #include <BitSet.h> // for BitSet
 #include <cstddef>  // for NULL
 #include <iostream> // for operator<<, ostream, size_t, basic_ostream, basi...
@@ -69,37 +70,6 @@ DFA<Symbol, State, TokenId>::DFA(State stateCount,
 template <typename Symbol, typename State, typename TokenId>
 std::ostream& operator<<(std::ostream&, const DFA<Symbol, State, TokenId>&);
 
-template <typename T>
-struct NumIterator {
-    using difference_type = std::ptrdiff_t;
-    using value_type = const T;
-    using pointer = const T*;
-    using reference = const T&;
-    using iterator_category = std::random_access_iterator_tag;
-
-    T x_;
-
-    NumIterator() = default;
-    NumIterator(T x) : x_(x) {}
-
-    T operator*() { return x_; }
-    NumIterator& operator++() {
-        ++x_;
-        return *this;
-    }
-    bool operator!=(const NumIterator& other) { return x_ != other.x_; }
-    difference_type operator-(const NumIterator& other) { return x_ - other.x_; }
-};
-
-template <typename T>
-struct NumRange {
-    T a_, b_;
-    NumRange(T a, T b) : a_(a), b_(b) {}
-
-    NumIterator<T> begin() const { return a_; }
-    NumIterator<T> end() const { return b_; }
-};
-
 template <typename Symbol, typename State, typename TokenId>
 State determineDeadState(const State stateCount,
                          const Symbol symbolCount,
@@ -111,8 +81,8 @@ State determineDeadState(const State stateCount,
         return std::all_of(ptr, ptr + symbolCount, [q](State q_) { return q_ == q; });
     };
     auto isDeadState = [&](State q) { return !final[q] && idempotent(q); };
-    auto stop = NumIterator<State>(stateCount);
-    auto it = std::find_if(NumIterator<State>(0u), stop, isDeadState);
+    auto stop = counting_iterator<State>(stateCount);
+    auto it = std::find_if(counting_iterator<State>(0u), stop, isDeadState);
     if (it != stop) {
         std::cout << *it << " is the dead state" << std::endl;
         return *it;

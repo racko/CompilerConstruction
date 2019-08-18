@@ -1,3 +1,10 @@
+add_library(ranges INTERFACE)
+
+target_include_directories(ranges
+  INTERFACE
+    .
+)
+
 add_library(poker
   determine_hand_rank.cpp
   hand_rank.cpp

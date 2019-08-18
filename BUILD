@@ -64,6 +64,7 @@ cc_library(
     includes = [
         "include",
     ],
+    deps = ["//examples/poker:ranges"],
 )
 
 cc_library(
