@@ -107,10 +107,7 @@ State determineDeadState(const State stateCount,
 
 template <typename Symbol, typename State, typename TokenId>
 DFA<Symbol, State, TokenId> toDFA(const NFA<Symbol, State, TokenId>& nfa) {
-    std::vector<TokenId> final;
-    State stateCount{};
     std::vector<State> T;
-    State start{};
     const Symbol symbolCount(nfa.symbolCount - 1);
     std::vector<std::size_t> symbolToId(128, symbolCount);
     std::vector<Symbol> idToSymbol(128, symbolCount);
@@ -143,7 +140,7 @@ DFA<Symbol, State, TokenId> toDFA(const NFA<Symbol, State, TokenId>& nfa) {
     //  std::cout << "closure(s0): " << S << std::endl;
     stateToId[S] = id;
     stack.push_back(id);
-    start = id;
+    const State start = id;
     id++;
 
     while (!stack.empty()) {
@@ -209,10 +206,10 @@ DFA<Symbol, State, TokenId> toDFA(const NFA<Symbol, State, TokenId>& nfa) {
             }
         }
     }
-    stateCount = id;
+    const State stateCount = id;
     std::cout << "final state count: " << stateCount << std::endl;
     //  std::cout << "checking for terminal states" << std::endl;
-    final.resize(stateCount, 0);
+    std::vector<TokenId> final(stateCount, 0);
     for (unsigned int q = 0; q < stateCount; q++) {
         const BitSet& U = idToState[q];
         //    std::cout << "checking dfa state " << q << ": " << U << std::endl;
