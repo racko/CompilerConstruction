@@ -64,8 +64,6 @@ struct DFA {
         const std::vector<State>& T,
         const std::vector<std::size_t>& symbolToId,
         const std::vector<Symbol>& idToSymbol);
-
-    void determineDeadState();
 };
 
 template <typename Symbol, typename State, typename TokenId>
@@ -474,11 +472,6 @@ State determineDeadState(const State stateCount,
         std::cout << "there is no dead state" << std::endl;
         return stateCount;
     }
-}
-
-template <typename Symbol, typename State, typename TokenId>
-void DFA<Symbol, State, TokenId>::determineDeadState() {
-    deadState = ::determineDeadState(stateCount, symbolCount, T, final);
 }
 
 template <typename Symbol, typename State, typename TokenId>
