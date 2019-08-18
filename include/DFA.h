@@ -18,9 +18,6 @@ using Position = std::size_t;
 using PositionRange = std::pair<Position, Position>;
 } // namespace detail
 
-template <typename State>
-struct partition;
-
 template <typename Symbol, typename State, typename TokenId>
 struct DFA {
     State stateCount{};
