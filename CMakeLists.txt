@@ -36,24 +36,39 @@ add_compile_options(
 )
 
 add_library(util
-    src/Print.cpp
     src/BitSet.cpp
-    src/HashSet.cpp
+    src/BitSet_constexpr.cpp
+    src/DFA.cpp
+    src/DFA_constexpr.cpp
+    src/DFA_fwd.cpp
+    src/DFA_minimization_constexpr.cpp
     src/Grammar.cpp
     src/Grammar2.cpp
-    src/lrParser.cpp
-    src/llParser.cpp
-    src/lrParser2.cpp
-    src/attributed_lrparser.cpp
-    src/Regex.cpp
-    src/constexpr.cpp
-    src/NumRange.cpp
-    src/partition.cpp
+    src/HashSet.cpp
+    src/HashSet_constexpr.cpp
+    src/NFA.cpp
     src/NFA_constexpr.cpp
-    src/DFA_constexpr.cpp
-    src/DFA_minimization_constexpr.cpp
+    src/NFA_fwd.cpp
     src/NFA_to_DFA_constexpr.cpp
+    src/NumRange.cpp
+    src/Print.cpp
+    src/Regex.cpp
+    src/Regex_constexpr.cpp
+    src/Token.cpp
+    src/attributed_lrparser.cpp
+    src/constexpr.cpp
     src/constexpr_jsonLexer.cpp
+    src/hash_table.cpp
+    src/llParser.cpp
+    src/lrParser.cpp
+    src/lrParser2.cpp
+    src/nfaBuilder.cpp
+    src/nfaBuilder_constexpr.cpp
+    src/nfaBuilder_fwd.cpp
+    src/parser.cpp
+    src/partition.cpp
+    src/token_stream.cpp
+    src/variant.cpp
 )
 
 if(BUILD_TESTING)
