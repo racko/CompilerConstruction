@@ -3,6 +3,7 @@
 #include "DFA.h"
 #include "NFA.h"
 #include "NFA_to_DFA.h"
+#include "DFA_minimization.h"
 #include "iterative_fold.h"
 #include "nfaBuilder.h"
 #include "rank_count.h"

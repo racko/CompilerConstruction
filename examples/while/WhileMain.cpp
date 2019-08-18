@@ -1,6 +1,7 @@
 #include "Grammar.h"      // for kind, kind::EOI, kind::EPS, kind::NONTERMINAL
 #include "NFA.h"          // for NFA
 #include "NFA_to_DFA.h"   // for toDFA
+#include "DFA_minimization.h"   // for minimize
 #include "Regex.h"        // for Lexer, Lexer::Token, Lexer::DFA_t, Lexer::...
 #include "While.h"        // for Token, T, Grammar, operator<<, GrammarElement
 #include "lrParser.h"     // for LRParser

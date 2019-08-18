@@ -4,6 +4,7 @@
 #include "variant.h"     // for null
 #include <NFA.h>         // for NFA
 #include <NFA_to_DFA.h>  // for toDFA
+#include <DFA_minimization.h>  // for minimize
 #include <Regex.h>       // for Lexer, Lexer::Token, Lexer::TokenId, Lexer:...
 #include <cstddef>       // for size_t
 #include <iostream>      // for operator<<, stringstream, basic_ostream

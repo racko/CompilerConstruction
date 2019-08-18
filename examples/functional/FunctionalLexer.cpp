@@ -1,6 +1,7 @@
 #include "FunctionalLexer.h"
 #include "NFA.h"
 #include "NFA_to_DFA.h"
+#include "DFA_minimization.h"
 #include "nfaBuilder.h"
 #include <fstream>
 

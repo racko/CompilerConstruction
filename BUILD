@@ -31,6 +31,7 @@ cc_library(
         "include/DFA.h",
         "include/DFA_fwd.h",
         #"include/DFA_constexpr.h",
+        "include/DFA_minimization.h",
         #"include/DFA_minimization_constexpr.h",
         "include/Grammar.h",
         "include/Grammar2.h",

@@ -41,6 +41,7 @@ add_library(util
     src/DFA.cpp
     src/DFA_constexpr.cpp
     src/DFA_fwd.cpp
+    src/DFA_minimization.cpp
     src/DFA_minimization_constexpr.cpp
     src/Grammar.cpp
     src/Grammar2.cpp

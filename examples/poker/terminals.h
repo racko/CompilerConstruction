@@ -5,6 +5,13 @@
 #include <unordered_map>
 #include <vector>
 
+#ifndef NULL
+#define NULL 0
+#include <boost/serialization/unordered_map.hpp>
+#include <boost/serialization/vector.hpp>
+#endif
+#undef NULL
+
 class Terminals {
     // We insert dummy entries because terminalID 0 is reserved for
     // non-terminals :)
