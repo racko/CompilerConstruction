@@ -65,8 +65,6 @@ struct DFA {
         const std::vector<std::size_t>& symbolToId,
         const std::vector<Symbol>& idToSymbol);
 
-    void generateFromMinimizationResults(const partition<State>& part);
-
     void determineDeadState();
 
     void minimize();
@@ -342,12 +340,24 @@ auto inverseTransitionTable(const std::vector<State>& T, std::size_t stateCount,
 }
 
 template <typename Symbol, typename State, typename TokenId>
-void DFA<Symbol, State, TokenId>::generateFromMinimizationResults(const partition<State>& part) {
-    auto newStateCount = part.c_i.size();
+State determineDeadState(const State stateCount,
+                         const Symbol symbolCount,
+                         const std::vector<State>& T,
+                         const std::vector<TokenId>& final);
+
+template <typename Symbol, typename State, typename TokenId>
+DFA<Symbol, State, TokenId> generateFromMinimizationResults(const partition<State>& part,
+                                                            const State start,
+                                                            const Symbol symbolCount,
+                                                            const std::vector<State>& T,
+                                                            const std::vector<TokenId>& final,
+                                                            const std::vector<std::size_t>& symbolToId,
+                                                            const std::vector<Symbol>& idToSymbol) {
+    State newStateCount = part.c_i.size();
     std::cout << "new state count: " << newStateCount << std::endl;
-    std::vector<Class> newT(newStateCount * symbolCount);
+    std::vector<State> newT(newStateCount * symbolCount);
     std::vector<TokenId> newFinal(newStateCount);
-    for (Class q = 0; q < newStateCount; q++) {
+    for (State q = 0; q < newStateCount; q++) {
         auto t1 = part.c_i[q];
         auto s = t1.first;
         const auto ptr1 = T.data() + part.p[s] * symbolCount;
@@ -356,12 +366,14 @@ void DFA<Symbol, State, TokenId>::generateFromMinimizationResults(const partitio
             ptr2[a] = part.c[part.pI[ptr1[a]]];
         newFinal[q] = final[part.p[s]];
     }
-    start = part.c[part.pI[start]]; // bad: State start gets assigned a Class => This should be a free function that
-                                    // generates a DFA<Class> from DFA<State>
-    final = std::move(newFinal);
-    stateCount = newStateCount;
-    T = std::move(newT);
-    determineDeadState();
+    return DFA<Symbol, State, TokenId>(newStateCount,
+                                       symbolCount,
+                                       part.c[part.pI[start]],
+                                       determineDeadState(newStateCount, symbolCount, newT, newFinal),
+                                       std::move(newFinal),
+                                       std::move(newT),
+                                       symbolToId,
+                                       idToSymbol);
 }
 
 template <typename Symbol, typename State, typename TokenId>
@@ -404,7 +416,8 @@ void DFA<Symbol, State, TokenId>::minimize() {
     //  std::cout << "pI: " << show(pI) << std::endl;
     //  std::cout << "c: " << show(c) << std::endl;
 
-    generateFromMinimizationResults(part);
+    *this = ::generateFromMinimizationResults<Symbol, State, TokenId>(
+        part, start, symbolCount, T, final, symbolToId, idToSymbol);
 }
 
 template <typename T>
