@@ -11,13 +11,6 @@
 #include <utility> // for pair
 #include <vector>  // for vector
 
-namespace detail {
-using Set = BitSet;
-
-using Position = std::size_t;
-using PositionRange = std::pair<Position, Position>;
-} // namespace detail
-
 template <typename Symbol, typename State, typename TokenId>
 struct DFA {
     State stateCount{};

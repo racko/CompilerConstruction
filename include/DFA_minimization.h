@@ -10,6 +10,13 @@
 #include <utility>   // for make_pair, pair
 #include <vector>    // for vector
 
+namespace detail {
+using Set = BitSet;
+
+using Position = std::size_t;
+using PositionRange = std::pair<Position, Position>;
+} // namespace detail
+
 template <typename State>
 struct partition {
   private:
