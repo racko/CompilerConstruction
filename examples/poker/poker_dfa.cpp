@@ -99,7 +99,7 @@ std::pair<DFA<Symbol, StateId, TerminalId>, Terminals> make_minimal_DFA(std::ost
     auto dfa = make_DFA(logger);
     logger << "dfa done\n";
     logger << dfa.first << '\n';
-    dfa.first.minimize();
+    dfa.first = minimize(dfa.first);
     logger << "minimization done\n";
     logger << dfa.first << '\n';
     return dfa;

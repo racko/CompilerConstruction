@@ -382,7 +382,7 @@ auto myLexer::getDFA() -> DFA_t {
 
     NFA<Symbol, State, TokenId> nfa1(builder);
     DFA_t dfa1{toDFA(nfa1)};
-    dfa1.minimize();
+    dfa1 = minimize(dfa1);
 
     return dfa1;
 }

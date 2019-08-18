@@ -187,7 +187,7 @@ auto myLexer::impl::getDFA() -> DFA_t {
     std::cout << "DFA" << std::endl;
     DFA_t dfa1{toDFA(nfa1)};
     std::cout << "minimal DFA" << std::endl;
-    dfa1.minimize();
+    dfa1 = minimize(dfa1);
     return dfa1;
 }
 

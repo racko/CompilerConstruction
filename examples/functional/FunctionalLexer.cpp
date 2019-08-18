@@ -92,7 +92,7 @@ auto myLexer::getDFA() -> DFA_t {
     DFA_t dfa1{toDFA(nfa1)};
     std::ofstream file2("functional_dfa.dot");
     file2 << dfa1;
-    dfa1.minimize();
+    dfa1 = minimize(dfa1);
     std::ofstream file3("functional_min_dfa.dot");
     file3 << dfa1;
     return dfa1;

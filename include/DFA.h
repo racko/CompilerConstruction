@@ -66,8 +66,6 @@ struct DFA {
         const std::vector<Symbol>& idToSymbol);
 
     void determineDeadState();
-
-    void minimize();
 };
 
 template <typename Symbol, typename State, typename TokenId>
@@ -87,9 +85,6 @@ DFA<Symbol, State, TokenId>::DFA(State stateCount,
       T{T},
       symbolToId{symbolToId},
       idToSymbol{idToSymbol} {}
-
-// template <typename Symbol, typename State, typename TokenId>
-// DFA<Symbol, detail::Position, TokenId> minimize(const DFA<Symbol, State, TokenId>& dfa);
 
 template <typename Symbol, typename State, typename TokenId>
 std::ostream& operator<<(std::ostream&, const DFA<Symbol, State, TokenId>&);
@@ -377,19 +372,27 @@ DFA<Symbol, State, TokenId> generateFromMinimizationResults(const partition<Stat
 }
 
 template <typename Symbol, typename State, typename TokenId>
-void DFA<Symbol, State, TokenId>::minimize() {
+DFA<Symbol, State, TokenId> minimize(const DFA<Symbol, State, TokenId>& dfa) {
     std::cout << "minimize" << std::endl;
+
+    const auto& T = dfa.T;
+    const auto start = dfa.start;
+    const auto stateCount = dfa.stateCount;
+    const auto symbolCount = dfa.symbolCount;
+    const auto& final = dfa.final;
+    const auto& symbolToId = dfa.symbolToId;
+    const auto& idToSymbol = dfa.idToSymbol;
 
     auto tI = inverseTransitionTable<Symbol>(T, stateCount, symbolCount);
 
     partition<State> part(final);
 
-    std::vector<Class> stack;
+    std::vector<State> stack;
     stack.reserve(part.c_i.size());
     // std::generate_n(std::back_inserter(stack), kinds.size(), [i = kinds.size()-1] () mutable { return i--;});
     std::generate_n(std::back_inserter(stack), part.c_i.size(), [i = 0]() mutable { return i++; });
 
-    Set tmp(stateCount, false);
+    detail::Set tmp(stateCount, false);
     while (!stack.empty()) {
         // std::cout << "stack: " << show(stack) << std::endl;
         auto splitter = stack.back();
@@ -416,7 +419,7 @@ void DFA<Symbol, State, TokenId>::minimize() {
     //  std::cout << "pI: " << show(pI) << std::endl;
     //  std::cout << "c: " << show(c) << std::endl;
 
-    *this = ::generateFromMinimizationResults<Symbol, State, TokenId>(
+    return generateFromMinimizationResults<Symbol, State, TokenId>(
         part, start, symbolCount, T, final, symbolToId, idToSymbol);
 }
 
