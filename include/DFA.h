@@ -543,7 +543,10 @@ struct NumRange {
 };
 
 template <typename Symbol, typename State, typename TokenId>
-void DFA<Symbol, State, TokenId>::determineDeadState() {
+State determineDeadState(const State stateCount,
+                         const Symbol symbolCount,
+                         const std::vector<State>& T,
+                         const std::vector<TokenId>& final) {
     //  std::cout << "determineDeadState" << std::endl;
     auto idempotent = [&](State q) {
         const auto ptr = T.data() + q * symbolCount;
@@ -553,12 +556,17 @@ void DFA<Symbol, State, TokenId>::determineDeadState() {
     auto stop = NumIterator<State>(stateCount);
     auto it = std::find_if(NumIterator<State>(0u), stop, isDeadState);
     if (it != stop) {
-        deadState = *it;
-        std::cout << deadState << " is the dead state" << std::endl;
+        std::cout << *it << " is the dead state" << std::endl;
+        return *it;
     } else {
         std::cout << "there is no dead state" << std::endl;
-        deadState = stateCount;
+        return stateCount;
     }
+}
+
+template <typename Symbol, typename State, typename TokenId>
+void DFA<Symbol, State, TokenId>::determineDeadState() {
+    deadState = ::determineDeadState(stateCount, symbolCount, T, final);
 }
 
 template <typename Symbol, typename State, typename TokenId>
