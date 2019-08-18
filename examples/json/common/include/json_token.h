@@ -45,8 +45,8 @@ inline type getNumberOfNonterminals() { return numberOfNonterminals; }
 
 inline type getNumberOfGrammarElements() { return static_cast<type>(numberOfTerminals + numberOfNonterminals); }
 
-extern const char* nt_strings[];
-extern const char* t_strings[];
+extern const char* const nt_strings[];
+extern const char* const t_strings[];
 
 std::ostream& operator<<(std::ostream& s, T const& a);
 
