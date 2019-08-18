@@ -15,10 +15,11 @@ NullLogger null_logger;
 
 [[maybe_unused]] void
 printValidCards(std::ostream& stream, const DFA<Symbol, StateId, TerminalId>& dfa, const StateId s) {
-    const auto& transitions = dfa.T.data() + dfa.symbolCount * s;
-    for (auto i = 0U; i < dfa.symbolCount; ++i) {
+    const auto symbol_count = dfa.symbols_.count();
+    const auto& transitions = dfa.T.data() + symbol_count * s;
+    for (auto i = 0U; i < symbol_count; ++i) {
         if (transitions[i] != dfa.deadState) {
-            stream << int(dfa.idToSymbol[i]) << ' ';
+            stream << int(dfa.symbols_.idToSymbol(i)) << ' ';
         }
     }
     stream << '\n';
@@ -32,15 +33,14 @@ HandRank rank(const Symbol* const cards) {
     auto s = dfa.start;
     const auto fptr = dfa.finals.data();
     logger << "starting in state " << s << ", type " << fptr[s] << '\n';
-    logger << "dfa.symbolToId.size(): " << dfa.symbolToId.size() << '\n';
     const auto Tptr = dfa.T.data();
-    const auto scount = dfa.symbolCount;
+    const auto scount = dfa.symbols_.count();
     const auto dstate = dfa.deadState;
     printValidCards(logger, dfa, s);
     assert(s != dstate);
     for (auto i = 0; i < 6; ++i) {
         logger << "symbol: " << cards[i] << '\n';
-        auto sid = dfa.symbolToId[cards[i]];
+        auto sid = dfa.symbols_.symbolToId(cards[i]);
         if (sid == scount) {
             throw std::runtime_error("invalid card");
         }
@@ -51,7 +51,7 @@ HandRank rank(const Symbol* const cards) {
             throw std::runtime_error("not a valid hand");
         }
     }
-    s = Tptr[s * scount + dfa.symbolToId[cards[6]]];
+    s = Tptr[s * scount + dfa.symbols_.symbolToId(cards[6])];
     if (s == dstate) { // Not an assert because this is input validation.
         throw std::runtime_error("not a valid hand");
     }

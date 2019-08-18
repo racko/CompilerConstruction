@@ -11,46 +11,60 @@
 #include <utility> // for pair
 #include <vector>  // for vector
 
+template <typename Symbol>
+class Symbols {
+  public:
+    Symbols() = default;
+    Symbols(const Symbol symbolCount, std::vector<std::size_t> symbolToId, std::vector<Symbol> idToSymbol)
+        : symbolCount_{symbolCount}, symbolToId_{std::move(symbolToId)}, idToSymbol_{std::move(idToSymbol)} {}
+    Symbol count() const { return symbolCount_; }
+    std::size_t symbolToId(const std::size_t symbol) const { return symbolToId_[symbol]; }
+    Symbol idToSymbol(const std::size_t id) const { return idToSymbol_[id]; }
+
+    bool operator==(const Symbols<Symbol>& rhs) const {
+        return symbolCount_ == rhs.symbolCount_ && symbolToId_ == rhs.symbolToId_ && idToSymbol_ == rhs.idToSymbol_;
+    }
+
+    template <class Archive>
+    void serialize(Archive& ar, unsigned int) {
+        ar& symbolCount_;
+        ar& symbolToId_;
+        ar& idToSymbol_;
+    }
+
+  private:
+    Symbol symbolCount_{};
+    std::vector<std::size_t> symbolToId_;
+    std::vector<Symbol> idToSymbol_;
+};
+
 template <typename Symbol, typename State, typename TokenId>
 struct DFA {
     State stateCount{};
-    Symbol symbolCount{};
     State start{};
     State deadState{};
     std::vector<TokenId> finals;
     std::vector<State> T;
-    std::vector<std::size_t> symbolToId;
-    std::vector<Symbol> idToSymbol;
+    Symbols<Symbol> symbols_;
 
     DFA() = default;
 
     DFA(State stateCount,
-        Symbol symbolCount,
         State start,
         State deadState,
         const std::vector<TokenId>& finals,
         const std::vector<State>& T,
-        const std::vector<std::size_t>& symbolToId,
-        const std::vector<Symbol>& idToSymbol);
+        const Symbols<Symbol>& symbols);
 };
 
 template <typename Symbol, typename State, typename TokenId>
 DFA<Symbol, State, TokenId>::DFA(State stateCount,
-                                 Symbol symbolCount,
                                  State start,
                                  State deadState,
                                  const std::vector<TokenId>& finals,
                                  const std::vector<State>& T,
-                                 const std::vector<std::size_t>& symbolToId,
-                                 const std::vector<Symbol>& idToSymbol)
-    : stateCount{stateCount},
-      symbolCount{symbolCount},
-      start{start},
-      deadState{deadState},
-      finals{finals},
-      T{T},
-      symbolToId{symbolToId},
-      idToSymbol{idToSymbol} {}
+                                 const Symbols<Symbol>& symbols)
+    : stateCount{stateCount}, start{start}, deadState{deadState}, finals{finals}, T{T}, symbols_{symbols} {}
 
 template <typename Symbol, typename State, typename TokenId>
 std::ostream& operator<<(std::ostream&, const DFA<Symbol, State, TokenId>&);
@@ -79,9 +93,8 @@ State determineDeadState(const State stateCount,
 
 template <typename Symbol, typename State, typename TokenId>
 bool operator==(const DFA<Symbol, State, TokenId>& lhs, const DFA<Symbol, State, TokenId>& rhs) {
-    return lhs.stateCount == rhs.stateCount && lhs.symbolCount == rhs.symbolCount && lhs.start == rhs.start &&
-           lhs.deadState == rhs.deadState && lhs.finals == rhs.finals && lhs.T == rhs.T &&
-           lhs.symbolToId == rhs.symbolToId && lhs.idToSymbol == rhs.idToSymbol;
+    return lhs.stateCount == rhs.stateCount && lhs.start == rhs.start && lhs.deadState == rhs.deadState &&
+           lhs.finals == rhs.finals && lhs.T == rhs.T && lhs.symbols_ == rhs.symbols_;
 }
 
 template <typename Symbol, typename State, typename TokenId>
@@ -95,12 +108,12 @@ std::ostream& operator<<(std::ostream& s, const DFA<Symbol, State, TokenId>& dfa
         if (dfa.finals[p]) {
             s << "  " << p << "[label = \"" << p << '|' << dfa.finals[p] << "\" shape = doublecircle];\n";
         }
-        const auto ptr = dfa.T.data() + p * dfa.symbolCount;
-        for (auto a = 0u; a < dfa.symbolCount; ++a) {
+        const auto ptr = dfa.T.data() + p * dfa.symbols_.count();
+        for (auto a = 0u; a < dfa.symbols_.count(); ++a) {
             if (ptr[a] != dfa.deadState) {
                 // s << "  " << p << " -> " << ptr[a] << " [label = \"" << showCharEscaped(dfa.idToSymbol[a]) <<
                 // "\"];\n";
-                s << "  " << p << " -> " << ptr[a] << " [label = \"" << int(dfa.idToSymbol[a]) << "\"];\n";
+                s << "  " << p << " -> " << ptr[a] << " [label = \"" << int(dfa.symbols_.idToSymbol(a)) << "\"];\n";
             }
         }
     }
@@ -114,13 +127,11 @@ namespace serialization {
 template <class Archive, typename Symbol, typename State, typename TokenId>
 void serialize(Archive& ar, DFA<Symbol, State, TokenId>& dfa, unsigned int) {
     ar& dfa.stateCount;
-    ar& dfa.symbolCount;
     ar& dfa.start;
     ar& dfa.deadState;
     ar& dfa.finals;
     ar& dfa.T;
-    ar& dfa.symbolToId;
-    ar& dfa.idToSymbol;
+    ar& dfa.symbols_;
 }
 
 } // namespace serialization

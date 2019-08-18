@@ -138,6 +138,6 @@ DFA<Symbol, State, TokenId> toDFA(const NFA<Symbol, State, TokenId>& nfa) {
     }
 
     State deadState = ::determineDeadState(stateCount, symbolCount, T, finals);
-    return DFA<Symbol, State, TokenId>(stateCount, symbolCount, start, deadState, finals, T, symbolToId, idToSymbol);
+    return DFA<Symbol, State, TokenId>(stateCount, start, deadState, finals, T, Symbols<Symbol>{symbolCount, symbolToId, idToSymbol});
 }
 

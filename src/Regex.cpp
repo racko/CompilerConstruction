@@ -17,13 +17,12 @@ auto Lexer::getToken() -> Token {
     auto current = c;
     const auto fptr = dfa_.finals.data();
     const auto Tptr = dfa_.T.data();
-    const auto sptr = dfa_.symbolToId.data();
-    const auto scount = dfa_.symbolCount;
+    const auto scount = dfa_.symbols_.count();
     const auto dstate = dfa_.deadState;
     while (/**current != EOF && */ s != dstate) {
         // cout << "got '" << showCharEscaped(*current) << "'" << endl;
         // auto _c = dfa_.symbolToId.at(*current);
-        const auto _c = sptr[*current];
+        const auto _c = dfa_.symbols_.symbolToId(*current);
         // if (_c == scount) {
         //    throw std::runtime_error("invalid symbol '" + printEscaped(*current) + "'");
         //}
