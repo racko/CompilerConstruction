@@ -100,8 +100,20 @@ template <typename Symbol, typename State, typename TokenId>
 std::ostream& operator<<(std::ostream&, const DFA<Symbol, State, TokenId>&);
 
 template <typename Symbol, typename State, typename TokenId>
-DFA<Symbol, State, TokenId>::DFA(const NFA<Symbol, State, TokenId>& nfa)
-    : symbolCount(nfa.symbolCount - 1), symbolToId(128, symbolCount), idToSymbol(128, symbolCount) {
+State determineDeadState(const State stateCount,
+                         const Symbol symbolCount,
+                         const std::vector<State>& T,
+                         const std::vector<TokenId>& final);
+
+template <typename Symbol, typename State, typename TokenId>
+DFA<Symbol, State, TokenId> toDFA(const NFA<Symbol, State, TokenId>& nfa) {
+    std::vector<TokenId> final;
+    State stateCount{};
+    std::vector<State> T;
+    State start{};
+    const Symbol symbolCount(nfa.symbolCount - 1);
+    std::vector<std::size_t> symbolToId(128, symbolCount);
+    std::vector<Symbol> idToSymbol(128, symbolCount);
     using BitSet = HashSet;
     std::cout << "DFA constructor" << std::endl;
     std::cout << "stateCount = " << nfa.stateCount << std::endl;
@@ -224,8 +236,12 @@ DFA<Symbol, State, TokenId>::DFA(const NFA<Symbol, State, TokenId>& nfa)
         }
     }
 
-    determineDeadState();
+    State deadState = ::determineDeadState(stateCount, symbolCount, T, final);
+    return DFA<Symbol, State, TokenId>(stateCount, symbolCount, start, deadState, final, T, symbolToId, idToSymbol);
 }
+
+template <typename Symbol, typename State, typename TokenId>
+DFA<Symbol, State, TokenId>::DFA(const NFA<Symbol, State, TokenId>& nfa) : DFA{toDFA(nfa)} {}
 
 template <typename State>
 struct partition {
