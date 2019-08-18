@@ -95,15 +95,15 @@ splitterSet(const PositionRange& t1, Symbol a, Set& tmp, const Partition& part, 
 }
 
 template <int64_t MaxNodes, int64_t MaxSymbols, typename Symbol, typename State, int64_t Size>
-constexpr auto inverseTransitionTable(const vector<State, Size>& T, int64_t stateCount, int64_t symbolCount) {
+constexpr auto inverseTransitionTable(const const_expr::vector<State, Size>& T, int64_t stateCount, int64_t symbolCount) {
     // using TSet = HashSet<MaxNodes>;
     using TSet = BitSet<MaxNodes>;
     if (stateCount > MaxNodes)
         throw std::runtime_error("stateCount > MaxNodes");
     if (symbolCount > MaxSymbols)
         throw std::runtime_error("symbolCount > MaxSymbols");
-    vector<vector<TSet, MaxNodes>, MaxSymbols> tI(symbolCount,
-                                                  vector<TSet, MaxNodes>(stateCount, TSet(stateCount, false)));
+    const_expr::vector<const_expr::vector<TSet, MaxNodes>, MaxSymbols> tI(symbolCount,
+                                                  const_expr::vector<TSet, MaxNodes>(stateCount, TSet(stateCount, false)));
     auto tIptr = tI.data();
 
     for (State i = 0; i < stateCount; i++) {
@@ -120,14 +120,14 @@ constexpr DFA<Symbol, Class, TokenId, MaxNodes, MaxSymbols>
 generateFromMinimizationResults(const partition<State, Class, MaxNodes>& part,
                                 State start,
                                 int64_t symbolCount,
-                                const vector<State, MaxNodes * MaxSymbols>& T,
-                                const vector<TokenId, MaxNodes>& finals,
-                                const vector<int64_t, MaxSymbols>& symbolToId,
-                                const vector<Symbol, MaxSymbols>& idToSymbol) {
+                                const const_expr::vector<State, MaxNodes * MaxSymbols>& T,
+                                const const_expr::vector<TokenId, MaxNodes>& finals,
+                                const const_expr::vector<int64_t, MaxSymbols>& symbolToId,
+                                const const_expr::vector<Symbol, MaxSymbols>& idToSymbol) {
     auto newStateCount = part.c_i.size();
     // std::cout << "new state count: " << newStateCount << std::endl;
-    vector<Class, MaxNodes * MaxSymbols> newT(newStateCount * symbolCount);
-    vector<TokenId, MaxNodes> newFinals(newStateCount);
+    const_expr::vector<Class, MaxNodes * MaxSymbols> newT(newStateCount * symbolCount);
+    const_expr::vector<TokenId, MaxNodes> newFinals(newStateCount);
     for (Class q = 0; q < newStateCount; q++) {
         auto t1 = part.c_i[q];
         auto s = t1.first;
@@ -165,7 +165,7 @@ minimize(const DFA<Symbol, State, TokenId, MaxNodes, MaxSymbols>& dfa) {
 
     partition<State, Class, MaxNodes> part(finals);
 
-    vector<Class, MaxNodes> stack;
+    const_expr::vector<Class, MaxNodes> stack;
     stack.reserve(part.c_i.size());
     // std::generate_n(std::back_inserter(stack), kinds.size(), [i = kinds.size()-1] () mutable { return i--;});
     generate_n(back_inserter(stack), part.c_i.size(), [i = 0]() mutable { return i++; });

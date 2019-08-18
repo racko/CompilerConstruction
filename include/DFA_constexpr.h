@@ -8,21 +8,21 @@
 #include <stdexcept>   // for runtime_error
 
 using Position = int64_t;
-using PositionRange = pair<Position, Position>;
+using PositionRange = const_expr::pair<Position, Position>;
 
 template <typename State, typename TokenId, int64_t Size1, int64_t Size2>
 constexpr State determineDeadState(int64_t stateCount,
                                    int64_t symbolCount,
-                                   const vector<State, Size1>& T,
-                                   const vector<TokenId, Size2>& finals) {
+                                   const const_expr::vector<State, Size1>& T,
+                                   const const_expr::vector<TokenId, Size2>& finals) {
     //  std::cout << "determineDeadState" << std::endl;
     auto idempotent = [&](State q) {
         const auto ptr = T.data() + q * symbolCount;
-        return all_of(ptr, ptr + symbolCount, [&](State q_) { return q_ == q; });
+        return const_expr::all_of(ptr, ptr + symbolCount, [&](State q_) { return q_ == q; });
     };
     auto isDeadState = [&](State q) { return !finals[q] && idempotent(q); };
     NumRange<State> r(0, stateCount);
-    auto it = find_if(r.begin(), r.end(), isDeadState);
+    auto it = const_expr::find_if(r.begin(), r.end(), isDeadState);
     if (it != r.end()) {
         return *it;
         // std::cout << deadState << " is the dead state" << std::endl;
@@ -38,10 +38,10 @@ struct DFA {
     int64_t symbolCount; // TODO change to Symbol lastSymbol ...
     State start;
     State deadState;
-    vector<TokenId, MaxNodes> finals;
-    vector<State, MaxNodes * MaxSymbols> T;
-    vector<int64_t, MaxSymbols> symbolToId;
-    vector<Symbol, MaxSymbols> idToSymbol;
+    const_expr::vector<TokenId, MaxNodes> finals;
+    const_expr::vector<State, MaxNodes * MaxSymbols> T;
+    const_expr::vector<int64_t, MaxSymbols> symbolToId;
+    const_expr::vector<Symbol, MaxSymbols> idToSymbol;
 
     // constexpr DFA() = default;
 
@@ -58,10 +58,10 @@ struct DFA {
                   int64_t symbolCount,
                   State start,
                   State deadState,
-                  const vector<TokenId, MaxNodes>& finals,
-                  const vector<State, MaxNodes * MaxSymbols>& T,
-                  const vector<int64_t, MaxSymbols>& symbolToId,
-                  const vector<Symbol, MaxSymbols>& idToSymbol);
+                  const const_expr::vector<TokenId, MaxNodes>& finals,
+                  const const_expr::vector<State, MaxNodes * MaxSymbols>& T,
+                  const const_expr::vector<int64_t, MaxSymbols>& symbolToId,
+                  const const_expr::vector<Symbol, MaxSymbols>& idToSymbol);
 };
 
 // template<typename Symbol, typename State, typename TokenId, int64_t MaxNodes, int64_t MaxSymbols>
@@ -90,10 +90,10 @@ constexpr DFA<Symbol, State, TokenId, MaxNodes, MaxSymbols>::DFA(int64_t stateCo
                                                                  int64_t symbolCount_,
                                                                  State start_,
                                                                  State deadState_,
-                                                                 const vector<TokenId, MaxNodes>& finals_,
-                                                                 const vector<State, MaxNodes * MaxSymbols>& T_,
-                                                                 const vector<int64_t, MaxSymbols>& symbolToId_,
-                                                                 const vector<Symbol, MaxSymbols>& idToSymbol_)
+                                                                 const const_expr::vector<TokenId, MaxNodes>& finals_,
+                                                                 const const_expr::vector<State, MaxNodes * MaxSymbols>& T_,
+                                                                 const const_expr::vector<int64_t, MaxSymbols>& symbolToId_,
+                                                                 const const_expr::vector<Symbol, MaxSymbols>& idToSymbol_)
     : stateCount(stateCount_),
       symbolCount(symbolCount_),
       start(start_),

@@ -28,7 +28,7 @@ if(BUILD_TESTING)
 
     target_link_libraries(json_test.exe
       PRIVATE
-        catch2
+        catch2::catch2
         json
         json-ll
         json-lr
@@ -40,6 +40,6 @@ if(BUILD_TESTING)
 endif()
 
 add_subdirectory(common)
-add_subdirectory(LL)
-add_subdirectory(LR)
-add_subdirectory(LR2)
+add_subdirectory(ll)
+add_subdirectory(lr)
+add_subdirectory(lr2)

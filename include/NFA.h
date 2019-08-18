@@ -15,7 +15,8 @@ template <typename Symbol, typename State, typename TokenId>
 struct NFA {
     using BitSet = HashSet;
     Symbol eps;
-    size_t symbolCount, stateCount;
+    Symbol symbolCount;
+    State stateCount;
     State start;
     std::vector<TokenId> final;
     std::vector<std::vector<BitSet>> table;
@@ -74,13 +75,15 @@ void NFA<Symbol, State, TokenId>::getClosure(BitSet& S) const {
 template <typename Symbol, typename State, typename TokenId>
 NFA<Symbol, State, TokenId>::NFA(const nfaBuilder<Symbol, State, TokenId>& nfa)
     : eps(nfa.eps),
-      symbolCount(nfa.symbolToId.size()),
-      stateCount(nfa.ns.size()),
+      symbolCount(static_cast<Symbol>(nfa.symbolToId.size())),
+      stateCount(static_cast<State>(nfa.ns.size())),
       start(nfa.start),
       final(stateCount),
       table(stateCount, std::vector<BitSet>(symbolCount, BitSet(stateCount, false))),
       symbols(nfa.idToSymbol),
       newStates(nfa.ns.size()) {
+    assert(nfa.symbolToId.size() < static_cast<std::size_t>(std::numeric_limits<Symbol>::max()));
+    assert(nfa.ns.size() < static_cast<std::size_t>(std::numeric_limits<State>::max()));
     std::cout << "constructing NFA from nfaBuilder" << std::endl;
     std::cout << "stateCount: " << stateCount << std::endl;
     std::cout << "start: " << nfa.start << std::endl;
@@ -106,9 +109,8 @@ std::ostream& operator<<(std::ostream& s, const NFA<Symbol, State, TokenId>& nfa
     s << "digraph G {\n";
     for (unsigned int p = 0; p < nfa.stateCount; p++) {
         if (nfa.final[p])
-            s << "  " << p << "[shape = doublecircle];\n";
+            s << "  " << p << "[label = \"" << p << '|' << nfa.final[p] << "\" shape = doublecircle];\n";
         for (auto a = 0u; a < nfa.symbolCount; ++a) {
-            s << "[DEBUG] symbol id: " << a << '\n';
             if (nfa.table[p][a].count() > 0) {
                 s << "  " << p << " -> { ";
                 auto q = nfa.table[p][a].begin();
@@ -120,7 +122,7 @@ std::ostream& operator<<(std::ostream& s, const NFA<Symbol, State, TokenId>& nfa
                         s << ", " << *q;
                     }
                 }
-                //s << " } [label = \"" << showCharEscaped(nfa.symbols[a]) << "\"];\n";
+                // s << " } [label = \"" << showCharEscaped(nfa.symbols[a]) << "\"];\n";
                 s << " } [label = \"" << int(nfa.symbols[a]) << "\"];\n";
             }
         }

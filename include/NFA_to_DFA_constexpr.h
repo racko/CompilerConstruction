@@ -20,18 +20,18 @@ constexpr DFA<Symbol, DfaState, TokenId, MaxNodes, MaxSymbols>
 toDFA(const NFA<Symbol, NfaState, TokenId, MaxNodes, MaxSymbols, MaxTransitions, MaxResultStates>& nfa) {
     using SymbolIndex = int64_t;
     auto symbolCount(nfa.symbolCount - 1);
-    vector<SymbolIndex, MaxSymbols> symbolToId(128, symbolCount);
+    const_expr::vector<SymbolIndex, MaxSymbols> symbolToId(128, symbolCount);
     if (symbolCount > std::numeric_limits<Symbol>::max())
         throw std::range_error("toDFA: symbolCount");
-    vector<Symbol, MaxSymbols> idToSymbol(128, static_cast<Symbol>(symbolCount));
+    const_expr::vector<Symbol, MaxSymbols> idToSymbol(128, static_cast<Symbol>(symbolCount));
 
-    vector<DfaState, MaxNodes * MaxSymbols> T;
+    const_expr::vector<DfaState, MaxNodes * MaxSymbols> T;
 
     using States = HashSet<MaxNodes>;
     // std::cout << "DFA constructor" << std::endl;
     // std::cout << "stateCount = " << nfa.stateCount << std::endl;
     // std::cout << "symbolCount = " << symbolCount << std::endl;
-    vector<SymbolIndex, MaxSymbols> symbolMap(nfa.symbolCount);
+    const_expr::vector<SymbolIndex, MaxSymbols> symbolMap(nfa.symbolCount);
     SymbolIndex nonEpsSymbol = 0;
     for (auto i = SymbolIndex(); i < nfa.symbolCount; i++) {
         if (i != nfa.eps) { // @FIXME: this implies that NFA::eps is actually a SymbolIndex
@@ -47,11 +47,11 @@ toDFA(const NFA<Symbol, NfaState, TokenId, MaxNodes, MaxSymbols, MaxTransitions,
 
     auto n = nfa.stateCount;
     DfaState id = 0;
-    vector<DfaState, MaxNodes>
+    const_expr::vector<DfaState, MaxNodes>
         stack; /// @FIXME: (non-minimized) DFA MaxNodes can be exponentially larger than NFA MaxNodes
-    vector<States, MaxNodes> idToState;
+    const_expr::vector<States, MaxNodes> idToState;
     // unordered_map<States,DfaState,MaxNodes> stateToId;
-    HashMap<States, DfaState, MaxNodes> stateToId;
+    const_expr::HashMap<States, DfaState, MaxNodes> stateToId;
     idToState.emplace_back(n, false);
     States& S = idToState.back();
     S.set(nfa.start);
@@ -143,7 +143,7 @@ toDFA(const NFA<Symbol, NfaState, TokenId, MaxNodes, MaxSymbols, MaxTransitions,
     // std::cout << "final state count: " << stateCount << std::endl;
     //  std::cout << "checking for terminal states" << std::endl;
     const auto not_final = TokenId{};
-    vector<TokenId, MaxNodes> finals(stateCount, not_final);
+    const_expr::vector<TokenId, MaxNodes> finals(stateCount, not_final);
     for (DfaState q = 0; q < stateCount; q++) {
         const States& UU = idToState[q];
         //    std::cout << "checking dfa state " << q << ": " << UU << std::endl;

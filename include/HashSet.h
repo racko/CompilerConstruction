@@ -38,13 +38,13 @@ struct HashSet {
     };
 
     std::unordered_set<unsigned int> s;
-    unsigned int n = 0;
+    std::size_t n = 0;
 
     HashSet() = default;
     ~HashSet(); // ignore rule of five here. It's defaulted in the cpp. I only want the compiler to not generate the unordered_set destructor everywhere ...
 
-    HashSet(unsigned int _n);
-    HashSet(unsigned int _n, const bool x);
+    HashSet(std::size_t _n);
+    HashSet(std::size_t _n, bool x);
 
     void resize(unsigned int _n);
 
@@ -52,7 +52,7 @@ struct HashSet {
 
     const_ref operator[](unsigned int i) const;
 
-    unsigned int size() const;
+    std::size_t size() const;
 
     size_t count() const;
 
@@ -81,11 +81,11 @@ class hash<HashSet> {
 };
 }
 
-inline HashSet::HashSet(unsigned int _n) : n(_n) {
+inline HashSet::HashSet(const std::size_t _n) : n(_n) {
     //cout << "constructed HashSet(" << _n << "): " << *this << endl;
 }
 
-inline HashSet::HashSet(unsigned int _n, const bool x) : n(_n) {
+inline HashSet::HashSet(const std::size_t _n, const bool x) : n(_n) {
     if (x) {
         throw std::runtime_error("You don't want to construct a HashSet with all values in it ... you'd want to use a BitSet for this");
     }
@@ -100,7 +100,7 @@ inline HashSet::const_ref HashSet::operator[](unsigned int i) const {
     return HashSet::const_ref(s, i);
 }
 
-inline unsigned int HashSet::size() const {
+inline std::size_t HashSet::size() const {
     return n;
 }
 

@@ -27,10 +27,10 @@ struct NFA {
     Symbol eps;
     int64_t symbolCount, stateCount;
     State start;
-    vector<TokenId, MaxNodes> finals;
-    vector<vector<internal_set, MaxNodes>, MaxSymbols> table; // MaxTransitions instead of MaxSymbols?
-    vector<Symbol, MaxSymbols> symbols;
-    vector<Set, MaxNodes> closures;
+    const_expr::vector<TokenId, MaxNodes> finals;
+    const_expr::vector<const_expr::vector<internal_set, MaxNodes>, MaxSymbols> table; // MaxTransitions instead of MaxSymbols?
+    const_expr::vector<Symbol, MaxSymbols> symbols;
+    const_expr::vector<Set, MaxNodes> closures;
 
     // constexpr NFA(int64_t _symbolCount, int64_t _stateCount, Symbol _eps, State _start, vector<TokenId,MaxNodes>
     // _final) : eps(_eps), symbolCount(_symbolCount), stateCount(_stateCount), start(_start),
@@ -48,7 +48,7 @@ struct NFA {
     // constexpr void getClosure(Set& s) const;
   private: // only made private to find remaing call sites
     constexpr void
-    getClosure(Set& s, HashSet<MaxTransitions>& newStates, vector<typename Set::value_type, MaxNodes>& stack) const;
+    getClosure(Set& s, HashSet<MaxTransitions>& newStates, const_expr::vector<typename Set::value_type, MaxNodes>& stack) const;
 };
 
 template <typename Symbol,
@@ -65,7 +65,7 @@ constexpr NFA<Symbol, State, TokenId, MaxNodes, MaxSymbols, MaxTransitions, MaxR
       stateCount(nfa.ns.getStateCount()),
       start(nfa.start),
       finals(stateCount),
-      table(symbolCount, vector<internal_set, MaxNodes>(stateCount, internal_set(stateCount, false))),
+      table(symbolCount, const_expr::vector<internal_set, MaxNodes>(stateCount, internal_set(stateCount, false))),
       symbols(nfa.idToSymbol) {
     //  cout << "symbols: " << show(nfa.idToSymbol) << std::endl;
 
@@ -88,7 +88,7 @@ constexpr NFA<Symbol, State, TokenId, MaxNodes, MaxSymbols, MaxTransitions, MaxR
 
     Set S(stateCount);
     HashSet<MaxTransitions> newStates(stateCount);
-    vector<typename Set::value_type, MaxNodes> stack;
+    const_expr::vector<typename Set::value_type, MaxNodes> stack;
     for (State p = 0; p < stateCount; p++) {
         S.set(p);
         getClosure(S, newStates, stack);
@@ -127,7 +127,7 @@ template <typename Symbol,
           int64_t MaxTransitions,
           int64_t MaxResultStates>
 constexpr void NFA<Symbol, State, TokenId, MaxNodes, MaxSymbols, MaxTransitions, MaxResultStates>::getClosure(
-    Set& S, HashSet<MaxTransitions>& newStates, vector<typename Set::value_type, MaxNodes>& stack) const {
+    Set& S, HashSet<MaxTransitions>& newStates, const_expr::vector<typename Set::value_type, MaxNodes>& stack) const {
     // cout << "getClosure(" << S << ")" << std::endl;
     // Set newStates(stateCount);
     // HashSet<MaxNodes> newStates(stateCount);

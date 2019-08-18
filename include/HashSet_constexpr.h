@@ -11,7 +11,7 @@ struct integer_hash {
 
 template<int64_t Size, typename T = unsigned int>
 struct HashSet {
-    using internal_set = unordered_set<T,Size, integer_hash<T>, int16_t>;
+    using internal_set = const_expr::unordered_set<T,Size, integer_hash<T>, int16_t>;
     using value_type = T;
     struct ref {
         internal_set& s;

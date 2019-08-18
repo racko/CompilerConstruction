@@ -1,3 +1,4 @@
+build --disk_cache=/tmp/nvme/racko/bazel_disk_cache
 build --cxxopt=-fdiagnostics-color=always
 #build --cxxopt=-Werror
 build --cxxopt=-Wall

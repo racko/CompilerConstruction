@@ -1,22 +1,24 @@
 #pragma once
 
+#include "NumRange.h" // for NumIterator
+#include "Print.h"
+#include <cassert>     // for assert
 #include <cstddef>     // for size_t
 #include <cstdint>     // for int64_t, uint64_t, int32_t, int8_t, uint32_t
-#include <cassert>      // for assert
-#include <functional>   // for hash, function
-#include <iterator>     // for begin, end, iterator_traits, distance
-#include <limits>       // for numeric_limits, numeric_limits<>::digits
-#include <new>          // for bad_alloc
-#include <ostream>      // for operator<<, ostream
-#include <stdexcept>    // for range_error
-#include <tuple>        // for tuple, forward_as_tuple
-#include <type_traits>  // for is_nothrow_move_assignable, is_nothrow_move_c...
-#include <utility>      // for move, forward, index_sequence, make_index_seq...
-#include "NumRange.h"   // for NumIterator
+#include <functional>  // for hash, function
+#include <iterator>    // for begin, end, iterator_traits, distance
+#include <limits>      // for numeric_limits, numeric_limits<>::digits
+#include <new>         // for bad_alloc
+#include <ostream>     // for operator<<, ostream
+#include <stdexcept>   // for range_error
+#include <tuple>       // for tuple, forward_as_tuple
+#include <type_traits> // for is_nothrow_move_assignable, is_nothrow_move_c...
+#include <utility>     // for move, forward, index_sequence, make_index_seq...
 
 // this only benefits Debug mode runtime, not constexpr evaluation
 #define INLINE //__attribute__((always_inline))
 
+namespace const_expr {
 template <class InputIt1, class InputIt2>
 constexpr bool equal(InputIt1 first1, const InputIt1 last1, InputIt2 first2) {
     for (; first1 != last1; ++first1, ++first2) {
@@ -860,7 +862,7 @@ struct unordered_map {
     template <typename This>
     // requires std::is_same_v<std::decay_t<This>, unordered_map<Key,Value,Size>>
     static constexpr auto INLINE find_impl(This&& t, const Key& k) {
-        return ::find_if(t.begin(), t.end(), ByKey<Key>(k));
+        return const_expr::find_if(t.begin(), t.end(), ByKey<Key>(k));
     }
 };
 
@@ -1092,50 +1094,6 @@ constexpr back_insert_iterator<Container> INLINE back_inserter(Container& c) {
     return back_insert_iterator<Container>(c);
 }
 
-template <class T, int64_t Size>
-std::ostream& showVector(const vector<T, Size>& v, std::ostream& s) {
-    if (v.empty()) {
-        s << "[]";
-        return s;
-    }
-    s << "[ " << v[0];
-    for (unsigned int i = 1; i < v.size(); i++)
-        s << ", " << v[i];
-
-    s << " ]";
-    return s;
-}
-
-template <class T, int64_t Size>
-std::function<std::ostream&(std::ostream&)> show(const vector<T, Size>& v) {
-    return [&v](std::ostream& s) -> std::ostream& { return showVector(v, s); };
-}
-
-template <class T1, class T2>
-std::ostream& showPair(const pair<T1, T2>& p, std::ostream& s) {
-    s << "(" << p.first << "," << p.second << ")";
-    return s;
-}
-
-template <class T1, class T2>
-std::function<std::ostream&(std::ostream&)> show(const pair<T1, T2>& p) {
-    return [&p](std::ostream& s) -> std::ostream& { return showPair(p, s); };
-}
-
-template <class T1, class T2, int64_t Size>
-std::ostream& showVector(const vector<pair<T1, T2>, Size>& v, std::ostream& s) {
-    if (v.empty()) {
-        s << "[]";
-        return s;
-    }
-    s << "[ " << show(v[0]);
-    for (unsigned int i = 1; i < v.size(); i++)
-        s << ", " << show(v[i]);
-
-    s << " ]";
-    return s;
-}
-
 constexpr const char* find_0(const char* str) {
     while (*str != '\0') {
         ++str;
@@ -1143,10 +1101,7 @@ constexpr const char* find_0(const char* str) {
     return str;
 }
 
-// TODO: expand this namespace ...
-namespace const_expr {
 constexpr int64_t strlen(const char* const str) { return find_0(str) - str; }
-} // namespace const_expr
 
 template <int64_t Size>
 struct string {
@@ -1302,28 +1257,28 @@ constexpr string_view to_string_view(const string<N>& s) {
 }
 
 template <typename T>
-struct strlen;
+struct static_strlen;
 
 template <int64_t N>
-struct strlen<charr<N>> {
+struct static_strlen<charr<N>> {
     static const int64_t value{N - 1};
 };
 
 // at least with clang 8 (and the very early v10 branch), string literals are "char[N]" and not "const char[N]" during
 // constexpr template type matching (or whatever I should call it ...)
 template <int64_t N>
-struct strlen<char[N]> {
+struct static_strlen<char[N]> {
     static const int64_t value{N - 1};
 };
 
 template <int64_t N>
-struct strlen<string<N>> {
+struct static_strlen<string<N>> {
     static const int64_t value{N};
 };
 
 template <typename... Ts>
 constexpr int64_t strcatsize() {
-    return (0 + ... + strlen<Ts>::value);
+    return (0 + ... + static_strlen<Ts>::value);
 }
 
 template <typename... Ts>
@@ -1723,3 +1678,29 @@ struct unordered_set : private HashTable<Key, MaxElementCount, Hash, Index> {
         return i == -1 ? t.stop_ : t.values.data + i;
     }
 };
+} // namespace const_expr
+
+template <class T, int64_t Size>
+struct showImpl<const_expr::vector<T, Size>> {
+    static std::ostream& Show(std::ostream& s, const const_expr::vector<T, Size>& v) {
+        if (v.empty()) {
+            s << "[]";
+            return s;
+        }
+        s << "[ " << v[0];
+        for (unsigned int i = 1; i < v.size(); i++)
+            s << ", " << v[i];
+
+        s << " ]";
+        return s;
+    }
+};
+
+template <class T1, class T2>
+struct showImpl<const_expr::pair<T1, T2>> {
+    static std::ostream& Show(std::ostream& s, const const_expr::pair<T1, T2>& p) {
+        s << "(" << p.first << "," << p.second << ")";
+        return s;
+    }
+};
+

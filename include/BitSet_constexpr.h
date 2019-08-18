@@ -235,7 +235,7 @@ constexpr BitSet<max_n>::BitSet(int64_t _n) : n(_n) {}
 
 template<int64_t max_n>
 constexpr BitSet<max_n>::BitSet(int64_t _n, const bool x) : n(_n) {
-    fill_n(p, wordsInUse(), x ? -1ULL : 0ULL);
+    const_expr::fill_n(p, wordsInUse(), x ? -1ULL : 0ULL);
 }
 
 template<int64_t max_n>
@@ -302,7 +302,7 @@ constexpr int64_t BitSet<max_n>::count() const {
 
 template<int64_t max_n>
 constexpr void BitSet<max_n>::clear() {
-    fill_n(p, wordsInUse(), 0ULL);
+    const_expr::fill_n(p, wordsInUse(), 0ULL);
 }
 
 template<int64_t max_n>
@@ -538,7 +538,7 @@ template<int64_t max_n>
 constexpr typename BitSet<max_n>::sparse_iterator& BitSet<max_n>::sparse_iterator::operator++() {
     if (const auto i = *(s.p + ((c + 1) >> 6)) & (-1ULL << ((c + 1) & 63)); i != 0) {
         //c = ((c + 1) & ~63) + count_trailing_zeros(i);
-        c = ((c + 1) & ~63) + Mod67BitPosition[(-i & i) % 67];
+        c = ((c + 1) & ~63) + const_expr::Mod67BitPosition[(-i & i) % 67];
         return *this;
     }
     auto pp = s.p + ((c + 1) >> 6) + 1;
@@ -547,7 +547,7 @@ constexpr typename BitSet<max_n>::sparse_iterator& BitSet<max_n>::sparse_iterato
     for (; pp != stop; ++pp) {
         if (const auto i = *pp; i != 0) {
             //c = ((pp - s.p) << 6) + count_trailing_zeros(i);
-            c = ((pp - s.p) << 6) + Mod67BitPosition[(-i & i) % 67];
+            c = ((pp - s.p) << 6) + const_expr::Mod67BitPosition[(-i & i) % 67];
             return *this;
         }
     }

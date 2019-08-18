@@ -32,7 +32,7 @@ if(BUILD_TESTING)
 
     target_link_libraries(functional_test.exe
       PRIVATE
-        catch2
+        catch2::catch2
         functional
         test_main
     )

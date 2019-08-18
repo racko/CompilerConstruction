@@ -1,7 +1,8 @@
 #include "Print.h"
 
-template <>
-std::ostream& showVector(const std::vector<bool>& v, std::ostream& s) {
+#include <sstream>
+
+std::ostream& showImpl<std::vector<bool>>::Show(std::ostream& s, const std::vector<bool>& v) {
     unsigned int i = 0;
 
     while (i < v.size() && !v[i])
@@ -20,22 +21,7 @@ std::ostream& showVector(const std::vector<bool>& v, std::ostream& s) {
     return s;
 }
 
-template <>
-std::ostream& showVector(const std::vector<std::pair<unsigned int,unsigned int>>& v, std::ostream& s) {
-    if (v.empty()) {
-        s << "[]";
-        return s;
-    }
-    s << "[ " << show(v[0]);
-    for (unsigned int i = 1; i < v.size(); i++)
-        s << ", " << show(v[i]);
-
-    s << " ]";
-    return s;
-}
-
-template <>
-std::ostream& showVector(const std::vector<char>& v, std::ostream& s) {
+std::ostream& showImpl<std::vector<char>>::Show(std::ostream& s, const std::vector<char>& v) {
     if (v.empty()) {
         s << "[]";
         return s;
@@ -48,47 +34,46 @@ std::ostream& showVector(const std::vector<char>& v, std::ostream& s) {
     return s;
 }
 
-std::string print(int c) {
+std::ostream& operator<<(std::ostream& s, const showChar sc) {
+    const auto c = sc.c_;
     // TODO: Put all 256 values into an array?
     static const char* const controlChars[] = { "EOF", "NUL", "SOH", "STX", "ETX", "EOT", "ENQ", "ACK", "BEL", "BS", "HT", "LF", "VT", "FF", "CR", "SO", "SI", "DLE", "DC1", "DC2", "DC3", "DC4", "NAK", "SYN", "ETB", "CAN", "EM", "SUB", "ESC", "FS", "GS", "RS", "US", "SPACE" };
     if (c < -1 || c > 127)
-        return std::to_string(c);
+        return s << c;
     else if (c < 33)
-        return controlChars[c + 1];
+        return s << controlChars[c + 1];
     else if (c == 127)
-        return "DEL";
+        return s << "DEL";
     else
-        return std::string(1, static_cast<char>(c));
+        return s << static_cast<char>(c);
 }
 
-//std::ostream& operator<<(std::ostream& s, const showChar c) {
-//    static const char* const controlChars[] = { "EOF", "NUL", "SOH", "STX", "ETX", "EOT", "ENQ", "ACK", "BEL", "BS", "HT", "LF", "VT", "FF", "CR", "SO", "SI", "DLE", "DC1", "DC2", "DC3", "DC4", "NAK", "SYN", "ETB", "CAN", "EM", "SUB", "ESC", "FS", "GS", "RS", "US", "SPACE" };
-//    if (c < -1 || c > 127) {
-//        s << std::to_string(c);
-//    } else if (c < 33) {
-//        s << controlChars[c + 1];
-//    } else if (c == 127) {
-//        s << "DEL";
-//    } else {
-//        s << std::string(1, static_cast<char>(c));
-//    }
-//    return s;
-//}
+std::string print(int c) {
+    std::stringstream s;
+    s << showChar(c);
+    return s.str();
+}
+
+std::ostream& operator<<(std::ostream& s, const showCharEscaped sc) {
+    const auto c = sc.c_;
+    // TODO: Put all 256 values into an array?
+    static const char* const controlChars[] = { "EOF", "NUL", "SOH", "STX", "ETX", "EOT", "ENQ", "ACK", "BEL", "BS", "HT", "LF", "VT", "FF", "CR", "SO", "SI", "DLE", "DC1", "DC2", "DC3", "DC4", "NAK", "SYN", "ETB", "CAN", "EM", "SUB", "ESC", "FS", "GS", "RS", "US", "SPACE" };
+    if (c < -1 || c > 127)
+        return s << c;
+    else if (c < 33)
+        return s << controlChars[c + 1];
+    else if (c == 127)
+        return s << "DEL";
+    else if (c == '"')
+        return s << "\\\"";
+    else if (c == '\\')
+        return s << "BSL";
+    else
+        return s << static_cast<char>(c);
+}
 
 std::string printEscaped(int c) {
-    // TODO: Put all 256 values into an array?
-    static const char* const controlChars[] = { "EOF", "NUL", "SOH", "STX", "ETX", "EOT", "ENQ", "ACK", "BEL", "BS", "HT", "LF", "VT", "FF", "CR", "SO", "SI", "DLE", "DC1", "DC2", "DC3", "DC4", "NAK", "SYN", "ETB", "CAN", "EM", "SUB", "ESC", "FS", "GS", "RS", "US", "SPACE" };
-    if (c < -1 || c > 127)
-        return std::to_string(c);
-    else if (c < 33)
-        return controlChars[c + 1];
-    else if (c == 127)
-        return "DEL";
-    else if (c == '"')
-        return "\\\"";
-    else if (c == '\\')
-        return "BSL";
-    else
-        return std::string(1, static_cast<char>(c));
+    std::stringstream s;
+    s << showCharEscaped(c);
+    return s.str();
 }
-

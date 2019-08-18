@@ -1,5 +1,7 @@
 #pragma once
 
+#include "DFA_fwd.h"
+
 #include "Print.h"
 #include <BitSet.h>
 #include <HashSet.h>
@@ -30,7 +32,7 @@
 namespace detail {
 using Set = BitSet;
 
-using Position = size_t;
+using Position = std::size_t;
 using PositionRange = std::pair<Position, Position>;
 } // namespace detail
 
@@ -44,17 +46,23 @@ struct DFA {
 
   public:
     using Class = State;
-    size_t stateCount;  // TODO change to State lastState for safe comparisions
-    size_t symbolCount; // TODO change to Symbol lastSymbol ...
-    State start, deadState;
+    State stateCount{};
+    Symbol symbolCount{};
+    State start{};
+    State deadState{};
     std::vector<TokenId> final;
     std::vector<State> T;
-    std::vector<size_t> symbolToId;
+    std::vector<std::size_t> symbolToId;
     std::vector<Symbol> idToSymbol;
+
     DFA() = default;
+
     DFA(const NFA<Symbol, State, TokenId>& nfa);
+
     void generateFromMinimizationResults(const partition<State>& part);
+
     void determineDeadState();
+
     void minimize();
 };
 
@@ -71,8 +79,8 @@ DFA<Symbol, State, TokenId>::DFA(const NFA<Symbol, State, TokenId>& nfa)
     std::cout << "DFA constructor" << std::endl;
     std::cout << "stateCount = " << nfa.stateCount << std::endl;
     std::cout << "symbolCount = " << symbolCount << std::endl;
-    std::vector<size_t> symbolMap(nfa.symbolCount);
-    size_t nonEpsSymbol = 0;
+    std::vector<std::size_t> symbolMap(nfa.symbolCount);
+    std::size_t nonEpsSymbol = 0;
     for (auto i = Symbol(); i < nfa.symbolCount; i++)
         if (i != nfa.eps) {
             symbolMap[i] = nonEpsSymbol;
@@ -169,7 +177,7 @@ DFA<Symbol, State, TokenId>::DFA(const NFA<Symbol, State, TokenId>& nfa)
     for (unsigned int q = 0; q < stateCount; q++) {
         const BitSet& U = idToState[q];
         //    std::cout << "checking dfa state " << q << ": " << U << std::endl;
-        size_t first_nfa_state = SIZE_MAX;
+        std::size_t first_nfa_state = SIZE_MAX;
         for (auto s : U) {
             // std::cout << "checking nfa state " << *s << std::endl;
             if (nfa.final[s] != 0 && final[q] == 0) {
@@ -281,14 +289,14 @@ bool partition<State>::swapToFront(Position l, Position h, const Set& tmp) {
 
     // the below is more efficient when the compiler reloads p.begin() and tmp.p from memory in every iteration in the
     // implementation above
-    const auto stop = p.begin() + h;
+    const auto stop = p.begin() + static_cast<std::ptrdiff_t>(h);
     const auto _p = tmp.p;
-    for (auto i = p.begin() + l; i != stop; ++i) {
+    for (auto i = p.begin() + static_cast<std::ptrdiff_t>(l); i != stop; ++i) {
         if (*(_p + (*i >> 6)) & (0x1LL << *i)) {
             std::swap(p[l], *i);
             // std::cout << "swapping " << l << " and " << i << ": " << show(p) << std::endl;
             pI[p[l]] = l;
-            pI[*i] = std::distance(p.begin(), i);
+            pI[*i] = static_cast<std::size_t>(std::distance(p.begin(), i));
             return true;
         }
     }
@@ -424,7 +432,7 @@ void splitterSet(const detail::PositionRange& t1,
 }
 
 template <typename Symbol, typename State>
-auto inverseTransitionTable(const std::vector<State>& T, size_t stateCount, size_t symbolCount) {
+auto inverseTransitionTable(const std::vector<State>& T, std::size_t stateCount, std::size_t symbolCount) {
     using TSet = HashSet;
     std::vector<std::vector<TSet>> tI(symbolCount, std::vector<TSet>(stateCount, TSet(stateCount, false)));
 
@@ -539,7 +547,7 @@ void DFA<Symbol, State, TokenId>::determineDeadState() {
     //  std::cout << "determineDeadState" << std::endl;
     auto idempotent = [&](State q) {
         const auto ptr = T.data() + q * symbolCount;
-        return std::all_of(ptr, ptr + symbolCount, [&](State q_) { return q_ == q; });
+        return std::all_of(ptr, ptr + symbolCount, [q](State q_) { return q_ == q; });
     };
     auto isDeadState = [&](State q) { return !final[q] && idempotent(q); };
     auto stop = NumIterator<State>(stateCount);
@@ -569,7 +577,7 @@ std::ostream& operator<<(std::ostream& s, const DFA<Symbol, State, TokenId>& dfa
         }
 
         if (dfa.final[p]) {
-            s << "  " << p << "[shape = doublecircle];\n";
+            s << "  " << p << "[label = \"" << p << '|' << dfa.final[p] << "\" shape = doublecircle];\n";
         }
         const auto ptr = dfa.T.data() + p * dfa.symbolCount;
         for (auto a = 0u; a < dfa.symbolCount; ++a) {

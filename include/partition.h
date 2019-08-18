@@ -7,15 +7,15 @@
 template <typename State, typename Class, int64_t MaxNodes>
 struct partition {
     using Position = int64_t;
-    using PositionRange = pair<Position, Position>;
+    using PositionRange = const_expr::pair<Position, Position>;
 
-    vector<State, MaxNodes> p;
-    vector<Position, MaxNodes> pI;
-    vector<PositionRange, MaxNodes> c_i;
-    vector<Class, MaxNodes> c;
+    const_expr::vector<State, MaxNodes> p;
+    const_expr::vector<Position, MaxNodes> pI;
+    const_expr::vector<PositionRange, MaxNodes> c_i;
+    const_expr::vector<Class, MaxNodes> c;
 
     template <typename TokenId>
-    constexpr partition(const vector<TokenId, MaxNodes>& finals);
+    constexpr partition(const const_expr::vector<TokenId, MaxNodes>& finals);
 
     template <typename Set>
     constexpr bool swapToFront(Position l, Position h, const Set& tmp);
@@ -34,10 +34,10 @@ struct partition {
 
 template <typename State, typename Class, int64_t MaxNodes>
 template <typename TokenId>
-constexpr partition<State, Class, MaxNodes>::partition(const vector<TokenId, MaxNodes>& finals)
+constexpr partition<State, Class, MaxNodes>::partition(const const_expr::vector<TokenId, MaxNodes>& finals)
     : p(finals.size()), pI(finals.size()), c(finals.size()) {
     auto stateCount = finals.size();
-    vector<vector<State, MaxNodes>, MaxNodes>
+    const_expr::vector<const_expr::vector<State, MaxNodes>, MaxNodes>
         kinds; // given TokenId k, kinds[k] is vector<State> containing states of kind k
 
     for (State i = 0; i < stateCount; i++) {
@@ -85,7 +85,7 @@ constexpr bool partition<State, Class, MaxNodes>::swapToFront(Position l, Positi
     // std::cout << "swapping in-splitter to front" << std::endl;
     for (auto i = l; i < h; i++) {
         if (tmp.get(p[i])) {
-            swap(p[l], p[i]);
+            const_expr::swap(p[l], p[i]);
             // std::cout << "swapping " << l << " and " << i << ": " << show(p) << std::endl;
             pI[p[l]] = l;
             pI[p[i]] = i;
@@ -102,7 +102,7 @@ constexpr bool partition<State, Class, MaxNodes>::swapToBack(Position l, Positio
     auto last = h - 1;
     for (auto i = static_cast<int>(last); i >= int(l); i--) {
         if (!tmp.get(p[i])) {
-            swap(p[i], p[last]);
+            const_expr::swap(p[i], p[last]);
             // std::cout << "swapping " << i << " and " << last << ": " << show(p) << std::endl;
             pI[p[last]] = last;
             pI[p[i]] = i;
@@ -127,7 +127,7 @@ constexpr auto partition<State, Class, MaxNodes>::swapRest(Position l, Position 
         while (!tmp.get(p[k]));
         if (k < j)
             break;
-        swap(p[j], p[k]);
+        const_expr::swap(p[j], p[k]);
         // std::cout << "swapping " << j << " and " << k << ": " << show(p) << std::endl;
         pI[p[j]] = j;
         pI[p[k]] = k;
@@ -137,8 +137,8 @@ constexpr auto partition<State, Class, MaxNodes>::swapRest(Position l, Position 
 
 template <typename State, typename Class, int64_t MaxNodes>
 constexpr void partition<State, Class, MaxNodes>::update(Position l, Position h, Position j, Class b) {
-    auto A = make_pair(l, j);
-    auto B = make_pair(j, h);
+    auto A = const_expr::make_pair(l, j);
+    auto B = const_expr::make_pair(j, h);
 
     // std::cout << "B': (" << A.first << "-" << A.second << ")" << std::endl;
     // std::cout << "B'': (" << B.first << "-" << B.second << ")" << std::endl;
@@ -150,12 +150,12 @@ constexpr void partition<State, Class, MaxNodes>::update(Position l, Position h,
     if (A_size > B_size) {
         c_i[b] = A;
         c_i.push_back(B);
-        fill_n(c.begin() + B.first, B_size, newIx);
+        const_expr::fill_n(c.begin() + B.first, B_size, newIx);
         // std::cout << "Pushing B'' on the stack. Index: " << newIx << std::endl;
     } else {
         c_i[b] = B;
         c_i.push_back(A);
-        fill_n(c.begin() + A.first, A_size, newIx);
+        const_expr::fill_n(c.begin() + A.first, A_size, newIx);
         // std::cout << "Pushing B' on the stack. Index: " << newIx << std::endl;
     }
 }

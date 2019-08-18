@@ -13,15 +13,15 @@ endif()
 add_library(jsoncpp SHARED IMPORTED)
 set_property(TARGET jsoncpp PROPERTY IMPORTED_LOCATION ${JSONCPP})
 
-add_library(catch2 INTERFACE IMPORTED)
-set_property(TARGET catch2 PROPERTY INTERFACE_INCLUDE_DIRECTORIES /usr/include/catch2)
+add_library(catch2::catch2 INTERFACE IMPORTED)
+set_property(TARGET catch2::catch2 PROPERTY INTERFACE_INCLUDE_DIRECTORIES /usr/include/catch2)
 
 # TODO: replace with separate target_include_directories calls as soon as the libraries are cleaned up
 include_directories(include)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 add_compile_options(
     -Wall
@@ -62,9 +62,7 @@ if(BUILD_TESTING)
         /home/racko/tmp/cslim/lib/libCSlim.a
     )
     set_property(TARGET fitnesse PROPERTY INTERFACE_INCLUDE_DIRECTORIES
-        /home/racko/tmp/cslim/include/Com
-        /home/racko/tmp/cslim/include/CSlim
-        /home/racko/tmp/cslim/include/ExecutorC
+        /home/racko/tmp/cslim/include
     )
 
     add_library(test_main STATIC
@@ -73,7 +71,7 @@ if(BUILD_TESTING)
 
     target_link_libraries(test_main
       PRIVATE
-        catch2
+        catch2::catch2
     )
 
     add_executable(util_test.exe
@@ -84,7 +82,7 @@ if(BUILD_TESTING)
 
     target_link_libraries(util_test.exe
       PRIVATE
-        catch2
+        catch2::catch2
         test_main
         util
     )

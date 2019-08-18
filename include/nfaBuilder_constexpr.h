@@ -26,8 +26,8 @@ inline std::string printEscaped2(int c) {
 template<typename State, typename TokenId, int64_t MaxTransitions, int64_t MaxResultStates>
 class node_t {
 public:
-    using result_states = vector<State,MaxResultStates>;
-    using transitions = unordered_map<int64_t,result_states,MaxTransitions>;
+    using result_states = const_expr::vector<State,MaxResultStates>;
+    using transitions = const_expr::unordered_map<int64_t,result_states,MaxTransitions>;
 
     constexpr node_t() = default;
 
@@ -101,15 +101,15 @@ public:
 
     constexpr TokenId getKind(State) const { return TokenId(); }
 
-    constexpr const vector<int64_t,StateCount>& getTransitionCounts() const { return ns_; }
+    constexpr const const_expr::vector<int64_t,StateCount>& getTransitionCounts() const { return ns_; }
 private:
-    vector<int64_t,StateCount> ns_;
+    const_expr::vector<int64_t,StateCount> ns_;
 };
 
 template<typename State, typename TokenId, int64_t StateCount, int64_t MaxTransitions>
 class ResultingStateCountingGraph {
 public:
-    using transitions = unordered_map<int64_t,int64_t,MaxTransitions>;
+    using transitions = const_expr::unordered_map<int64_t,int64_t,MaxTransitions>;
 
     constexpr State addState() {
         if (ns_.size() > std::numeric_limits<State>::max())
@@ -133,10 +133,10 @@ public:
 
     constexpr TokenId getKind(State) const { return TokenId(); }
 
-    constexpr const vector<transitions,StateCount>& getResultingStateCounts() const { return ns_; }
+    constexpr const const_expr::vector<transitions,StateCount>& getResultingStateCounts() const { return ns_; }
 
 private:
-    vector<transitions,StateCount> ns_;
+    const_expr::vector<transitions,StateCount> ns_;
 };
 
 template<typename State, typename TokenId, int64_t MaxNodes, int64_t MaxTransitions, int64_t MaxResultStates>
@@ -168,20 +168,20 @@ public:
 
 //private:
     using node = node_t<State,TokenId,MaxTransitions,MaxResultStates>;
-    using nodes = vector<node,MaxNodes>;
+    using nodes = const_expr::vector<node,MaxNodes>;
     nodes ns_;
 
 };
 
 template<typename Symbol, typename State, int64_t MaxSymbols, typename Graph> // TODO: add default argument for Graph as soon as I can compute the counts
 struct nfaBuilder {
-    using Pair = pair<State,State>;
+    using Pair = const_expr::pair<State,State>;
 
     State start;
     Symbol eps;
     Graph ns; // TODO: add parameter to constructor
-    vector<Symbol,MaxSymbols> idToSymbol;
-    unordered_map<Symbol,int64_t,MaxSymbols> symbolToId;
+    const_expr::vector<Symbol,MaxSymbols> idToSymbol;
+    const_expr::unordered_map<Symbol,int64_t,MaxSymbols> symbolToId;
 
     constexpr nfaBuilder(Symbol _eps = Symbol());
 

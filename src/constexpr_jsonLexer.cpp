@@ -27,13 +27,13 @@ constexpr nfaBuilder<Symbol, State, MaxSymbols, G> make_nfaBuilder() {
     char nonzerodigit[] = "(1|2|3|4|5|6|7|8|9)";
     char ws[] = "( |\t|\n|\r)*";
 
-    auto digit = strcat("(0|", nonzerodigit, ")");
-    auto integer = strcat("(0|", nonzerodigit, digit, "*)");
-    auto exp = strcat(R"(((e|E)(-|\+)?)", digit, digit, "*)");
-    auto frac = strcat("(.", digit, digit, "*)");
-    auto num = strcat("(-?", integer, frac, "?", exp, "?)");
+    auto digit = const_expr::strcat("(0|", nonzerodigit, ")");
+    auto integer = const_expr::strcat("(0|", nonzerodigit, digit, "*)");
+    auto exp = const_expr::strcat(R"(((e|E)(-|\+)?)", digit, digit, "*)");
+    auto frac = const_expr::strcat("(.", digit, digit, "*)");
+    auto num = const_expr::strcat("(-?", integer, frac, "?", exp, "?)");
 
-    string<195> unescaped;
+    const_expr::string<195> unescaped;
     unescaped += "( |!"; // 0x20, 0x21
     // 0x22 is ", so it has to be escaped
     for (char i = 0x23; i <= 0x27; ++i)
@@ -56,15 +56,15 @@ constexpr nfaBuilder<Symbol, State, MaxSymbols, G> make_nfaBuilder() {
 
     // note: forward slash can be used escaped as well as unescaped. That's part of the json spec.
     // Stackoverflow explains that this is helpful for embedding json in javascript.
-    auto chr = strcat("(", unescaped, R"(|\\("|\\|/|b|f|n|r|t|u)", hexdigit, hexdigit, hexdigit, hexdigit, "))");
-    auto str = strcat(R"((")", chr, R"(*"))");
+    auto chr = const_expr::strcat("(", unescaped, R"(|\\("|\\|/|b|f|n|r|t|u)", hexdigit, hexdigit, hexdigit, hexdigit, "))");
+    auto str = const_expr::strcat(R"((")", chr, R"(*"))");
 
-    builder.lexRegex(strcat(ws, "[", ws).data(), 4);
-    builder.lexRegex(strcat(ws, "]", ws).data(), 5);
-    builder.lexRegex(strcat(ws, "{", ws).data(), 6);
-    builder.lexRegex(strcat(ws, "}", ws).data(), 7);
-    builder.lexRegex(strcat(ws, ":", ws).data(), 8);
-    builder.lexRegex(strcat(ws, ",", ws).data(), 9);
+    builder.lexRegex(const_expr::strcat(ws, "[", ws).data(), 4);
+    builder.lexRegex(const_expr::strcat(ws, "]", ws).data(), 5);
+    builder.lexRegex(const_expr::strcat(ws, "{", ws).data(), 6);
+    builder.lexRegex(const_expr::strcat(ws, "}", ws).data(), 7);
+    builder.lexRegex(const_expr::strcat(ws, ":", ws).data(), 8);
+    builder.lexRegex(const_expr::strcat(ws, ",", ws).data(), 9);
     builder.lexRegex(num.data(), 10);
     builder.lexRegex(str.data(), 11);
     return builder;
@@ -80,7 +80,7 @@ static constexpr const auto MaxTransitions = [] {
     using G = TransitionCountingGraph<State, TokenId, MaxNodes>;
     auto builder = make_nfaBuilder<G>();
     const auto& transitionCounts = builder.ns.getTransitionCounts();
-    return *max_element(transitionCounts.begin(), transitionCounts.end());
+    return *const_expr::max_element(transitionCounts.begin(), transitionCounts.end());
     // return *max_element(transitionCounts.begin(), transitionCounts.begin() + MaxNodes);
 }();
 
