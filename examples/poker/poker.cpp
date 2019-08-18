@@ -30,7 +30,7 @@ HandRank rank(const Symbol* const cards) {
     const auto& [dfa, terminals] = x;
 
     auto s = dfa.start;
-    const auto fptr = dfa.final.data();
+    const auto fptr = dfa.finals.data();
     logger << "starting in state " << s << ", type " << fptr[s] << '\n';
     logger << "dfa.symbolToId.size(): " << dfa.symbolToId.size() << '\n';
     const auto Tptr = dfa.T.data();

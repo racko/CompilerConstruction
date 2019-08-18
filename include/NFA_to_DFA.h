@@ -38,7 +38,7 @@ DFA<Symbol, State, TokenId> toDFA(const NFA<Symbol, State, TokenId>& nfa) {
     BitSet& S = idToState.back();
     S[nfa.start] = true;
     //  std::cout << "nfa.start: " << nfa.start << std::endl;
-    //  std::cout << "nfa.final" << show(nfa.final) << std::endl;
+    //  std::cout << "nfa.finals" << show(nfa.finals) << std::endl;
     //  std::cout << "s0: " << S << std::endl;
     nfa.getClosure(S);
     //  std::cout << "closure(s0): " << S << std::endl;
@@ -113,31 +113,31 @@ DFA<Symbol, State, TokenId> toDFA(const NFA<Symbol, State, TokenId>& nfa) {
     const State stateCount = id;
     std::cout << "final state count: " << stateCount << std::endl;
     //  std::cout << "checking for terminal states" << std::endl;
-    std::vector<TokenId> final(stateCount, 0);
+    std::vector<TokenId> finals(stateCount, 0);
     for (unsigned int q = 0; q < stateCount; q++) {
         const BitSet& U = idToState[q];
         //    std::cout << "checking dfa state " << q << ": " << U << std::endl;
         std::size_t first_nfa_state = SIZE_MAX;
         for (auto s : U) {
             // std::cout << "checking nfa state " << *s << std::endl;
-            if (nfa.final[s] != 0 && final[q] == 0) {
+            if (nfa.finals[s] != 0 && finals[q] == 0) {
                 first_nfa_state = s;
-                final[q] = nfa.final[s];
-                // std::cout << "dfa.final[" << q << "] = " << "nfa.final[" << s << "] = " << int(nfa.final[s]) <<
+                finals[q] = nfa.finals[s];
+                // std::cout << "dfa.finals[" << q << "] = " << "nfa.finals[" << s << "] = " << int(nfa.finals[s]) <<
                 // std::endl;
-            } else if (nfa.final[s] != 0 && s < first_nfa_state) {
+            } else if (nfa.finals[s] != 0 && s < first_nfa_state) {
                 first_nfa_state = s;
-                final[q] = nfa.final[s];
-                // std::cout << "dfa.final[" << q << "] is ambiguous. Preferring nfa.final[" << s << "] = " <<
-                // int(nfa.final[s]) << std::endl;
-            } else if (nfa.final[s] != 0) {
-                // std::cout << "dfa.final[" << q << "] is ambiguous. Ignoring nfa.final[" << s << "] = " <<
-                // int(nfa.final[s]) << std::endl;
+                finals[q] = nfa.finals[s];
+                // std::cout << "dfa.finals[" << q << "] is ambiguous. Preferring nfa.finals[" << s << "] = " <<
+                // int(nfa.finals[s]) << std::endl;
+            } else if (nfa.finals[s] != 0) {
+                // std::cout << "dfa.finals[" << q << "] is ambiguous. Ignoring nfa.finals[" << s << "] = " <<
+                // int(nfa.finals[s]) << std::endl;
             }
         }
     }
 
-    State deadState = ::determineDeadState(stateCount, symbolCount, T, final);
-    return DFA<Symbol, State, TokenId>(stateCount, symbolCount, start, deadState, final, T, symbolToId, idToSymbol);
+    State deadState = ::determineDeadState(stateCount, symbolCount, T, finals);
+    return DFA<Symbol, State, TokenId>(stateCount, symbolCount, start, deadState, finals, T, symbolToId, idToSymbol);
 }
 

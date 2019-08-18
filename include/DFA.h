@@ -32,7 +32,7 @@ struct DFA {
     Symbol symbolCount{};
     State start{};
     State deadState{};
-    std::vector<TokenId> final;
+    std::vector<TokenId> finals;
     std::vector<State> T;
     std::vector<std::size_t> symbolToId;
     std::vector<Symbol> idToSymbol;
@@ -43,7 +43,7 @@ struct DFA {
         Symbol symbolCount,
         State start,
         State deadState,
-        const std::vector<TokenId>& final,
+        const std::vector<TokenId>& finals,
         const std::vector<State>& T,
         const std::vector<std::size_t>& symbolToId,
         const std::vector<Symbol>& idToSymbol);
@@ -54,7 +54,7 @@ DFA<Symbol, State, TokenId>::DFA(State stateCount,
                                  Symbol symbolCount,
                                  State start,
                                  State deadState,
-                                 const std::vector<TokenId>& final,
+                                 const std::vector<TokenId>& finals,
                                  const std::vector<State>& T,
                                  const std::vector<std::size_t>& symbolToId,
                                  const std::vector<Symbol>& idToSymbol)
@@ -62,7 +62,7 @@ DFA<Symbol, State, TokenId>::DFA(State stateCount,
       symbolCount{symbolCount},
       start{start},
       deadState{deadState},
-      final{final},
+      finals{finals},
       T{T},
       symbolToId{symbolToId},
       idToSymbol{idToSymbol} {}
@@ -74,13 +74,13 @@ template <typename Symbol, typename State, typename TokenId>
 State determineDeadState(const State stateCount,
                          const Symbol symbolCount,
                          const std::vector<State>& T,
-                         const std::vector<TokenId>& final) {
+                         const std::vector<TokenId>& finals) {
     //  std::cout << "determineDeadState" << std::endl;
     auto idempotent = [&](State q) {
         const auto ptr = T.data() + q * symbolCount;
         return std::all_of(ptr, ptr + symbolCount, [q](State q_) { return q_ == q; });
     };
-    auto isDeadState = [&](State q) { return !final[q] && idempotent(q); };
+    auto isDeadState = [&](State q) { return !finals[q] && idempotent(q); };
     auto stop = counting_iterator<State>(stateCount);
     auto it = std::find_if(counting_iterator<State>(0u), stop, isDeadState);
     if (it != stop) {
@@ -95,7 +95,7 @@ State determineDeadState(const State stateCount,
 template <typename Symbol, typename State, typename TokenId>
 bool operator==(const DFA<Symbol, State, TokenId>& lhs, const DFA<Symbol, State, TokenId>& rhs) {
     return lhs.stateCount == rhs.stateCount && lhs.symbolCount == rhs.symbolCount && lhs.start == rhs.start &&
-           lhs.deadState == rhs.deadState && lhs.final == rhs.final && lhs.T == rhs.T &&
+           lhs.deadState == rhs.deadState && lhs.finals == rhs.finals && lhs.T == rhs.T &&
            lhs.symbolToId == rhs.symbolToId && lhs.idToSymbol == rhs.idToSymbol;
 }
 
@@ -107,8 +107,8 @@ std::ostream& operator<<(std::ostream& s, const DFA<Symbol, State, TokenId>& dfa
             continue;
         }
 
-        if (dfa.final[p]) {
-            s << "  " << p << "[label = \"" << p << '|' << dfa.final[p] << "\" shape = doublecircle];\n";
+        if (dfa.finals[p]) {
+            s << "  " << p << "[label = \"" << p << '|' << dfa.finals[p] << "\" shape = doublecircle];\n";
         }
         const auto ptr = dfa.T.data() + p * dfa.symbolCount;
         for (auto a = 0u; a < dfa.symbolCount; ++a) {
@@ -132,7 +132,7 @@ void serialize(Archive& ar, DFA<Symbol, State, TokenId>& dfa, unsigned int) {
     ar& dfa.symbolCount;
     ar& dfa.start;
     ar& dfa.deadState;
-    ar& dfa.final;
+    ar& dfa.finals;
     ar& dfa.T;
     ar& dfa.symbolToId;
     ar& dfa.idToSymbol;

@@ -18,7 +18,7 @@ struct NFA {
     Symbol symbolCount;
     State stateCount;
     State start;
-    std::vector<TokenId> final;
+    std::vector<TokenId> finals;
     std::vector<std::vector<BitSet>> table;
     std::vector<Symbol> symbols;
     mutable BitSet newStates;
@@ -38,7 +38,7 @@ NFA<Symbol, State, TokenId>::NFA(
       symbolCount(_symbolCount),
       stateCount(_stateCount),
       start(_start),
-      final(std::move(_final)),
+      finals(std::move(_final)),
       symbols(symbolCount),
       newStates(stateCount) {
     for (auto i = Symbol(); i < symbolCount; i++)
@@ -78,7 +78,7 @@ NFA<Symbol, State, TokenId>::NFA(const nfaBuilder<Symbol, State, TokenId>& nfa)
       symbolCount(static_cast<Symbol>(nfa.symbolToId.size())),
       stateCount(static_cast<State>(nfa.ns.size())),
       start(nfa.start),
-      final(stateCount),
+      finals(stateCount),
       table(stateCount, std::vector<BitSet>(symbolCount, BitSet(stateCount, false))),
       symbols(nfa.idToSymbol),
       newStates(nfa.ns.size()) {
@@ -100,7 +100,7 @@ NFA<Symbol, State, TokenId>::NFA(const nfaBuilder<Symbol, State, TokenId>& nfa)
             // std::cout << "T[" << p << "][" << t.first << "] = " << table[p][t.first] << std::endl;
         }
         // std::cout << "kind(" << p << ") = " << nfa.ns[p].kind << std::endl;
-        final[p] = nfa.ns[p].kind;
+        finals[p] = nfa.ns[p].kind;
     }
 }
 
@@ -108,8 +108,8 @@ template <typename Symbol, typename State, typename TokenId>
 std::ostream& operator<<(std::ostream& s, const NFA<Symbol, State, TokenId>& nfa) {
     s << "digraph G {\n";
     for (unsigned int p = 0; p < nfa.stateCount; p++) {
-        if (nfa.final[p])
-            s << "  " << p << "[label = \"" << p << '|' << nfa.final[p] << "\" shape = doublecircle];\n";
+        if (nfa.finals[p])
+            s << "  " << p << "[label = \"" << p << '|' << nfa.finals[p] << "\" shape = doublecircle];\n";
         for (auto a = 0u; a < nfa.symbolCount; ++a) {
             if (nfa.table[p][a].count() > 0) {
                 s << "  " << p << " -> { ";

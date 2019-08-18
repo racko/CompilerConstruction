@@ -10,12 +10,12 @@ auto Lexer::getToken() -> Token {
     }
     // cout << "entered getToken()" << endl;
     auto s = dfa_.start;
-    auto f = dfa_.final[s];
+    auto f = dfa_.finals[s];
     // cout << "starting in state " << s << ", type " << f << endl;
     const auto start = c;
     auto lastFinal = c;
     auto current = c;
-    const auto fptr = dfa_.final.data();
+    const auto fptr = dfa_.finals.data();
     const auto Tptr = dfa_.T.data();
     const auto sptr = dfa_.symbolToId.data();
     const auto scount = dfa_.symbolCount;
