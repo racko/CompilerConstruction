@@ -3,6 +3,7 @@
 #include "num_view.h"    // for num_view
 #include "variant.h"     // for null
 #include <NFA.h>         // for NFA
+#include <NFA_to_DFA.h>  // for toDFA
 #include <Regex.h>       // for Lexer, Lexer::Token, Lexer::TokenId, Lexer:...
 #include <cstddef>       // for size_t
 #include <iostream>      // for operator<<, stringstream, basic_ostream
@@ -184,7 +185,7 @@ auto myLexer::impl::getDFA() -> DFA_t {
     std::cout << "NFA" << std::endl;
     NFA<Symbol, State, TokenId> nfa1(builder);
     std::cout << "DFA" << std::endl;
-    DFA_t dfa1(nfa1);
+    DFA_t dfa1{toDFA(nfa1)};
     std::cout << "minimal DFA" << std::endl;
     dfa1.minimize();
     return dfa1;

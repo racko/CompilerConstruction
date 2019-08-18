@@ -49,6 +49,7 @@ add_library(util
     src/NFA.cpp
     src/NFA_constexpr.cpp
     src/NFA_fwd.cpp
+    src/NFA_to_DFA.cpp
     src/NFA_to_DFA_constexpr.cpp
     src/NumRange.cpp
     src/Print.cpp

@@ -1,5 +1,6 @@
 #include "Grammar.h"      // for kind, kind::EOI, kind::EPS, kind::NONTERMINAL
 #include "NFA.h"          // for NFA
+#include "NFA_to_DFA.h"   // for toDFA
 #include "Regex.h"        // for Lexer, Lexer::Token, Lexer::DFA_t, Lexer::...
 #include "While.h"        // for Token, T, Grammar, operator<<, GrammarElement
 #include "lrParser.h"     // for LRParser
@@ -380,7 +381,7 @@ auto myLexer::getDFA() -> DFA_t {
     builder.lexRegex(var, (unsigned)T::ID + 1);
 
     NFA<Symbol, State, TokenId> nfa1(builder);
-    DFA_t dfa1(nfa1);
+    DFA_t dfa1{toDFA(nfa1)};
     dfa1.minimize();
 
     return dfa1;

@@ -5,7 +5,6 @@
 #include "Print.h"
 #include <BitSet.h>
 #include <HashSet.h>
-#include <NFA.h>
 
 #include <ostream>
 #include <vector>
@@ -66,8 +65,6 @@ struct DFA {
         const std::vector<std::size_t>& symbolToId,
         const std::vector<Symbol>& idToSymbol);
 
-    DFA(const NFA<Symbol, State, TokenId>& nfa);
-
     void generateFromMinimizationResults(const partition<State>& part);
 
     void determineDeadState();
@@ -98,147 +95,6 @@ DFA<Symbol, State, TokenId>::DFA(State stateCount,
 
 template <typename Symbol, typename State, typename TokenId>
 std::ostream& operator<<(std::ostream&, const DFA<Symbol, State, TokenId>&);
-
-template <typename Symbol, typename State, typename TokenId>
-State determineDeadState(const State stateCount,
-                         const Symbol symbolCount,
-                         const std::vector<State>& T,
-                         const std::vector<TokenId>& final);
-
-template <typename Symbol, typename State, typename TokenId>
-DFA<Symbol, State, TokenId> toDFA(const NFA<Symbol, State, TokenId>& nfa) {
-    std::vector<State> T;
-    const Symbol symbolCount(nfa.symbolCount - 1);
-    std::vector<std::size_t> symbolToId(128, symbolCount);
-    std::vector<Symbol> idToSymbol(128, symbolCount);
-    using BitSet = HashSet;
-    std::cout << "DFA constructor" << std::endl;
-    std::cout << "stateCount = " << nfa.stateCount << std::endl;
-    std::cout << "symbolCount = " << symbolCount << std::endl;
-    std::vector<std::size_t> symbolMap(nfa.symbolCount);
-    std::size_t nonEpsSymbol = 0;
-    for (auto i = Symbol(); i < nfa.symbolCount; i++)
-        if (i != nfa.eps) {
-            symbolMap[i] = nonEpsSymbol;
-            symbolToId[nfa.symbols[i]] = nonEpsSymbol;
-            idToSymbol[nonEpsSymbol] = nfa.symbols[i];
-            nonEpsSymbol++;
-        }
-
-    unsigned int n = nfa.stateCount;
-    unsigned int id = 0;
-    std::vector<unsigned int> stack;
-    std::vector<BitSet> idToState;
-    std::unordered_map<BitSet, unsigned int> stateToId;
-    idToState.emplace_back(n, false);
-    BitSet& S = idToState.back();
-    S[nfa.start] = true;
-    //  std::cout << "nfa.start: " << nfa.start << std::endl;
-    //  std::cout << "nfa.final" << show(nfa.final) << std::endl;
-    //  std::cout << "s0: " << S << std::endl;
-    nfa.getClosure(S);
-    //  std::cout << "closure(s0): " << S << std::endl;
-    stateToId[S] = id;
-    stack.push_back(id);
-    const State start = id;
-    id++;
-
-    while (!stack.empty()) {
-        // std::cout << "stack: " << show(stack) << std::endl;
-        unsigned int q = stack.back();
-        stack.pop_back();
-        // auto& _p = idToState[q];
-        // std::cout << "state: " << _p << std::endl;
-        if (T.size() < (q + 1) * symbolCount)
-            T.resize((q + 1) * symbolCount);
-        for (unsigned int a = 0; a < nfa.symbolCount; a++) {
-            if (a != nfa.eps) {
-                const auto& p = idToState[q];
-                // std::cout << "Constructing delta(" << p << "," << a << ")" << std::endl;
-                BitSet U(nfa.stateCount, false);
-                for (auto s : p) {
-                    // std::cout << "collecting T[" << *s << "][" << a << "] = " << nfa.table[*s][a] << std::endl;
-                    U |= nfa.table[s][a];
-                }
-                // std::cout << "targets: " << U << std::endl;
-                //        if (U.count() > 1)
-                //          cin.get();
-                nfa.getClosure(U);
-                // std::cout << "closure: " << U << std::endl;
-                //        if (U.count() > 1)
-                //          cin.get();
-                //        std::cout << "idToState: " << std::endl;
-                //        for (auto& i: idToState) {
-                //          auto it = stateToId.find(i);
-                //          std::cout << i << " (";
-                //          if (it != stateToId.end())
-                //            std::cout << it->first << ": " << it->second;
-                //          else
-                //            std::cout << "not found";
-                //          std::cout << ")" << std::endl;
-                //        }
-                //        std::cout << "stateToId: " << std::endl;
-                //        for (auto& i: stateToId) {
-                //          BitSet localCopy(i.first);
-                //          std::cout
-                //            << i.second << ": "
-                //            << localCopy << std::endl;
-                //        }
-                // std::cout << "stateToId.find(U);" << std::endl;
-                auto it = stateToId.find(U);
-                if (it == stateToId.end()) {
-                    // std::cout << "idToState.emplace_back(std::move(U));" << std::endl;
-                    idToState.emplace_back(std::move(U));
-                    // std::cout << "auto& UU = idToState.back();" << std::endl;
-                    auto& UU = idToState.back();
-                    // std::cout << "stateToId[UU] = id;" << std::endl;
-                    stateToId[UU] = id;
-                    // std::cout << "stack.push_back(id);" << std::endl;
-                    stack.push_back(id);
-                    // std::cout << "T[q][symbolMap[a]] = id;" << std::endl;
-                    T[q * symbolCount + symbolMap[a]] = id;
-                    // std::cout << "new state; id = " << id << std::endl;
-                    id++;
-                } else {
-                    // std::cout << "seen before; id = " << it->second << std::endl;
-                    T[q * symbolCount + symbolMap[a]] = it->second;
-                }
-            }
-        }
-    }
-    const State stateCount = id;
-    std::cout << "final state count: " << stateCount << std::endl;
-    //  std::cout << "checking for terminal states" << std::endl;
-    std::vector<TokenId> final(stateCount, 0);
-    for (unsigned int q = 0; q < stateCount; q++) {
-        const BitSet& U = idToState[q];
-        //    std::cout << "checking dfa state " << q << ": " << U << std::endl;
-        std::size_t first_nfa_state = SIZE_MAX;
-        for (auto s : U) {
-            // std::cout << "checking nfa state " << *s << std::endl;
-            if (nfa.final[s] != 0 && final[q] == 0) {
-                first_nfa_state = s;
-                final[q] = nfa.final[s];
-                // std::cout << "dfa.final[" << q << "] = " << "nfa.final[" << s << "] = " << int(nfa.final[s]) <<
-                // std::endl;
-            } else if (nfa.final[s] != 0 && s < first_nfa_state) {
-                first_nfa_state = s;
-                final[q] = nfa.final[s];
-                // std::cout << "dfa.final[" << q << "] is ambiguous. Preferring nfa.final[" << s << "] = " <<
-                // int(nfa.final[s]) << std::endl;
-            } else if (nfa.final[s] != 0) {
-                // std::cout << "dfa.final[" << q << "] is ambiguous. Ignoring nfa.final[" << s << "] = " <<
-                // int(nfa.final[s]) << std::endl;
-            }
-        }
-    }
-
-    State deadState = ::determineDeadState(stateCount, symbolCount, T, final);
-    return DFA<Symbol, State, TokenId>(stateCount, symbolCount, start, deadState, final, T, symbolToId, idToSymbol);
-}
-
-template <typename Symbol, typename State, typename TokenId>
-DFA<Symbol, State, TokenId>::DFA(const NFA<Symbol, State, TokenId>& nfa) : DFA{toDFA(nfa)} {}
 
 template <typename State>
 struct partition {

@@ -39,6 +39,7 @@ cc_library(
         "include/NFA.h",
         #"include/NFA_constexpr.h",
         "include/NFA_fwd.h",
+        "include/NFA_to_DFA.h",
         #"include/NFA_to_DFA_constexpr.h",
         "include/Print.h",
         "include/Regex.h",

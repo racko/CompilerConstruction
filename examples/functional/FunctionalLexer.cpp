@@ -1,4 +1,6 @@
 #include "FunctionalLexer.h"
+#include "NFA.h"
+#include "NFA_to_DFA.h"
 #include "nfaBuilder.h"
 #include <fstream>
 
@@ -87,7 +89,7 @@ auto myLexer::getDFA() -> DFA_t {
     NFA<Symbol, State, TokenId> nfa1(builder);
     std::ofstream file1("functional_nfa.dot");
     file1 << nfa1;
-    DFA_t dfa1(nfa1);
+    DFA_t dfa1{toDFA(nfa1)};
     std::ofstream file2("functional_dfa.dot");
     file2 << dfa1;
     dfa1.minimize();

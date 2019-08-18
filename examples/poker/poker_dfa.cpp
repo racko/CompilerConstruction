@@ -2,6 +2,7 @@
 
 #include "DFA.h"
 #include "NFA.h"
+#include "NFA_to_DFA.h"
 #include "iterative_fold.h"
 #include "nfaBuilder.h"
 #include "rank_count.h"
@@ -90,7 +91,7 @@ std::pair<DFA<Symbol, StateId, TerminalId>, Terminals> make_DFA(std::ostream& lo
     const auto nfa = make_NFA(logger);
     logger << "nfa done\n";
     // logger << nfa.first << '\n';
-    return {nfa};
+    return {toDFA(nfa.first), std::move(nfa.second)};
 }
 } // namespace
 
