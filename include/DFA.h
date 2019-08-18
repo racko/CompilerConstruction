@@ -2,19 +2,14 @@
 
 #include "DFA_fwd.h"
 
-#include <ranges.h>
 #include <BitSet.h> // for BitSet
+#include <boost/serialization/vector.hpp>
 #include <cstddef>  // for NULL
 #include <iostream> // for operator<<, ostream, size_t, basic_ostream, basi...
 #include <iterator> // for random_access_iterator_tag
-#include <utility>  // for pair
-#include <vector>   // for vector
-
-#ifndef NULL
-#define NULL 0
-#endif
-#include <boost/serialization/vector.hpp>
-#undef NULL
+#include <ranges.h>
+#include <utility> // for pair
+#include <vector>  // for vector
 
 namespace detail {
 using Set = BitSet;

@@ -133,7 +133,7 @@ auto myLexer::impl::getDFA() -> DFA_t {
     builder.lexRegex(in, (unsigned)T::FALSE + 1);
     in.clear();
     in << "null";
-    builder.lexRegex(in, (unsigned)T::NULL + 1);
+    builder.lexRegex(in, (unsigned)T::NIL + 1);
     in.clear();
     in << "true";
     builder.lexRegex(in, (unsigned)T::TRUE + 1);
@@ -202,7 +202,7 @@ auto myLexer::impl::action(const char* s, size_t n, TokenId t) -> Token {
         return {tid, true};
     case T::FALSE:
         return {tid, false};
-    case T::NULL:
+    case T::NIL:
     case T::BEGIN_ARRAY:
     case T::BEGIN_OBJECT:
     case T::END_ARRAY:

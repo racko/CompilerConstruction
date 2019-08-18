@@ -23,7 +23,7 @@ std::vector<std::vector<Grammar::String>> makeProductions() {
     productions[(unsigned)NT::JSON_TEXT] = {{NT::VALUE}};
 
     productions[(unsigned)NT::VALUE] = {{T::FALSE},
-                                        {T::NULL},
+                                        {T::NIL},
                                         {T::TRUE},
                                         {T::BEGIN_OBJECT, NT::OBJECT, T::END_OBJECT},
                                         {T::BEGIN_ARRAY, NT::ARRAY, T::END_ARRAY},

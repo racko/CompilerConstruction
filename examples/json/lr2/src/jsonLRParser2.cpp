@@ -109,7 +109,7 @@ json::value* Attributes::shift(Token&& token) {
         *val = boost::get<bool>(token.second);
         return val;
     }
-    case json::T::NULL: {
+    case json::T::NIL: {
         auto val = new_value();
         *val = boost::blank();
         return val;

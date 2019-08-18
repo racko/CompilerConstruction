@@ -111,7 +111,7 @@ json::value* Parser::shift(Token&& token) {
         *val = get<bool>(token.second);
         return val;
     }
-    case T::NULL: {
+    case T::NIL: {
         auto val = new_value();
         *val = null();
         return val;

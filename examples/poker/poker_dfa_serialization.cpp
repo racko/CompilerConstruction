@@ -4,19 +4,14 @@
 #include "poker_dfa.h"
 #include "terminals.h"
 #include "types.h"
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/serialization/serialization.hpp>
 #include <fstream>
 #include <ostream>
 #include <stdexcept>
 #include <utility>
-
-#ifndef NULL
-#define NULL 0
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/archive/binary_oarchive.hpp>
-#include <boost/serialization/serialization.hpp>
-#endif
-#undef NULL
 
 std::pair<DFA<Symbol, StateId, TerminalId>, Terminals> loadRanker(std::ostream& logger) {
     boost::filesystem::path ranker_path{"ranker.dat"};

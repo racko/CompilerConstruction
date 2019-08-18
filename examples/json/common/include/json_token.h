@@ -14,8 +14,6 @@
 #include <variant.h>     // for null
 #include <vector>        // for vector
 
-#undef NULL
-
 namespace json {
 using type = std::uint8_t;
 
@@ -27,7 +25,7 @@ enum class T : type {
     NAME_SEPARATOR,
     VALUE_SEPARATOR,
     FALSE,
-    NULL,
+    NIL,
     TRUE,
     NUM,
     STRING,
