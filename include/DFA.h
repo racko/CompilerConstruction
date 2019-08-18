@@ -57,6 +57,15 @@ struct DFA {
 
     DFA() = default;
 
+    DFA(State stateCount,
+        Symbol symbolCount,
+        State start,
+        State deadState,
+        const std::vector<TokenId>& final,
+        const std::vector<State>& T,
+        const std::vector<std::size_t>& symbolToId,
+        const std::vector<Symbol>& idToSymbol);
+
     DFA(const NFA<Symbol, State, TokenId>& nfa);
 
     void generateFromMinimizationResults(const partition<State>& part);
@@ -65,6 +74,24 @@ struct DFA {
 
     void minimize();
 };
+
+template <typename Symbol, typename State, typename TokenId>
+DFA<Symbol, State, TokenId>::DFA(State stateCount,
+                                 Symbol symbolCount,
+                                 State start,
+                                 State deadState,
+                                 const std::vector<TokenId>& final,
+                                 const std::vector<State>& T,
+                                 const std::vector<std::size_t>& symbolToId,
+                                 const std::vector<Symbol>& idToSymbol)
+    : stateCount{stateCount},
+      symbolCount{symbolCount},
+      start{start},
+      deadState{deadState},
+      final{final},
+      T{T},
+      symbolToId{symbolToId},
+      idToSymbol{idToSymbol} {}
 
 // template <typename Symbol, typename State, typename TokenId>
 // DFA<Symbol, detail::Position, TokenId> minimize(const DFA<Symbol, State, TokenId>& dfa);
