@@ -32,7 +32,7 @@ struct partition {
     std::vector<Class> c;
 
     template <typename TokenId>
-    partition(const std::vector<TokenId>& finals);
+    partition(const TokenIds<TokenId>& finals);
 
     bool swapToFront(Position l, Position h, const Set& tmp);
 
@@ -47,16 +47,16 @@ struct partition {
 
 template <typename State>
 template <typename TokenId>
-partition<State>::partition(const std::vector<TokenId>& finals)
-    : p(finals.size()), pI(finals.size()), c(finals.size()) {
-    auto stateCount = finals.size();
-    std::vector<std::vector<State>>
-        kinds; // given TokenId k, kinds[k] is std::vector<State> containing states of kind k
+partition<State>::partition(const TokenIds<TokenId>& finals)
+    : p(finals.GetStateCount()), pI(finals.GetStateCount()), c(finals.GetStateCount()) {
+    auto stateCount = finals.GetStateCount();
+    // given TokenId k, kinds[k] is std::vector<State> containing states of kind k
+    std::vector<std::vector<State>> kinds;
 
     for (State i = 0; i < stateCount; i++) {
-        if (kinds.size() <= finals[i])
-            kinds.resize(finals[i] + 1);
-        kinds[finals[i]].push_back(i);
+        if (kinds.size() <= finals.GetTokenId(i))
+            kinds.resize(finals.GetTokenId(i) + 1);
+        kinds[finals.GetTokenId(i)].push_back(i);
     }
 
     // std::cout << "kinds: ";
@@ -191,6 +191,9 @@ void partition<State>::update(Position l, Position h, Position j, Class b, std::
 
 template <typename State>
 void partition<State>::split(const Set& tmp, std::vector<Class>& stack) {
+    if (tmp.count() == 0) {
+        return;
+    }
     const auto groupCount = c_i.size();
     for (Class b = 0; b < groupCount; b++) {
         const auto indices = c_i[b];
@@ -250,14 +253,15 @@ void splitterSet(const detail::PositionRange& t1,
 }
 
 template <typename Symbol, typename State>
-auto inverseTransitionTable(const std::vector<State>& T, std::size_t stateCount, std::size_t symbolCount) {
+auto inverseTransitionTable(const Transitions<State>& T) {
     using TSet = HashSet;
+    const auto stateCount = T.GetStateCount();
+    const auto symbolCount = T.GetSymbolCount();
     std::vector<std::vector<TSet>> tI(symbolCount, std::vector<TSet>(stateCount, TSet(stateCount, false)));
 
     for (State i = 0; i < stateCount; i++) {
-        const auto ptr = T.data() + i * symbolCount;
         for (Symbol a = 0; a < symbolCount; a++) {
-            tI[a][ptr[a]][i] = true;
+            tI[a][T.GetTransition(i, a)][i] = true;
         }
     }
     return tI;
@@ -266,8 +270,8 @@ auto inverseTransitionTable(const std::vector<State>& T, std::size_t stateCount,
 template <typename Symbol, typename State, typename TokenId>
 DFA<Symbol, State, TokenId> generateFromMinimizationResults(const partition<State>& part,
                                                             const State start,
-                                                            const std::vector<State>& T,
-                                                            const std::vector<TokenId>& finals,
+                                                            const Transitions<State>& T,
+                                                            const TokenIds<TokenId>& finals,
                                                             const Symbols<Symbol>& symbols) {
     const auto symbolCount = symbols.count();
     const State newStateCount = part.c_i.size();
@@ -277,31 +281,31 @@ DFA<Symbol, State, TokenId> generateFromMinimizationResults(const partition<Stat
     for (State q = 0; q < newStateCount; q++) {
         auto t1 = part.c_i[q];
         auto s = t1.first;
-        const auto ptr1 = T.data() + part.p[s] * symbolCount;
         const auto ptr2 = newT.data() + q * symbolCount;
         for (Symbol a = 0; a < symbolCount; a++)
-            ptr2[a] = part.c[part.pI[ptr1[a]]];
-        newFinal[q] = finals[part.p[s]];
+            ptr2[a] = part.c[part.pI[T.GetTransition(part.p[s], a)]];
+        newFinal[q] = finals.GetTokenId(part.p[s]);
     }
-    return DFA<Symbol, State, TokenId>(newStateCount,
-                                       part.c[part.pI[start]],
-                                       determineDeadState(newStateCount, symbolCount, newT, newFinal),
-                                       std::move(newFinal),
-                                       std::move(newT),
-                                       symbols);
+    return DFA<Symbol, State, TokenId>(
+        DfaStates<State, TokenId>(newStateCount,
+                                  part.c[part.pI[start]],
+                                  determineDeadState(newStateCount, symbolCount, newT, newFinal),
+                                  TokenIds<TokenId>(std::move(newFinal)),
+                                  Transitions<State>(newStateCount, symbolCount, std::move(newT))),
+        symbols);
 }
 
 template <typename Symbol, typename State, typename TokenId>
 DFA<Symbol, State, TokenId> minimize(const DFA<Symbol, State, TokenId>& dfa) {
     std::cout << "minimize" << std::endl;
 
-    const auto& T = dfa.T;
-    const auto start = dfa.start;
-    const auto stateCount = dfa.stateCount;
+    const auto& T = dfa.states_.GetTransitions();
+    const auto start = dfa.states_.GetStart();
+    const auto stateCount = dfa.states_.GetCount();
     const auto symbolCount = dfa.symbols_.count();
-    const auto& finals = dfa.finals;
+    const auto& finals = dfa.states_.GetTokenIds();
 
-    auto tI = inverseTransitionTable<Symbol>(T, stateCount, symbolCount);
+    auto tI = inverseTransitionTable<Symbol>(T);
 
     partition<State> part(finals);
 
@@ -324,8 +328,6 @@ DFA<Symbol, State, TokenId> minimize(const DFA<Symbol, State, TokenId>& dfa) {
 
             splitterSet(t1, a, tmp, part, tI);
 
-            if (tmp.count() == 0)
-                continue;
             // std::cout << "splitter set: " << tmp << '\n';
             part.split(tmp, stack);
         }

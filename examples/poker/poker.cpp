@@ -15,10 +15,8 @@ NullLogger null_logger;
 
 [[maybe_unused]] void
 printValidCards(std::ostream& stream, const DFA<Symbol, StateId, TerminalId>& dfa, const StateId s) {
-    const auto symbol_count = dfa.symbols_.count();
-    const auto& transitions = dfa.T.data() + symbol_count * s;
-    for (auto i = 0U; i < symbol_count; ++i) {
-        if (transitions[i] != dfa.deadState) {
+    for (auto i = 0U; i < dfa.symbols_.count(); ++i) {
+        if (dfa.states_.GetTransition(s, i) != dfa.states_.GetDeadState()) {
             stream << int(dfa.symbols_.idToSymbol(i)) << ' ';
         }
     }
@@ -30,12 +28,10 @@ HandRank rank(const Symbol* const cards) {
     static auto x = loadRanker(logger);
     const auto& [dfa, terminals] = x;
 
-    auto s = dfa.start;
-    const auto fptr = dfa.finals.data();
-    logger << "starting in state " << s << ", type " << fptr[s] << '\n';
-    const auto Tptr = dfa.T.data();
+    auto s = dfa.states_.GetStart();
+    logger << "starting in state " << s << ", type " << dfa.states_.GetTokenId(s) << '\n';
     const auto scount = dfa.symbols_.count();
-    const auto dstate = dfa.deadState;
+    const auto dstate = dfa.states_.GetDeadState();
     printValidCards(logger, dfa, s);
     assert(s != dstate);
     for (auto i = 0; i < 6; ++i) {
@@ -44,17 +40,17 @@ HandRank rank(const Symbol* const cards) {
         if (sid == scount) {
             throw std::runtime_error("invalid card");
         }
-        s = Tptr[s * scount + sid];
+        s = dfa.states_.GetTransition(s, sid);
         printValidCards(logger, dfa, s);
-        assert(fptr[s] == 0);
+        assert(dfa.states_.GetTokenId(s) == 0);
         if (s == dstate) { // Not an assert because this is input validation.
             throw std::runtime_error("not a valid hand");
         }
     }
-    s = Tptr[s * scount + dfa.symbols_.symbolToId(cards[6])];
+    s = dfa.states_.GetTransition(s, dfa.symbols_.symbolToId(cards[6]));
     if (s == dstate) { // Not an assert because this is input validation.
         throw std::runtime_error("not a valid hand");
     }
-    assert(fptr[s] > 0);
-    return getHandRank(terminals.getHandType(fptr[s]));
+    assert(dfa.states_.GetTokenId(s) > 0);
+    return getHandRank(terminals.getHandType(dfa.states_.GetTokenId(s)));
 }

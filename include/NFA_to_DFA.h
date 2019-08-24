@@ -1,13 +1,14 @@
 #pragma once
 
-#include <DFA.h>          // for DFA, determineDeadState
+#include "HashSet.h"     // for HashSet, hash
+#include <DFA.h>         // for DFA, determineDeadState
 #include <cstdint>       // for SIZE_MAX
-#include <iostream>       // for operator<<, size_t, endl, cout, ostream
-#include <unordered_map>  // for unordered_map, operator==, _Node_iterator
-#include <utility>        // for move, pair
-#include <vector>         // for vector
-#include "HashSet.h"      // for HashSet, hash
-template <typename Symbol, typename State, typename TokenId> struct NFA;
+#include <iostream>      // for operator<<, size_t, endl, cout, ostream
+#include <unordered_map> // for unordered_map, operator==, _Node_iterator
+#include <utility>       // for move, pair
+#include <vector>        // for vector
+template <typename Symbol, typename State, typename TokenId>
+struct NFA;
 
 template <typename Symbol, typename State, typename TokenId>
 DFA<Symbol, State, TokenId> toDFA(const NFA<Symbol, State, TokenId>& nfa) {
@@ -138,6 +139,9 @@ DFA<Symbol, State, TokenId> toDFA(const NFA<Symbol, State, TokenId>& nfa) {
     }
 
     State deadState = ::determineDeadState(stateCount, symbolCount, T, finals);
-    return DFA<Symbol, State, TokenId>(stateCount, start, deadState, finals, T, Symbols<Symbol>{symbolCount, symbolToId, idToSymbol});
+    return DFA<Symbol, State, TokenId>(
+        DfaStates<State, TokenId>(
+            stateCount, start, deadState, TokenIds<TokenId>(finals), Transitions<State>(stateCount, symbolCount, T)),
+        Symbols<Symbol>{symbolCount, symbolToId, idToSymbol});
 }
 
