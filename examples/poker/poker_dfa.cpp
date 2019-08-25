@@ -1,9 +1,9 @@
 #include "poker_dfa.h"
 
 #include "DFA.h"
+#include "DFA_minimization.h"
 #include "NFA.h"
 #include "NFA_to_DFA.h"
-#include "DFA_minimization.h"
 #include "iterative_fold.h"
 #include "nfaBuilder.h"
 #include "rank_count.h"
@@ -81,8 +81,8 @@ make_SortedCards_nfaBuilder(std::ostream& logger) {
 }
 
 std::pair<NFA<Symbol, StateId, TerminalId>, Terminals> make_NFA(std::ostream& logger) {
-    // const auto builder = make_RankCount_nfaBuilder(logger);
-    const auto builder = make_SortedCards_nfaBuilder(logger);
+    const auto builder = make_RankCount_nfaBuilder(logger);
+    // const auto builder = make_SortedCards_nfaBuilder(logger);
     logger << "nfa builder done\n";
     logger << "state count: " << builder.first.ns.size() << '\n';
     return {builder};
