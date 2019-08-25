@@ -9,22 +9,22 @@ auto Lexer::getToken() -> Token {
         return eof_;
     }
     // cout << "entered getToken()" << endl;
-    auto s = dfa_.states_.GetStart();
-    auto f = dfa_.states_.GetTokenId(s);
+    auto s = dfa_.GetStart();
+    auto f = dfa_.GetTokenId(s);
     // cout << "starting in state " << s << ", type " << f << endl;
     const auto start = c;
     auto lastFinal = c;
     auto current = c;
-    const auto dstate = dfa_.states_.GetDeadState();
+    const auto dstate = dfa_.GetDeadState();
     while (/**current != EOF && */ s != dstate) {
         // cout << "got '" << showCharEscaped(*current) << "'" << endl;
         // auto _c = dfa_.symbolToId.at(*current);
-        const auto _c = dfa_.symbols_.symbolToId(*current);
+        const auto _c = dfa_.symbolToId(*current);
         // if (_c == scount) {
         //    throw std::runtime_error("invalid symbol '" + printEscaped(*current) + "'");
         //}
-        s = dfa_.states_.GetTransition(s, _c);
-        const auto ff = dfa_.states_.GetTokenId(s);
+        s = dfa_.GetTransition(s, _c);
+        const auto ff = dfa_.GetTokenId(s);
         if (ff) {
             f = ff;
             lastFinal = current;

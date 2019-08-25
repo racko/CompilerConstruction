@@ -128,13 +128,35 @@ class DfaStates {
 };
 
 template <typename Symbol, typename State, typename TokenId>
-struct DFA {
-    DfaStates<State, TokenId> states_;
-    Symbols<Symbol> symbols_;
-
+class DFA {
+  public:
     DFA() = default;
 
     DFA(const DfaStates<State, TokenId>& states, const Symbols<Symbol>& symbols);
+
+    State GetStateCount() const { return states_.GetCount(); }
+    std::size_t GetSymbolCount() const { return symbols_.count(); }
+    State GetStart() const { return states_.GetStart(); }
+    State GetDeadState() const { return states_.GetDeadState(); }
+    TokenId GetTokenId(const State s) const { return states_.GetTokenId(s); }
+    State GetTransition(const State s, const std::size_t c) const { return states_.GetTransition(s, c); }
+    const Transitions<State>& GetTransitions() const { return states_.GetTransitions(); }
+    const TokenIds<TokenId>& GetTokenIds() const { return states_.GetTokenIds(); }
+    const Symbols<Symbol>& GetSymbols() const { return symbols_; }
+    std::size_t symbolToId(const std::size_t symbol) const { return symbols_.symbolToId(symbol); }
+    Symbol idToSymbol(const std::size_t id) const { return symbols_.idToSymbol(id); }
+
+    bool operator==(const DFA& rhs) const { return states_ == rhs.states_ && symbols_ == rhs.symbols_; }
+
+    template <class Archive>
+    void serialize(Archive& ar, unsigned int) {
+        ar& states_;
+        ar& symbols_;
+    }
+
+  private:
+    DfaStates<State, TokenId> states_;
+    Symbols<Symbol> symbols_;
 };
 
 template <typename Symbol, typename State, typename TokenId>
@@ -167,40 +189,23 @@ State determineDeadState(const State stateCount,
 }
 
 template <typename Symbol, typename State, typename TokenId>
-bool operator==(const DFA<Symbol, State, TokenId>& lhs, const DFA<Symbol, State, TokenId>& rhs) {
-    return lhs.states_ == rhs.states_ && lhs.symbols_ == rhs.symbols_;
-}
-
-template <typename Symbol, typename State, typename TokenId>
 std::ostream& operator<<(std::ostream& s, const DFA<Symbol, State, TokenId>& dfa) {
     s << "digraph G {\n";
-    for (unsigned int p = 0; p < dfa.states_.GetCount(); p++) {
-        if (p == dfa.states_.GetDeadState()) {
+    for (unsigned int p = 0; p < dfa.GetStateCount(); p++) {
+        if (p == dfa.GetDeadState()) {
             continue;
         }
 
-        if (dfa.states_.GetTokenId(p)) {
-            s << "  " << p << "[label = \"" << p << '|' << dfa.states_.GetDeadState() << "\" shape = doublecircle];\n";
+        if (dfa.GetTokenId(p)) {
+            s << "  " << p << "[label = \"" << p << '|' << dfa.GetDeadState() << "\" shape = doublecircle];\n";
         }
-        for (auto a = 0u; a < dfa.symbols_.count(); ++a) {
-            if (dfa.states_.GetTransition(p, a) != dfa.states_.GetDeadState()) {
-                s << "  " << p << " -> " << dfa.states_.GetTransition(p, a) << " [label = \""
-                  << int(dfa.symbols_.idToSymbol(a)) << "\"];\n";
+        for (auto a = 0u; a < dfa.GetSymbolCount(); ++a) {
+            if (dfa.GetTransition(p, a) != dfa.GetDeadState()) {
+                s << "  " << p << " -> " << dfa.GetTransition(p, a) << " [label = \"";
+                s << int(dfa.idToSymbol(a)) << "\"];\n";
             }
         }
     }
     s << "}\n";
     return s;
 }
-
-namespace boost {
-namespace serialization {
-
-template <class Archive, typename Symbol, typename State, typename TokenId>
-void serialize(Archive& ar, DFA<Symbol, State, TokenId>& dfa, unsigned int) {
-    ar& dfa.states_;
-    ar& dfa.symbols_;
-}
-
-} // namespace serialization
-} // namespace boost

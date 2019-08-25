@@ -299,11 +299,11 @@ template <typename Symbol, typename State, typename TokenId>
 DFA<Symbol, State, TokenId> minimize(const DFA<Symbol, State, TokenId>& dfa) {
     std::cout << "minimize" << std::endl;
 
-    const auto& T = dfa.states_.GetTransitions();
-    const auto start = dfa.states_.GetStart();
-    const auto stateCount = dfa.states_.GetCount();
-    const auto symbolCount = dfa.symbols_.count();
-    const auto& finals = dfa.states_.GetTokenIds();
+    const auto& T = dfa.GetTransitions();
+    const auto start = dfa.GetStart();
+    const auto stateCount = dfa.GetStateCount();
+    const auto symbolCount = dfa.GetSymbolCount();
+    const auto& finals = dfa.GetTokenIds();
 
     auto tI = inverseTransitionTable<Symbol>(T);
 
@@ -339,6 +339,6 @@ DFA<Symbol, State, TokenId> minimize(const DFA<Symbol, State, TokenId>& dfa) {
     //  std::cout << "pI: " << show(pI) << std::endl;
     //  std::cout << "c: " << show(c) << std::endl;
 
-    return generateFromMinimizationResults<Symbol, State, TokenId>(part, start, T, finals, dfa.symbols_);
+    return generateFromMinimizationResults<Symbol, State, TokenId>(part, start, T, finals, dfa.GetSymbols());
 }
 
