@@ -58,7 +58,7 @@ myLexer::myLexer() : pimpl(std::make_unique<impl>()) {}
 myLexer::~myLexer() = default;
 
 void myLexer::setText(const char* text) {
-    pimpl->lexer.c = text;
+    pimpl->lexer.c_ = text;
     pimpl->token = pimpl->t2t(pimpl->lexer.getToken());
 }
 

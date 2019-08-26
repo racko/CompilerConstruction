@@ -6,7 +6,7 @@
 #include <utility> // for move
 
 struct Lexer {
-    const char* c;
+    const char* c_;
     using Symbol = char;
     using State = uint16_t;
     using TokenId = uint8_t;

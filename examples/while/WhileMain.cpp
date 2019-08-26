@@ -203,7 +203,7 @@ struct myLexer : TokenStream<std::unique_ptr<Token>> {
     myLexer() : lexer(getDFA(), {nullptr, 0, static_cast<uint32_t>(T::EOI) + 1}, static_cast<uint32_t>(T::WS) + 1) {}
 
     void setText(const char* text) {
-        lexer.c = text;
+        lexer.c_ = text;
         token = t2t(lexer.getToken());
     }
 

@@ -52,7 +52,7 @@ struct myLexer : TokenStream<std::unique_ptr<Functional::Token>> {
     // iterator begin() { return iterator(*this); }
     // iterator begin() { return iterator(this); }
     void setText(const char* text) {
-        lexer.c = text;
+        lexer.c_ = text;
         token = t2t(lexer.getToken());
     }
 
