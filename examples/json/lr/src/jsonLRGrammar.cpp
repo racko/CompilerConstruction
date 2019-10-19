@@ -14,6 +14,10 @@ const std::vector<std::vector<Grammar::String>> Grammar::productions = makeProdu
 const std::unordered_map<GrammarElement, std::unordered_set<TerminalID>> Grammar::firsts = allFirsts<Grammar>();
 const std::unordered_map<NonterminalID, std::unordered_set<TerminalID>> Grammar::follows = allFollows<Grammar>();
 
+
+// TODO: {{VALUE}, {VALUES, VALUE}} and MEMBERS analogously. benchmark! compare state counts!
+// take care that [...,] and {...,} are still valid (tests? :/)
+// take care that [,...] and {,...} are still invalid (tests? :/)
 std::vector<std::vector<Grammar::String>> makeProductions() {
     std::vector<std::vector<Grammar::String>> productions(Grammar::numberOfNonterminals);
 

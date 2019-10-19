@@ -70,8 +70,10 @@ struct LLParser : Parser<T, typename G::Token> {
     T parse(TokenStream<typename G::Token>& w) override;
 
   private:
-    // virtual T action(typename G::NonterminalID A, uint32_t production, T* alpha, size_t n) = 0;
-    // virtual T shift(typename G::Token_rv_reference t) = 0;
+    // TODO. Semantics: Assume that A is on the stack and contains inherited attributes. Push symbols of the given production of A onto the stack and copy inherited attributes into place.
+    // Maybe keep A on the stack below the symbols of the new production so that we can use it as a place to store synthetic attributes. Then we need a way to check if we need to expand A or just run another action to copy the synthesized attributes to somewhere below A.
+    virtual T expand(typename G::NonterminalID& A, uint32_t production, T* alpha) = 0;
+    virtual T shift(typename G::Token_rv_reference t) = 0;
 
     using state = uint32_t;
     std::vector<std::vector<action<G>>> action_table;
