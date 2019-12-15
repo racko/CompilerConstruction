@@ -13,7 +13,7 @@ struct myLexer;
 /// (Furthermore, currently the parser only returns a non-owning view to it's internal data, so we
 /// would neet to return the parser with the value)
 struct JsonParser {
-    using Parser = Parser<json::value*,json::Token>;
+    using Parser = ::Parser<json::value*,json::Token>;
     JsonParser();
     JsonParser(std::unique_ptr<Parser> parser);
     ~JsonParser();

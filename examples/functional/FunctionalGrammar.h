@@ -173,7 +173,7 @@ struct Grammar {
     static const std::unordered_set<TerminalID>& getFirsts(const GrammarElement& X);
 
     // using Token_const_reference = const Functional::Token*;
-    using Token = std::unique_ptr<Token>;
+    using Token = std::unique_ptr<Functional::Token>;
 
     static TerminalID getTag(const Token& x);
 
