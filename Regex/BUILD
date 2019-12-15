@@ -70,17 +70,3 @@ cc_library(
     linkstatic = True,
     deps = ["@catch2"],
 )
-
-load("@bazel_compilation_database//:aspects.bzl", "compilation_database")
-
-compilation_database(
-    name = "compdb",
-    # ideally should be the same as `bazel info execution_root`.
-    exec_root = "/tmp/nvme/racko/bazel_cache/_bazel_racko/a01f0cba51a77ac3093e4226478c33ae/execroot/__main__",
-    targets = [
-        #"//examples/functional",
-        #"//examples/functional:functional.exe",
-        #"//examples/functional:functional_test",
-        #"//examples/functional:functional_fitnesse.exe",
-    ],
-)
