@@ -1,13 +1,13 @@
 #pragma once
 
-#include "jsonLRGrammar.h" // for Grammar
-#include "jsonValue.h"     // for value
-#include "json_token.h"    // for operator<<, operator==, NT, NonterminalID, T
-#include <array>           // for array
-#include <cstddef>         // for size_t
-#include <cstdint>         // for uint32_t
-#include <list>            // for list
-#include "Regex/lrParser.h"      // for LRParser
+#include "Regex/lrParser.h" // for LRParser
+#include "jsonLRGrammar.h"  // for Grammar
+#include "jsonValue.h"      // for value
+#include "json_token.h"     // for operator<<, operator==, NT, NonterminalID, T
+#include <array>            // for array
+#include <cstddef>          // for size_t
+#include <cstdint>          // for uint32_t
+#include <list>             // for list
 
 namespace jsonLR {
 struct Parser : public lr_parser::LRParser<Grammar, json::value*> {

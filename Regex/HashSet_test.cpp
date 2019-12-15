@@ -1,5 +1,5 @@
 #include "Regex/HashSet.h"
-#include <catch.hpp>  // for AssertionHandler, SourceLineInfo, StringRef
+#include <catch.hpp> // for AssertionHandler, SourceLineInfo, StringRef
 
 TEST_CASE("HashSet_TestHash0", "[HashSet]") {
     HashSet a(10);

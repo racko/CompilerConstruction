@@ -1,20 +1,20 @@
 #include "jsonLexer.h"
 
-#include "num_view.h"    // for num_view
-#include "Regex/variant.h"     // for null
-#include "Regex/NFA.h"         // for NFA
-#include "Regex/NFA_to_DFA.h"  // for toDFA
-#include "Regex/DFA_minimization.h"  // for minimize
-#include "Regex/Regex.h"       // for Lexer, Lexer::Token, Lexer::TokenId, Lexer:...
-#include <cstddef>       // for size_t
-#include <iostream>      // for operator<<, stringstream, basic_ostream
-#include <json_token.h>  // for Token, TerminalID, T, type
-#include "Regex/nfaBuilder.h"  // for nfaBuilder
-#include <sstream>       // for basic_stringstream<>::__stringbuf_type
-#include <stdexcept>     // for runtime_error
-#include <string_view>   // for string_view
-#include <unordered_map> // for unordered_map
-#include <vector>        // for vector
+#include "Regex/DFA_minimization.h" // for minimize
+#include "Regex/NFA.h"              // for NFA
+#include "Regex/NFA_to_DFA.h"       // for toDFA
+#include "Regex/Regex.h"            // for Lexer, Lexer::Token, Lexer::TokenId, Lexer:...
+#include "Regex/nfaBuilder.h"       // for nfaBuilder
+#include "Regex/variant.h"          // for null
+#include "num_view.h"               // for num_view
+#include <cstddef>                  // for size_t
+#include <iostream>                 // for operator<<, stringstream, basic_ostream
+#include <json_token.h>             // for Token, TerminalID, T, type
+#include <sstream>                  // for basic_stringstream<>::__stringbuf_type
+#include <stdexcept>                // for runtime_error
+#include <string_view>              // for string_view
+#include <unordered_map>            // for unordered_map
+#include <vector>                   // for vector
 
 namespace json {
 struct myLexer::impl {

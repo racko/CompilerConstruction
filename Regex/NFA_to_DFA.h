@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Regex/HashSet.h"     // for HashSet, hash
-#include "Regex/DFA.h"         // for DFA, determineDeadState
-#include <cstdint>       // for SIZE_MAX
-#include <iostream>      // for operator<<, size_t, endl, cout, ostream
-#include <unordered_map> // for unordered_map, operator==, _Node_iterator
-#include <utility>       // for move, pair
-#include <vector>        // for vector
+#include "Regex/DFA.h"     // for DFA, determineDeadState
+#include "Regex/HashSet.h" // for HashSet, hash
+#include <cstdint>         // for SIZE_MAX
+#include <iostream>        // for operator<<, size_t, endl, cout, ostream
+#include <unordered_map>   // for unordered_map, operator==, _Node_iterator
+#include <utility>         // for move, pair
+#include <vector>          // for vector
 template <typename Symbol, typename State, typename TokenId>
 struct NFA;
 
@@ -144,4 +144,3 @@ DFA<Symbol, State, TokenId> toDFA(const NFA<Symbol, State, TokenId>& nfa) {
             stateCount, start, deadState, TokenIds<TokenId>(finals), Transitions<State>(stateCount, symbolCount, T)),
         Symbols<Symbol>{symbolCount, symbolToId, idToSymbol});
 }
-

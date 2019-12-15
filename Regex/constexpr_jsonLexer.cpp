@@ -8,9 +8,9 @@
 #include "Regex/Regex_constexpr.h"            // for Lexer
 #include "Regex/constexpr.h"                  // for strcat, string, vector, vect...
 #include "Regex/nfaBuilder_constexpr.h"       // for nfaBuilder, CountingGraph
-#include <algorithm>                    // for max, min
-#include <cstdint>                      // for uint8_t, int64_t, int16_t
-#include <iostream>                     // for endl, cout, ostream
+#include <algorithm>                          // for max, min
+#include <cstdint>                            // for uint8_t, int64_t, int16_t
+#include <iostream>                           // for endl, cout, ostream
 
 static constexpr int64_t MaxSymbols = 128;
 using Symbol = char;
@@ -56,7 +56,8 @@ constexpr nfaBuilder<Symbol, State, MaxSymbols, G> make_nfaBuilder() {
 
     // note: forward slash can be used escaped as well as unescaped. That's part of the json spec.
     // Stackoverflow explains that this is helpful for embedding json in javascript.
-    auto chr = const_expr::strcat("(", unescaped, R"(|\\("|\\|/|b|f|n|r|t|u)", hexdigit, hexdigit, hexdigit, hexdigit, "))");
+    auto chr =
+        const_expr::strcat("(", unescaped, R"(|\\("|\\|/|b|f|n|r|t|u)", hexdigit, hexdigit, hexdigit, hexdigit, "))");
     auto str = const_expr::strcat(R"((")", chr, R"(*"))");
 
     builder.lexRegex(const_expr::strcat(ws, "[", ws).data(), 4);

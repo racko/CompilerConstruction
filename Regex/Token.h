@@ -2,7 +2,7 @@
 
 #include <cstddef>
 
-template<typename TokenId>
+template <typename TokenId>
 struct Token {
     const char* start;
     std::size_t length;

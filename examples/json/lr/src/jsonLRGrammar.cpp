@@ -1,7 +1,7 @@
 #include "jsonLRGrammar.h"
 
-#include "Regex/Grammar.h"           // for allFirsts, allFollows
-#include "json_token.h"        // for T, NT, NT::VALUE, NonterminalID, opera...
+#include "Regex/Grammar.h" // for allFirsts, allFollows
+#include "json_token.h"    // for T, NT, NT::VALUE, NonterminalID, opera...
 
 namespace jsonLR {
 using namespace json;
@@ -14,7 +14,6 @@ const std::vector<std::vector<Grammar::String>> Grammar::productions = makeProdu
 const std::unordered_map<GrammarElement, std::unordered_set<TerminalID>> Grammar::firsts = allFirsts<Grammar>();
 const std::unordered_map<NonterminalID, std::unordered_set<TerminalID>> Grammar::follows = allFollows<Grammar>();
 
-
 // TODO: {{VALUE}, {VALUES, VALUE}} and MEMBERS analogously. benchmark! compare state counts!
 // take care that [...,] and {...,} are still valid (tests? :/)
 // take care that [,...] and {,...} are still invalid (tests? :/)
@@ -25,8 +24,8 @@ std::vector<std::vector<Grammar::String>> makeProductions() {
 
     productions[(unsigned)NT::JSON_TEXT] = {{NT::VALUE}};
 
-    productions[(unsigned)NT::VALUE] = {{T::FALSE},  {T::NIL}, {T::TRUE},  {NT::OBJECT},
-                                        {NT::ARRAY}, {T::NUM},  {T::STRING}};
+    productions[(unsigned)NT::VALUE] = {
+        {T::FALSE}, {T::NIL}, {T::TRUE}, {NT::OBJECT}, {NT::ARRAY}, {T::NUM}, {T::STRING}};
 
     productions[(unsigned)NT::OBJECT] = {{T::BEGIN_OBJECT, NT::MEMBER, NT::MEMBERS, T::END_OBJECT},
                                          {T::BEGIN_OBJECT, T::END_OBJECT}};

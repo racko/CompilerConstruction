@@ -47,7 +47,6 @@ inline auto children(const SortedCards cards) {
     const auto cardCount = countCards(cards);
     const auto min_new_rank = std::max(6U - static_cast<std::uint32_t>(cardCount), 0U);
     // std::cout << "max_new_rank: " << max_new_rank << '\n';
-    return filter(
-        is_valid,
-        transform(make_transition, range(cardCount != 7 ? min_new_rank : max_new_rank, max_new_rank)));
+    return filter(is_valid,
+                  transform(make_transition, range(cardCount != 7 ? min_new_rank : max_new_rank, max_new_rank)));
 }

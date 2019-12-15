@@ -1,10 +1,10 @@
 #pragma once
 
 #include "Regex/Grammar.h" // for first, follow, kind, kind::TERMINAL
-#include <assert.h>  // for assert
-#include <cstdint>   // for uint32_t
-#include <iostream>  // for operator<<, stringstream, ostream, basic_ostream
 #include "Regex/parser.h"  // for Parser
+#include <assert.h>        // for assert
+#include <cstdint>         // for uint32_t
+#include <iostream>        // for operator<<, stringstream, ostream, basic_ostream
 #include <sstream>
 #include <stdexcept> // for runtime_error, logic_error
 #include <vector>    // for vector
@@ -70,9 +70,14 @@ struct LLParser : Parser<T, typename G::Token> {
     T parse(TokenStream<typename G::Token>& w) override;
 
   private:
-    // TODO. Semantics: Assume that A is on the stack and contains inherited attributes. Push symbols of the given production of A onto the stack and copy inherited attributes into place.
-    // Maybe keep A on the stack below the symbols of the new production so that we can use it as a place to store synthetic attributes. Then we need a way to check if we need to expand A or just run another action to copy the synthesized attributes to somewhere below A.
+    // TODO. Semantics: Assume that A is on the stack and contains inherited attributes. Push symbols of the given
+    // production of A onto the stack and copy inherited attributes into place. Maybe keep A on the stack below the
+    // symbols of the new production so that we can use it as a place to store synthetic attributes. Then we need a way
+    // to check if we need to expand A or just run another action to copy the synthesized attributes to somewhere below
+    // A.
+
     // virtual T expand(typename G::NonterminalID& A, uint32_t production, T* alpha) = 0;
+
     // virtual T shift(typename G::Token&& t) = 0;
 
     using state = uint32_t;

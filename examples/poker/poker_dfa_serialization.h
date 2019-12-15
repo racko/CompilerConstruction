@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Regex/DFA.h"
-#include "types.h"
 #include "terminals.h"
-#include <utility>
+#include "types.h"
 #include <iosfwd>
+#include <utility>
 
 std::pair<DFA<Symbol, StateId, TerminalId>, Terminals> loadRanker(std::ostream& logger);

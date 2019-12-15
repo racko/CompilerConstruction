@@ -1,10 +1,10 @@
 #pragma once
 
 #include <cstddef>       // for size_t
-#include <functional>     // for hash
-#include <iosfwd>         // for ostream, size_t
-#include <stdexcept>      // for runtime_error
-#include <unordered_set>  // for unordered_set, unordered_set<>::const_iterator
+#include <functional>    // for hash
+#include <iosfwd>        // for ostream, size_t
+#include <stdexcept>     // for runtime_error
+#include <unordered_set> // for unordered_set, unordered_set<>::const_iterator
 
 struct HashSet {
     struct ref {
@@ -41,7 +41,8 @@ struct HashSet {
     std::size_t n = 0;
 
     HashSet() = default;
-    ~HashSet(); // ignore rule of five here. It's defaulted in the cpp. I only want the compiler to not generate the unordered_set destructor everywhere ...
+    ~HashSet(); // ignore rule of five here. It's defaulted in the cpp. I only want the compiler to not generate the
+                // unordered_set destructor everywhere ...
 
     HashSet(std::size_t _n);
     HashSet(std::size_t _n, bool x);
@@ -60,7 +61,7 @@ struct HashSet {
 
     void clear();
 
-    bool operator== (const HashSet& rhs) const;
+    bool operator==(const HashSet& rhs) const;
 
     HashSet& operator|=(const HashSet& rhs);
 
@@ -74,39 +75,32 @@ struct HashSet {
 };
 
 namespace std {
-template<>
+template <>
 class hash<HashSet> {
-    public:
-    size_t operator()(const HashSet &s) const;
+  public:
+    size_t operator()(const HashSet& s) const;
 };
-}
+} // namespace std
 
 inline HashSet::HashSet(const std::size_t _n) : n(_n) {
-    //cout << "constructed HashSet(" << _n << "): " << *this << endl;
+    // cout << "constructed HashSet(" << _n << "): " << *this << endl;
 }
 
 inline HashSet::HashSet(const std::size_t _n, const bool x) : n(_n) {
     if (x) {
-        throw std::runtime_error("You don't want to construct a HashSet with all values in it ... you'd want to use a BitSet for this");
+        throw std::runtime_error(
+            "You don't want to construct a HashSet with all values in it ... you'd want to use a BitSet for this");
     }
-    //cout << "constructed HashSet(" << _n << ", " << x << "): " << *this << endl;
+    // cout << "constructed HashSet(" << _n << ", " << x << "): " << *this << endl;
 }
 
-inline HashSet::ref HashSet::operator[](unsigned int i) {
-    return HashSet::ref(s, i);
-}
+inline HashSet::ref HashSet::operator[](unsigned int i) { return HashSet::ref(s, i); }
 
-inline HashSet::const_ref HashSet::operator[](unsigned int i) const {
-    return HashSet::const_ref(s, i);
-}
+inline HashSet::const_ref HashSet::operator[](unsigned int i) const { return HashSet::const_ref(s, i); }
 
-inline std::size_t HashSet::size() const {
-    return n;
-}
+inline std::size_t HashSet::size() const { return n; }
 
-inline size_t HashSet::count() const {
-    return s.size();
-}
+inline size_t HashSet::count() const { return s.size(); }
 
 HashSet operator|(const HashSet& lhs, const HashSet& rhs);
 
@@ -117,12 +111,8 @@ std::ostream& operator<<(std::ostream&, const HashSet&);
 inline HashSet::ref::ref(std::unordered_set<unsigned int>& _s, unsigned int _i) : s(_s), i(_i) {}
 inline HashSet::const_ref::const_ref(const std::unordered_set<unsigned int>& _s, unsigned int _i) : s(_s), i(_i) {}
 
-inline std::unordered_set<unsigned int>::const_iterator HashSet::begin() const {
-    return s.begin();
-}
+inline std::unordered_set<unsigned int>::const_iterator HashSet::begin() const { return s.begin(); }
 
-inline std::unordered_set<unsigned int>::const_iterator HashSet::end() const {
-    return s.end();
-}
+inline std::unordered_set<unsigned int>::const_iterator HashSet::end() const { return s.end(); }
 
 void a_and_not_b(const HashSet& a, const HashSet& b, HashSet& c);

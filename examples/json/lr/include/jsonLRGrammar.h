@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Regex/Grammar.h"     // for kind
-#include <cstddef>       // for size_t
-#include <json_token.h>  // for kindOf, GrammarElement, NT, NT::VALUES, Non...
-#include <limits>        // for numeric_limits
-#include <unordered_map> // for unordered_map
-#include <unordered_set> // for unordered_set
-#include <vector>        // for vector
+#include "Regex/Grammar.h" // for kind
+#include <cstddef>         // for size_t
+#include <json_token.h>    // for kindOf, GrammarElement, NT, NT::VALUES, Non...
+#include <limits>          // for numeric_limits
+#include <unordered_map>   // for unordered_map
+#include <unordered_set>   // for unordered_set
+#include <vector>          // for vector
 
 namespace jsonLR {
 struct Grammar {

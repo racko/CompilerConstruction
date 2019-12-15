@@ -102,4 +102,3 @@ R countBits(T v) {
         v = clearLowestBit(v); // clear the least significant bit set
     return c;
 }
-

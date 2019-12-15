@@ -1,10 +1,10 @@
 #include <json_token.h>
 
 #include "Regex/Grammar.h" // for kind, kind::EOI, kind::EPS, kind::NONTERMINAL
-#include <algorithm> // for copy
-#include <iterator>  // for ostream_iterator
-#include <ostream>   // for operator<<
-#include <stdexcept> // for logic_error
+#include <algorithm>       // for copy
+#include <iterator>        // for ostream_iterator
+#include <ostream>         // for operator<<
+#include <stdexcept>       // for logic_error
 
 namespace json {
 const char* const nt_strings[] = {"start", "json-text", "value", "object", "member", "members", "array", "values"};

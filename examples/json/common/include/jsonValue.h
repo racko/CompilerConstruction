@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Regex/variant.h"                  // for null
-#include <boost/variant/variant.hpp>  // for variant
-#include <iosfwd>                     // for ostream
-#include <string_view>                // for string_view
-#include <utility>                    // for pair, pair<>::pair
+#include "Regex/variant.h"           // for null
+#include <boost/variant/variant.hpp> // for variant
+#include <iosfwd>                    // for ostream
 #include <num_view.h>
+#include <string_view> // for string_view
+#include <utility>     // for pair, pair<>::pair
 
 namespace json {
 struct value;

@@ -1,8 +1,8 @@
 #include "hand_rank.h"
 
-#include <ostream>
 #include <algorithm>
 #include <iterator>
+#include <ostream>
 
 bool operator==(const HandRank& a, const HandRank& b) { return a.type() == b.type() && a.ranks() == b.ranks(); }
 
@@ -13,7 +13,6 @@ bool operator<(const HandRank& a, const HandRank& b) {
         return a.ranks() < b.ranks();
     return false;
 }
-
 
 std::ostream& operator<<(std::ostream& s, const HandRank& a) {
     s << int(a.type()) << ", ";

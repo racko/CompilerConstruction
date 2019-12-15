@@ -1,11 +1,11 @@
 #pragma once
 
-#include <cstddef>
 #include <boost/iterator/counting_iterator.hpp>
 #include <boost/iterator/filter_iterator.hpp>
 #include <boost/iterator/function_output_iterator.hpp>
 #include <boost/iterator/reverse_iterator.hpp>
 #include <boost/iterator/transform_iterator.hpp>
+#include <cstddef>
 
 // boost::counting_iterator does not work with reverse_iterator: reverse_iterator<boost::counting_iterator>::operator*
 // returns a dangling reference to an expired local variable.
@@ -122,4 +122,3 @@ template <typename Function, typename InputRange>
 auto apply(Function f, InputRange in) {
     return f(in.begin(), in.end());
 }
-

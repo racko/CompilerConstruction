@@ -4,8 +4,8 @@
 #include "Regex/HashSet_constexpr.h" // for HashSet
 #include "Regex/Print.h"             // for showCharEscaped
 #include "Regex/constexpr.h"         // for vector
-#include <cstdint>             // for int64_t
-#include <iostream>            // for operator<<, ostream, basic_ostream
+#include <cstdint>                   // for int64_t
+#include <iostream>                  // for operator<<, ostream, basic_ostream
 
 template <typename State, typename TokenId, int64_t MaxNodes, int64_t MaxTransitions, int64_t MaxResultStates>
 class Graph;
@@ -28,7 +28,8 @@ struct NFA {
     int64_t symbolCount, stateCount;
     State start;
     const_expr::vector<TokenId, MaxNodes> finals;
-    const_expr::vector<const_expr::vector<internal_set, MaxNodes>, MaxSymbols> table; // MaxTransitions instead of MaxSymbols?
+    const_expr::vector<const_expr::vector<internal_set, MaxNodes>, MaxSymbols>
+        table; // MaxTransitions instead of MaxSymbols?
     const_expr::vector<Symbol, MaxSymbols> symbols;
     const_expr::vector<Set, MaxNodes> closures;
 
@@ -47,8 +48,9 @@ struct NFA {
 
     // constexpr void getClosure(Set& s) const;
   private: // only made private to find remaing call sites
-    constexpr void
-    getClosure(Set& s, HashSet<MaxTransitions>& newStates, const_expr::vector<typename Set::value_type, MaxNodes>& stack) const;
+    constexpr void getClosure(Set& s,
+                              HashSet<MaxTransitions>& newStates,
+                              const_expr::vector<typename Set::value_type, MaxNodes>& stack) const;
 };
 
 template <typename Symbol,

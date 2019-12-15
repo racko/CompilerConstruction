@@ -2,8 +2,8 @@
 
 #include "Regex/DFA.h"   // for DFA
 #include "Regex/Token.h" // for Token
-#include <cstdint> // for uint16_t, uint8_t
-#include <utility> // for move
+#include <cstdint>       // for uint16_t, uint8_t
+#include <utility>       // for move
 
 struct Lexer {
     const char* c_;

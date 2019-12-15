@@ -1,17 +1,17 @@
 #pragma once
 
 #include "Regex/Grammar.h" // for kind, kind::EOI, kind::NONTERMINAL, kind::TERMINAL
-#include <cassert>   // for assert
-#include <cstddef>   // for ptrdiff_t, size_t
-#include <cstdint>   // for uint32_t
-#include <iostream>  // for operator<<, endl, ostream, cout, basic_ostream
-#include <limits>    // for numeric_limits
-#include <list>      // for list
-#include <map>       // for map
 #include "Regex/parser.h"  // for Parser
-#include <set>       // for set
-#include <stdexcept> // for logic_error, runtime_error
-#include <vector>    // for vector
+#include <cassert>         // for assert
+#include <cstddef>         // for ptrdiff_t, size_t
+#include <cstdint>         // for uint32_t
+#include <iostream>        // for operator<<, endl, ostream, cout, basic_ostream
+#include <limits>          // for numeric_limits
+#include <list>            // for list
+#include <map>             // for map
+#include <set>             // for set
+#include <stdexcept>       // for logic_error, runtime_error
+#include <vector>          // for vector
 
 template <typename TokenType>
 class TokenStream;

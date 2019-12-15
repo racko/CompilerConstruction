@@ -6,11 +6,11 @@
 //#include <iosfwd> // for std::ostream&
 #include <functional> // for std::hash
 
-template<int64_t max_n>
+template <int64_t max_n>
 struct BitSetComplement;
 
 struct ref {
-    uint64_t *p;
+    uint64_t* p;
     uint64_t m;
 
     constexpr ref(uint64_t* _p, int64_t i);
@@ -26,7 +26,7 @@ struct ref {
 };
 
 struct const_ref {
-    const uint64_t *p;
+    const uint64_t* p;
     uint64_t m;
 
     constexpr const_ref(const uint64_t* _p, int64_t i);
@@ -39,24 +39,24 @@ struct const_ref {
     constexpr const_ref& operator=(const_ref&&) = delete;
 };
 
-template<int64_t max_n>
+template <int64_t max_n>
 struct BitSet {
     using value_type = int64_t;
     int64_t n = 0;
-    uint64_t p[(max_n+63)>>6]{};
+    uint64_t p[(max_n + 63) >> 6]{};
 
     constexpr BitSet() = default;
     constexpr BitSet(int64_t _n);
     constexpr BitSet(int64_t _n, const bool x);
 
-    template<int64_t w2>
+    template <int64_t w2>
     constexpr BitSet& operator=(const BitSetComplement<w2>& s);
 
     constexpr void resize(int64_t _n, bool x = false);
 
-    //constexpr ref operator[](int64_t i);
+    // constexpr ref operator[](int64_t i);
 
-    //constexpr const_ref operator[](int64_t i) const;
+    // constexpr const_ref operator[](int64_t i) const;
 
     constexpr bool INLINE get(int64_t i) const;
     constexpr void INLINE set(int64_t i);
@@ -70,16 +70,16 @@ struct BitSet {
 
     constexpr void clear();
 
-    template<int64_t w2>
+    template <int64_t w2>
     constexpr bool operator==(const BitSet<w2>& rhs) const;
 
-    template<int64_t w2>
+    template <int64_t w2>
     constexpr BitSet& operator|=(const BitSet<w2>& rhs);
 
-    template<int64_t w2>
+    template <int64_t w2>
     constexpr BitSet& operator&=(const BitSet<w2>& rhs);
 
-    template<int64_t w2>
+    template <int64_t w2>
     constexpr BitSet& operator-=(const BitSet<w2>& rhs);
 
     constexpr BitSet operator~() const;
@@ -109,117 +109,113 @@ struct BitSet {
     constexpr int64_t nextSetBit(int64_t fromIndex) const;
 };
 
-template<int64_t w1, int64_t w2>
+template <int64_t w1, int64_t w2>
 constexpr void INLINE swap(BitSet<w1>& lhs, BitSet<w2>& rhs) noexcept {
     lhs.swap(rhs);
 }
 
 namespace std {
-template<int64_t max_n>
+template <int64_t max_n>
 class hash<BitSet<max_n>> {
-public:
-    constexpr size_t operator()(const BitSet<max_n> &s) const noexcept;
+  public:
+    constexpr size_t operator()(const BitSet<max_n>& s) const noexcept;
 };
-}
+} // namespace std
 
-//template<int64_t max_n>
-//constexpr ref BitSet<max_n>::operator[](int64_t i) {
+// template<int64_t max_n>
+// constexpr ref BitSet<max_n>::operator[](int64_t i) {
 //    return ref(p, i);
 //}
 //
-//template<int64_t max_n>
-//constexpr const_ref BitSet<max_n>::operator[](int64_t i) const {
+// template<int64_t max_n>
+// constexpr const_ref BitSet<max_n>::operator[](int64_t i) const {
 //    return const_ref(p, i);
 //}
 
-template<int64_t max_n>
+template <int64_t max_n>
 constexpr bool BitSet<max_n>::get(int64_t i) const {
     return *(p + (i >> 6)) & (0x1ULL << (i & 63));
 }
 
-template<int64_t max_n>
+template <int64_t max_n>
 constexpr void BitSet<max_n>::set(int64_t i) {
     *(p + (i >> 6)) |= (0x1ULL << (i & 63));
 }
 
-template<int64_t max_n>
+template <int64_t max_n>
 constexpr void BitSet<max_n>::clear(int64_t i) {
     *(p + (i >> 6)) &= ~(0x1ULL << (i & 63));
 }
 
-template<int64_t max_n>
+template <int64_t max_n>
 constexpr int64_t BitSet<max_n>::wordsInUse() const {
     return (n + 63) >> 6;
 }
 
-template<int64_t max_n>
+template <int64_t max_n>
 constexpr int64_t BitSet<max_n>::size() const {
     return n;
 }
 
-template<int64_t w1, int64_t w2>
-constexpr BitSet<std::min(w1,w2)> INLINE operator|(const BitSet<w1>& lhs, const BitSet<w2>& rhs);
+template <int64_t w1, int64_t w2>
+constexpr BitSet<std::min(w1, w2)> INLINE operator|(const BitSet<w1>& lhs, const BitSet<w2>& rhs);
 
-template<int64_t w1, int64_t w2>
-constexpr BitSet<std::min(w1,w2)> INLINE operator&(const BitSet<w1>& lhs, const BitSet<w2>& rhs);
+template <int64_t w1, int64_t w2>
+constexpr BitSet<std::min(w1, w2)> INLINE operator&(const BitSet<w1>& lhs, const BitSet<w2>& rhs);
 
-template<int64_t w1, int64_t w2>
-constexpr BitSet<std::min(w1,w2)> INLINE operator-(const BitSet<w1>& lhs, const BitSet<w2>& rhs);
+template <int64_t w1, int64_t w2>
+constexpr BitSet<std::min(w1, w2)> INLINE operator-(const BitSet<w1>& lhs, const BitSet<w2>& rhs);
 
-template<int64_t max_n>
+template <int64_t max_n>
 std::ostream& operator<<(std::ostream&, const BitSet<max_n>&);
 
 constexpr ref::ref(uint64_t* _p, int64_t i) : p(_p + (i >> 6)), m(0x1ULL << (i & 63)) {}
 
-constexpr ref::operator bool() const {
-    return *p & m;
-}
+constexpr ref::operator bool() const { return *p & m; }
 
 constexpr const_ref::const_ref(const uint64_t* _p, int64_t i) : p(_p + (i >> 6)), m(0x1ULL << (i & 63)) {}
 
-constexpr const_ref::operator bool() const {
-    return *p & m;
-}
+constexpr const_ref::operator bool() const { return *p & m; }
 
 constexpr ref& ref::operator=(const bool x) {
     *p = (*p & ~m) | (-static_cast<uint64_t>(x) & m);
     return *this;
 }
 
-template<int64_t max_n>
+template <int64_t max_n>
 constexpr BitSet<max_n>::sparse_iterator::sparse_iterator(const BitSet<max_n>& _s, int64_t n) : s(_s), c(n - 1) {
     if (c + 1 < s.n)
         operator++();
 }
 
-template<int64_t max_n>
+template <int64_t max_n>
 constexpr bool BitSet<max_n>::sparse_iterator::operator!=(const BitSet<max_n>::sparse_iterator& it) const {
-    //cout << "c != it.c: " << c << " != " << it.c << endl;
+    // cout << "c != it.c: " << c << " != " << it.c << endl;
     return c != it.c;
 }
 
-template<int64_t max_n>
+template <int64_t max_n>
 constexpr int64_t BitSet<max_n>::sparse_iterator::operator*() const {
     return c;
 }
 
-template<int64_t max_n>
+template <int64_t max_n>
 struct BitSetComplement {
     const BitSet<max_n>& s;
-    constexpr INLINE BitSetComplement(const BitSet<max_n>&_s) : s(_s) {}
+    constexpr INLINE BitSetComplement(const BitSet<max_n>& _s) : s(_s) {}
 };
 
-template<int64_t max_n>
+template <int64_t max_n>
 constexpr typename BitSet<max_n>::sparse_iterator BitSet<max_n>::begin() const {
     return typename BitSet<max_n>::sparse_iterator(*this);
 }
 
-template<int64_t max_n>
+template <int64_t max_n>
 constexpr typename BitSet<max_n>::sparse_iterator BitSet<max_n>::end() const {
     return typename BitSet<max_n>::sparse_iterator(*this, n + 1);
 }
 
-template<int64_t w1, int64_t w2, int64_t w3>
+template <int64_t w1, int64_t w2, int64_t w3>
 constexpr void INLINE a_and_not_b(const BitSet<w1>& a, const BitSet<w2>& b, BitSet<w3>& c) {
     c = BitSetComplement<w2>(b);
     c &= a;
@@ -230,18 +226,18 @@ constexpr void INLINE a_and_not_b(const BitSet<w1>& a, const BitSet<w2>& b, BitS
 //#include <iomanip>
 //#include <ostream>
 
-template<int64_t max_n>
+template <int64_t max_n>
 constexpr BitSet<max_n>::BitSet(int64_t _n) : n(_n) {}
 
-template<int64_t max_n>
+template <int64_t max_n>
 constexpr BitSet<max_n>::BitSet(int64_t _n, const bool x) : n(_n) {
     const_expr::fill_n(p, wordsInUse(), x ? -1ULL : 0ULL);
 }
 
-template<int64_t max_n>
-template<int64_t w2>
+template <int64_t max_n>
+template <int64_t w2>
 constexpr BitSet<max_n>& BitSet<max_n>::operator=(const BitSetComplement<w2>& rhs) {
-    //std::cout << "copying BitSet(" << s << "): ";
+    // std::cout << "copying BitSet(" << s << "): ";
     if (n != rhs.s.n) {
         throw std::runtime_error("dimensions don't match: " + std::to_string(n) + " != " + std::to_string(rhs.s.n));
     }
@@ -251,16 +247,16 @@ constexpr BitSet<max_n>& BitSet<max_n>::operator=(const BitSetComplement<w2>& rh
     auto in = rhs.s.p;
     for (; out != stop; ++out, ++in)
         *out = ~(*in);
-    //std::cout << *this << endl;
+    // std::cout << *this << endl;
     return *this;
 }
 
-template<int64_t max_n>
+template <int64_t max_n>
 constexpr void BitSet<max_n>::resize(int64_t _n, const bool x) {
     auto newWordsInUse = (_n + 63) >> 6;
     if (_n <= n) {
         n = _n;
-    } else if (newWordsInUse <= ((max_n+63)>>6)) {
+    } else if (newWordsInUse <= ((max_n + 63) >> 6)) {
         // _n > n, but number of words remains the same
         // so we need to set the new bits in the last word to x
         auto bits = p + (n >> 6);
@@ -274,17 +270,17 @@ constexpr void BitSet<max_n>::resize(int64_t _n, const bool x) {
     }
 }
 
-template<int64_t max_n>
+template <int64_t max_n>
 constexpr int64_t BitSet<max_n>::count() const {
     if (wordsInUse() == 0)
         return 0;
     int64_t c = 0;
-    //for (auto i = begin(); i != end(); ++i)
+    // for (auto i = begin(); i != end(); ++i)
     //    c++;
     for (auto i = 0U; i < wordsInUse() - 1; ++i) {
         uint64_t v = p[i];
         for (; v; ++c) {
-            v &= v-1;
+            v &= v - 1;
         }
     }
     const auto handled_bits = (n >> 6) << 6;
@@ -300,13 +296,13 @@ constexpr int64_t BitSet<max_n>::count() const {
     return c;
 }
 
-template<int64_t max_n>
+template <int64_t max_n>
 constexpr void BitSet<max_n>::clear() {
     const_expr::fill_n(p, wordsInUse(), 0ULL);
 }
 
-template<int64_t max_n>
-template<int64_t w2>
+template <int64_t max_n>
+template <int64_t w2>
 constexpr bool BitSet<max_n>::operator==(const BitSet<w2>& rhs) const {
     if (n != rhs.n)
         return false;
@@ -317,15 +313,15 @@ constexpr bool BitSet<max_n>::operator==(const BitSet<w2>& rhs) const {
     for (auto i = 0; i < u; i++)
         if (p[i] != rhs.p[i])
             return false;
-    //auto mask = -1ULL >> -(n + 1);
+    // auto mask = -1ULL >> -(n + 1);
     auto mask = -1ULL >> (64 - (n & 63));
     return (p[u] & mask) == (rhs.p[u] & mask);
 }
 
-template<int64_t max_n>
-template<int64_t w2>
+template <int64_t max_n>
+template <int64_t w2>
 constexpr BitSet<max_n>& BitSet<max_n>::operator|=(const BitSet<w2>& rhs) {
-    //std::cout << *this << ".operator|(" << rhs << ")" << endl;
+    // std::cout << *this << ".operator|(" << rhs << ")" << endl;
     if (n != rhs.n) {
         throw std::runtime_error("dimensions don't match: " + std::to_string(n) + " != " + std::to_string(rhs.n));
     }
@@ -338,10 +334,10 @@ constexpr BitSet<max_n>& BitSet<max_n>::operator|=(const BitSet<w2>& rhs) {
     return *this;
 }
 
-template<int64_t max_n>
-template<int64_t w2>
+template <int64_t max_n>
+template <int64_t w2>
 constexpr BitSet<max_n>& BitSet<max_n>::operator&=(const BitSet<w2>& rhs) {
-    //std::cout << *this << ".operator&(" << rhs << ")" << endl;
+    // std::cout << *this << ".operator&(" << rhs << ")" << endl;
     if (n != rhs.n) {
         throw std::runtime_error("dimensions don't match: " + std::to_string(n) + " != " + std::to_string(rhs.n));
     }
@@ -354,10 +350,10 @@ constexpr BitSet<max_n>& BitSet<max_n>::operator&=(const BitSet<w2>& rhs) {
     return *this;
 }
 
-template<int64_t max_n>
-template<int64_t w2>
+template <int64_t max_n>
+template <int64_t w2>
 constexpr BitSet<max_n>& BitSet<max_n>::operator-=(const BitSet<w2>& rhs) {
-    //std::cout << *this << ".operator-(" << rhs << ")" << endl;
+    // std::cout << *this << ".operator-(" << rhs << ")" << endl;
     if (n != rhs.n) {
         throw std::runtime_error("dimensions don't match: " + std::to_string(n) + " != " + std::to_string(rhs.n));
     }
@@ -370,26 +366,26 @@ constexpr BitSet<max_n>& BitSet<max_n>::operator-=(const BitSet<w2>& rhs) {
     return *this;
 }
 
-template<int64_t max_n>
+template <int64_t max_n>
 constexpr BitSet<max_n> BitSet<max_n>::operator~() const {
-    //std::cout << *this << ".operator~()" << endl;
+    // std::cout << *this << ".operator~()" << endl;
     BitSet<max_n> s(n);
     for (auto i = 0u; i < wordsInUse(); i++)
         s.p[i] = ~p[i];
     return s;
 }
 
-template<int64_t max_n>
+template <int64_t max_n>
 constexpr int64_t BitSet<max_n>::nextSetBit(int64_t fromIndex) const {
     while (fromIndex < n && !get(fromIndex))
         fromIndex++;
     return fromIndex;
 }
 
-//template<int64_t max_n>
-//constexpr size_t std::hash<BitSet<max_n>>::operator()(const BitSet<max_n> &s) const noexcept {
+// template<int64_t max_n>
+// constexpr size_t std::hash<BitSet<max_n>>::operator()(const BitSet<max_n> &s) const noexcept {
 //    //std::cout << "hashing " << s << ": ";
-//    
+//
 //    auto tab = ::hashfn_tab.data();
 //
 //    uint64_t h = 0xBB40E64DA205B064ULL;
@@ -412,10 +408,10 @@ constexpr int64_t BitSet<max_n>::nextSetBit(int64_t fromIndex) const {
 //    return h;
 //}
 
-template<int64_t max_n>
-constexpr size_t std::hash<BitSet<max_n>>::operator()(const BitSet<max_n> &s) const noexcept {
-    //std::cout << "hashing " << s << ": ";
-    
+template <int64_t max_n>
+constexpr size_t std::hash<BitSet<max_n>>::operator()(const BitSet<max_n>& s) const noexcept {
+    // std::cout << "hashing " << s << ": ";
+
     auto tab = ::hashfn_tab.data();
 
     uint64_t h = 0xBB40E64DA205B064ULL;
@@ -450,39 +446,39 @@ constexpr size_t std::hash<BitSet<max_n>>::operator()(const BitSet<max_n> &s) co
     h = (h * 7664345821815920749ULL) ^ tab[(lastWord >> 48) & 0xff];
     h = (h * 7664345821815920749ULL) ^ tab[(lastWord >> 56) & 0xff];
 
-    //std::cout << h << endl;
+    // std::cout << h << endl;
     return h;
 }
 
-template<int64_t w1, int64_t w2>
+template <int64_t w1, int64_t w2>
 constexpr auto operator|(const BitSet<w1>& lhs, const BitSet<w2>& rhs) {
-    //std::cout << "operator|(" << lhs << ", " << rhs << ")" << endl;
+    // std::cout << "operator|(" << lhs << ", " << rhs << ")" << endl;
     if (lhs.n != rhs.n) {
         throw std::runtime_error("dimensions don't match: " + std::to_string(lhs.n) + " != " + std::to_string(rhs.n));
     }
 
-    BitSet<std::min(w1,w2)> s(w1 <= w2 ? lhs : rhs);
+    BitSet<std::min(w1, w2)> s(w1 <= w2 ? lhs : rhs);
     s |= (w1 <= w2 ? rhs : lhs);
 
     return s;
 }
 
-template<int64_t w1, int64_t w2>
+template <int64_t w1, int64_t w2>
 constexpr auto operator&(const BitSet<w1>& lhs, const BitSet<w2>& rhs) {
-    //std::cout << "operator&(" << lhs << ", " << rhs << ")" << endl;
+    // std::cout << "operator&(" << lhs << ", " << rhs << ")" << endl;
     if (lhs.n != rhs.n) {
         throw std::runtime_error("dimensions don't match: " + std::to_string(lhs.n) + " != " + std::to_string(rhs.n));
     }
 
-    BitSet<std::min(w1,w2)> s(w1 <= w2 ? lhs : rhs);
+    BitSet<std::min(w1, w2)> s(w1 <= w2 ? lhs : rhs);
     s &= (w1 <= w2 ? rhs : lhs);
 
     return s;
 }
 
-template<int64_t w1, int64_t w2>
+template <int64_t w1, int64_t w2>
 constexpr auto operator-(const BitSet<w1>& lhs, const BitSet<w2>& rhs) {
-    //std::cout << "operator-(" << lhs << ", " << rhs << ")" << endl;
+    // std::cout << "operator-(" << lhs << ", " << rhs << ")" << endl;
     if (lhs.n != rhs.n) {
         throw std::runtime_error("dimensions don't match: " + std::to_string(lhs.n) + " != " + std::to_string(rhs.n));
     }
@@ -493,8 +489,8 @@ constexpr auto operator-(const BitSet<w1>& lhs, const BitSet<w2>& rhs) {
     return s;
 }
 
-//template<int64_t max_n>
-//std::ostream& operator<<(std::ostream& s, const BitSet<max_n>& v) {
+// template<int64_t max_n>
+// std::ostream& operator<<(std::ostream& s, const BitSet<max_n>& v) {
 //    s << "(" << std::hex << &v << std::dec << ":" << v.n << ")";
 //    int64_t i = 0;
 //
@@ -513,8 +509,8 @@ constexpr auto operator-(const BitSet<w1>& lhs, const BitSet<w2>& rhs) {
 //    return s;
 //}
 
-//template<int64_t max_n>
-//constexpr typename BitSet<max_n>::sparse_iterator& BitSet<max_n>::sparse_iterator::operator++() {
+// template<int64_t max_n>
+// constexpr typename BitSet<max_n>::sparse_iterator& BitSet<max_n>::sparse_iterator::operator++() {
 //    const auto p_ = s.p;
 //    const auto next = c + 1;
 //    auto pp = p_ + (next >> 6);
@@ -534,10 +530,10 @@ constexpr auto operator-(const BitSet<w1>& lhs, const BitSet<w2>& rhs) {
 //    c = s.n;
 //    return *this;
 //}
-template<int64_t max_n>
+template <int64_t max_n>
 constexpr typename BitSet<max_n>::sparse_iterator& BitSet<max_n>::sparse_iterator::operator++() {
     if (const auto i = *(s.p + ((c + 1) >> 6)) & (-1ULL << ((c + 1) & 63)); i != 0) {
-        //c = ((c + 1) & ~63) + count_trailing_zeros(i);
+        // c = ((c + 1) & ~63) + count_trailing_zeros(i);
         c = ((c + 1) & ~63) + const_expr::Mod67BitPosition[(-i & i) % 67];
         return *this;
     }
@@ -546,7 +542,7 @@ constexpr typename BitSet<max_n>::sparse_iterator& BitSet<max_n>::sparse_iterato
 
     for (; pp != stop; ++pp) {
         if (const auto i = *pp; i != 0) {
-            //c = ((pp - s.p) << 6) + count_trailing_zeros(i);
+            // c = ((pp - s.p) << 6) + count_trailing_zeros(i);
             c = ((pp - s.p) << 6) + const_expr::Mod67BitPosition[(-i & i) % 67];
             return *this;
         }

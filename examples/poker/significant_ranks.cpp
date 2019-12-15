@@ -45,7 +45,6 @@ RankCount getSignificantRanks(const RankCount k) {
         // there can only be a single 4K because we only have seven cards. So we
         // don't need to check for the highest ranked 4K.
         return RankCount{fourKRanks, RankSet{}, RankSet{}, kicker};
-
     }
 
     const auto pairCount = pairRanks.countRanks();

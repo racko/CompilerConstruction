@@ -1,17 +1,17 @@
 #pragma once
 
-#include "Regex/Grammar.h"     // for kind
-#include <cassert>       // for assert
-#include <cstddef>       // for size_t
-#include <cstdint>       // for uint32_t, uint64_t
-#include <functional>    // for hash
-#include <list>          // for list
-#include <memory>        // for unique_ptr
-#include <ostream>       // for ostream, operator<<, size_t
-#include <string>        // for string
-#include <unordered_map> // for unordered_map
-#include <unordered_set> // for unordered_set
-#include <vector>        // for vector
+#include "Regex/Grammar.h" // for kind
+#include <cassert>         // for assert
+#include <cstddef>         // for size_t
+#include <cstdint>         // for uint32_t, uint64_t
+#include <functional>      // for hash
+#include <list>            // for list
+#include <memory>          // for unique_ptr
+#include <ostream>         // for ostream, operator<<, size_t
+#include <string>          // for string
+#include <unordered_map>   // for unordered_map
+#include <unordered_set>   // for unordered_set
+#include <vector>          // for vector
 
 namespace While {
 struct Token;

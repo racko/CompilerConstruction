@@ -1,16 +1,28 @@
 #include "Regex/Grammar2.h"
 
-#include <utility>  // for move
+#include <utility> // for move
 
 namespace grammar2 {
-Grammar::Grammar(uint32_t numberOfTerminals, uint32_t numberOfNonterminals, NonterminalID start, TerminalID eps,
-                 TerminalID eoi, std::vector<const char*> terminalStrings, std::vector<const char*> nonTerminalStrings,
+Grammar::Grammar(uint32_t numberOfTerminals,
+                 uint32_t numberOfNonterminals,
+                 NonterminalID start,
+                 TerminalID eps,
+                 TerminalID eoi,
+                 std::vector<const char*> terminalStrings,
+                 std::vector<const char*> nonTerminalStrings,
                  Productions productions)
-    : numberOfTerminals_(numberOfTerminals), numberOfNonterminals_(numberOfNonterminals), start_(start), eps_(eps),
-      eoi_(eoi), terminalStrings_(std::move(terminalStrings)), nonTerminalStrings_(std::move(nonTerminalStrings)),
-      productions_(std::move(productions)), firsts_(allFirsts(*this)) {}
+    : numberOfTerminals_(numberOfTerminals),
+      numberOfNonterminals_(numberOfNonterminals),
+      start_(start),
+      eps_(eps),
+      eoi_(eoi),
+      terminalStrings_(std::move(terminalStrings)),
+      nonTerminalStrings_(std::move(nonTerminalStrings)),
+      productions_(std::move(productions)),
+      firsts_(allFirsts(*this)) {}
 
-void first(TerminalID eps, const std::vector<GrammarElement>& alpha,
+void first(TerminalID eps,
+           const std::vector<GrammarElement>& alpha,
            const std::unordered_map<GrammarElement, std::unordered_set<TerminalID>>& fs,
            std::unordered_set<TerminalID>& out) {
     // std::cout << "alpha: " << alpha << std::endl;

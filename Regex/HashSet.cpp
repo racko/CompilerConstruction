@@ -156,4 +156,3 @@ void HashSet::resize(unsigned int _n) {
 }
 
 HashSet::~HashSet() = default;
-

@@ -1,11 +1,11 @@
 #pragma once
 
-#include <cassert>     // for assert
-#include <cstddef>     // for ptrdiff_t
-#include <limits>      // for numeric_limits
 #include "Regex/lrParser2.h" // for LRParser, type, type::ACCEPT, type::REDUCE
 #include "Regex/parser.h"    // for Parser
-#include <vector>      // for vector
+#include <cassert>           // for assert
+#include <cstddef>           // for ptrdiff_t
+#include <limits>            // for numeric_limits
+#include <vector>            // for vector
 
 namespace grammar2 {
 class Grammar;

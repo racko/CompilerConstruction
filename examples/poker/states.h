@@ -28,7 +28,7 @@ class States {
             builder.idToSymbol.push_back(i);
             builder.symbolToId[i] = id;
         }
-        //for (Symbol i = 1U; i < 14U; ++i) {
+        // for (Symbol i = 1U; i < 14U; ++i) {
         //    const auto id = builder.idToSymbol.size();
         //    builder.idToSymbol.push_back(i);
         //    builder.symbolToId[i] = id;
@@ -125,9 +125,9 @@ class States {
 
     void NOINLINE AddTransitions(const StateId ii, const std::uint32_t r, const StateId kk) {
         builder.ns[ii].ns[builder.symbolToId[1 + r]].push_back(kk);
-        //builder.ns[ii].ns[builder.symbolToId[1 + 13 + r]].push_back(kk);
-        //builder.ns[ii].ns[builder.symbolToId[1 + 26 + r]].push_back(kk);
-        //builder.ns[ii].ns[builder.symbolToId[1 + 39 + r]].push_back(kk);
+        // builder.ns[ii].ns[builder.symbolToId[1 + 13 + r]].push_back(kk);
+        // builder.ns[ii].ns[builder.symbolToId[1 + 26 + r]].push_back(kk);
+        // builder.ns[ii].ns[builder.symbolToId[1 + 39 + r]].push_back(kk);
     }
 
     nfaBuilder<Symbol, StateId, TerminalId> builder;

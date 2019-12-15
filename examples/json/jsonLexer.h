@@ -1,8 +1,8 @@
 #pragma once
 
-#include "json_token.h"   // for Token
-#include <memory>         // for unique_ptr
 #include "Regex/token_stream.h" // for TokenStream
+#include "json_token.h"         // for Token
+#include <memory>               // for unique_ptr
 
 namespace json {
 struct myLexer : public TokenStream<Token> {

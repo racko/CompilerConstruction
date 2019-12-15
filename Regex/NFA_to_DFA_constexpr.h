@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Regex/HashSet_constexpr.h" // for HashSet
-#include "Regex/constexpr.h"         // for vector, HashMap
 #include "Regex/DFA_constexpr.h"     // for DFA, determineDeadState
+#include "Regex/HashSet_constexpr.h" // for HashSet
 #include "Regex/NFA_constexpr.h"     // for NFA
-#include <cstdint>             // for int64_t
-#include <limits>              // for numeric_limits
-#include <stdexcept>           // for range_error
+#include "Regex/constexpr.h"         // for vector, HashMap
+#include <cstdint>                   // for int64_t
+#include <limits>                    // for numeric_limits
+#include <stdexcept>                 // for range_error
 
 template <typename DfaState,
           typename Symbol,
@@ -189,4 +189,3 @@ toDFA(const NFA<Symbol, NfaState, TokenId, MaxNodes, MaxSymbols, MaxTransitions,
     return DFA<Symbol, DfaState, TokenId, MaxNodes, MaxSymbols>(
         stateCount, symbolCount, start, deadState, finals, T, symbolToId, idToSymbol);
 }
-

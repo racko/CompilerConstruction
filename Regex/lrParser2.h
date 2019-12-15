@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Regex/Grammar2.h" // for NonterminalID, operator==, Grammar (ptr only)
-#include <cassert>    // for assert
-#include <cstdint>    // for uint32_t
-#include <memory>     // for unique_ptr
+#include <cassert>          // for assert
+#include <cstdint>          // for uint32_t
+#include <memory>           // for unique_ptr
 
 namespace lr_parser2 {
 enum class type : uint32_t { SHIFT, REDUCE, ACCEPT, FAIL };

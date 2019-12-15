@@ -1,7 +1,7 @@
 #include "json.h"
 
+#include "Regex/parser.h" // for Parser
 #include "jsonLexer.h"    // for myLexer
-#include "Regex/parser.h"       // for Parser
 #include <jsonLRParser.h> // for Parser
 #include <utility>        // for move
 

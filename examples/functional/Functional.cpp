@@ -7,7 +7,6 @@
 
 #include <fstream>
 
-
 namespace Functional {
 namespace evaluator = evaluator2;
 // actually wanted to name it eval ... but I already have to many of those ...

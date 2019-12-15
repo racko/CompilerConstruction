@@ -5,6 +5,6 @@ using TokenId = int; // otherwise I need to cast the second argument to the lexR
 constexpr TokenId eof_terminalid = 11;
 constexpr TokenId ws_terminalid = 12;
 
-//struct Token;
+// struct Token;
 
 /*constexpr*/ Token<TokenId> bla(const char* text);

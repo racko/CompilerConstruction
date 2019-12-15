@@ -3,12 +3,12 @@
 #include "Regex/BitSet.h"  // for BitSet, BitSet::ref
 #include "Regex/DFA.h"     // for PositionRange, DFA, Set, Position, determineDea...
 #include "Regex/HashSet.h" // for HashSet
-#include <iostream>  // for operator<<, endl, size_t, cout, ostream, basic_...
-#include <iterator>  // for back_inserter, distance
-#include <stdexcept> // for runtime_error
-#include <string>    // for to_string
-#include <utility>   // for make_pair, pair
-#include <vector>    // for vector
+#include <iostream>        // for operator<<, endl, size_t, cout, ostream, basic_...
+#include <iterator>        // for back_inserter, distance
+#include <stdexcept>       // for runtime_error
+#include <string>          // for to_string
+#include <utility>         // for make_pair, pair
+#include <vector>          // for vector
 
 namespace detail {
 using Set = BitSet;
@@ -341,4 +341,3 @@ DFA<Symbol, State, TokenId> minimize(const DFA<Symbol, State, TokenId>& dfa) {
 
     return generateFromMinimizationResults<Symbol, State, TokenId>(part, start, T, finals, dfa.GetSymbols());
 }
-

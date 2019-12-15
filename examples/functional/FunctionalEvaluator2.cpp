@@ -271,4 +271,3 @@ const LambdaExpr* evalProgram(const Program& p, Strategy strategy) {
 //    std::cout << "result(evalLambda): " << *evaluator.result << std::endl;
 //    return evaluator.result;
 //}
-

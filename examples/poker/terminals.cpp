@@ -28,4 +28,3 @@ TerminalId Terminals::getHandTypeIndex(const RankCount handType) {
 bool operator==(const Terminals& lhs, const Terminals& rhs) {
     return lhs.idToTerminal == rhs.idToTerminal && lhs.terminalToId == rhs.terminalToId;
 }
-

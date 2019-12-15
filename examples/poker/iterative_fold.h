@@ -1,10 +1,10 @@
 #pragma once
 
 #include "rank_count.h"
-#include <cstdint>
-#include <vector>
-#include <tuple>
 #include <cassert>
+#include <cstdint>
+#include <tuple>
+#include <vector>
 
 template <typename Operation>
 auto foldIterative(Operation f, const RankCount root, const std::size_t initial_memory_size) {

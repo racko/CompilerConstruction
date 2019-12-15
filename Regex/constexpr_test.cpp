@@ -1,7 +1,7 @@
 #include "Regex/Token.h" // for Token
 #include "Regex/constexpr.h"
 #include "Regex/constexpr_jsonLexer.h" // for bla, eof_terminalid
-#include <catch.hpp>             // for operator""_catch_sr, AssertionHandler
+#include <catch.hpp>                   // for operator""_catch_sr, AssertionHandler
 
 TEST_CASE("HashTable get fails if empty", "[HashTable]") {
     const_expr::HashTable<int, 1> t;
@@ -53,35 +53,53 @@ TEST_CASE("strcatsize singleton cstr", "[strcatsize]") {
 
 TEST_CASE("strcatsize empty string", "[strcatsize]") { REQUIRE(const_expr::strcatsize<const_expr::string<0>>() == 0); }
 
-TEST_CASE("strcatsize singleton string", "[strcatsize]") { REQUIRE(const_expr::strcatsize<const_expr::string<1>>() == 1); }
+TEST_CASE("strcatsize singleton string", "[strcatsize]") {
+    REQUIRE(const_expr::strcatsize<const_expr::string<1>>() == 1);
+}
 
 TEST_CASE("strcat no argument", "[strcat]") { REQUIRE(const_expr::strcat() == const_expr::string<0>{}); }
 
 TEST_CASE("strcat empty cstr", "[strcat]") { REQUIRE(const_expr::strcat("") == const_expr::string<0>{}); }
 
-TEST_CASE("strcat empty cstr + empty cstr", "[strcat]") { REQUIRE(const_expr::strcat("", "") == const_expr::string<0>{}); }
+TEST_CASE("strcat empty cstr + empty cstr", "[strcat]") {
+    REQUIRE(const_expr::strcat("", "") == const_expr::string<0>{});
+}
 
 TEST_CASE("strcat singleton cstr", "[strcat]") { REQUIRE(const_expr::strcat("a") == const_expr::string<1>{"a"}); }
 
 TEST_CASE("strcat single cstr", "[strcat]") { REQUIRE(const_expr::strcat("abc") == const_expr::string<3>{"abc"}); }
 
-TEST_CASE("strcat empty cstr + singleton cstr", "[strcat]") { REQUIRE(const_expr::strcat("", "a") == const_expr::string<1>{"a"}); }
+TEST_CASE("strcat empty cstr + singleton cstr", "[strcat]") {
+    REQUIRE(const_expr::strcat("", "a") == const_expr::string<1>{"a"});
+}
 
-TEST_CASE("strcat singleton cstr + singleton cstr", "[strcat]") { REQUIRE(const_expr::strcat("a", "b") == const_expr::string<2>{"ab"}); }
+TEST_CASE("strcat singleton cstr + singleton cstr", "[strcat]") {
+    REQUIRE(const_expr::strcat("a", "b") == const_expr::string<2>{"ab"});
+}
 
-TEST_CASE("strcat empty cstr + cstr", "[strcat]") { REQUIRE(const_expr::strcat("", "abc") == const_expr::string<3>{"abc"}); }
+TEST_CASE("strcat empty cstr + cstr", "[strcat]") {
+    REQUIRE(const_expr::strcat("", "abc") == const_expr::string<3>{"abc"});
+}
 
-TEST_CASE("strcat cstr + cstr", "[strcat]") { REQUIRE(const_expr::strcat("ab", "abc") == const_expr::string<5>{"ababc"}); }
+TEST_CASE("strcat cstr + cstr", "[strcat]") {
+    REQUIRE(const_expr::strcat("ab", "abc") == const_expr::string<5>{"ababc"});
+}
 
-TEST_CASE("strcat empty string", "[strcat]") { REQUIRE(const_expr::strcat(const_expr::string<0>{}) == const_expr::string<0>{}); }
+TEST_CASE("strcat empty string", "[strcat]") {
+    REQUIRE(const_expr::strcat(const_expr::string<0>{}) == const_expr::string<0>{});
+}
 
 TEST_CASE("strcat empty string + empty string", "[strcat]") {
     REQUIRE(const_expr::strcat(const_expr::string<0>{}, const_expr::string<0>{}) == const_expr::string<0>{});
 }
 
-TEST_CASE("strcat singleton string", "[strcat]") { REQUIRE(const_expr::strcat(const_expr::string<1>{"a"}) == const_expr::string<1>{"a"}); }
+TEST_CASE("strcat singleton string", "[strcat]") {
+    REQUIRE(const_expr::strcat(const_expr::string<1>{"a"}) == const_expr::string<1>{"a"});
+}
 
-TEST_CASE("strcat single string", "[strcat]") { REQUIRE(const_expr::strcat(const_expr::string<3>{"abc"}) == const_expr::string<3>{"abc"}); }
+TEST_CASE("strcat single string", "[strcat]") {
+    REQUIRE(const_expr::strcat(const_expr::string<3>{"abc"}) == const_expr::string<3>{"abc"});
+}
 
 TEST_CASE("strcat empty string + singleton string", "[strcat]") {
     REQUIRE(const_expr::strcat(const_expr::string<0>{}, const_expr::string<1>{"a"}) == const_expr::string<1>{"a"});
@@ -96,12 +114,17 @@ TEST_CASE("strcat empty string + string", "[strcat]") {
 }
 
 TEST_CASE("strcat string + string", "[strcat]") {
-    REQUIRE(const_expr::strcat(const_expr::string<2>{"ab"}, const_expr::string<3>{"abc"}) == const_expr::string<5>{"ababc"});
+    REQUIRE(const_expr::strcat(const_expr::string<2>{"ab"}, const_expr::string<3>{"abc"}) ==
+            const_expr::string<5>{"ababc"});
 }
 
-TEST_CASE("strcat cstr + string", "[strcat]") { REQUIRE(const_expr::strcat("ab", const_expr::string<3>{"abc"}) == const_expr::string<5>{"ababc"}); }
+TEST_CASE("strcat cstr + string", "[strcat]") {
+    REQUIRE(const_expr::strcat("ab", const_expr::string<3>{"abc"}) == const_expr::string<5>{"ababc"});
+}
 
-TEST_CASE("strcat string + cstr", "[strcat]") { REQUIRE(const_expr::strcat(const_expr::string<2>{"ab"}, "abc") == const_expr::string<5>{"ababc"}); }
+TEST_CASE("strcat string + cstr", "[strcat]") {
+    REQUIRE(const_expr::strcat(const_expr::string<2>{"ab"}, "abc") == const_expr::string<5>{"ababc"});
+}
 
 TEST_CASE("vector emplace", "[vector]") {
     const_expr::vector<int, 10> v;
@@ -158,8 +181,8 @@ TEST_CASE("vector emplace", "[vector]") {
 //    // only ascii for now ...
 //    unescaped += ')';
 //
-//    auto chr = const_expr::strcat("(", unescaped, "|\\\\(\"|\\\\|/|b|f|n|r|t|u", hexdigit, hexdigit, hexdigit, hexdigit, "))");
-//    auto str = const_expr::strcat("(\"", chr, "*\")");
+//    auto chr = const_expr::strcat("(", unescaped, "|\\\\(\"|\\\\|/|b|f|n|r|t|u", hexdigit, hexdigit, hexdigit,
+//    hexdigit, "))"); auto str = const_expr::strcat("(\"", chr, "*\")");
 //
 //    builder.lexRegex(const_expr::strcat(ws, "[", ws).data(), 4);
 //    builder.lexRegex(const_expr::strcat(ws, "]", ws).data(), 5);

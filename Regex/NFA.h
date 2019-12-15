@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Regex/Print.h"
 #include "Regex/NFA_fwd.h"
+#include "Regex/Print.h"
 #include "Regex/nfaBuilder.h"
 //#include "Regex/BitSet.h"
 #include "Regex/HashSet.h"

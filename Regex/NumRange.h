@@ -2,7 +2,7 @@
 #include <cstddef>
 #include <iterator>
 
-template<typename T>
+template <typename T>
 struct NumIterator {
     using difference_type = std::ptrdiff_t;
     using value_type = const T;
@@ -18,11 +18,25 @@ struct NumIterator {
     constexpr T operator*() { return x_; }
     constexpr T operator*() const { return x_; }
 
-    constexpr NumIterator& operator++() { ++x_; return *this; }
-    constexpr NumIterator operator++(int) { NumIterator tmp(*this); ++x_; return tmp; }
+    constexpr NumIterator& operator++() {
+        ++x_;
+        return *this;
+    }
+    constexpr NumIterator operator++(int) {
+        NumIterator tmp(*this);
+        ++x_;
+        return tmp;
+    }
 
-    constexpr NumIterator& operator--() { --x_; return *this; }
-    constexpr NumIterator operator--(int) { NumIterator tmp(*this); --x_; return tmp; }
+    constexpr NumIterator& operator--() {
+        --x_;
+        return *this;
+    }
+    constexpr NumIterator operator--(int) {
+        NumIterator tmp(*this);
+        --x_;
+        return tmp;
+    }
 
     constexpr bool operator==(const NumIterator& other) const { return x_ == other.x_; }
     constexpr bool operator!=(const NumIterator& other) const { return x_ != other.x_; }
@@ -30,7 +44,7 @@ struct NumIterator {
     constexpr difference_type operator-(const NumIterator& other) const { return x_ - other.x_; }
 };
 
-template<typename T>
+template <typename T>
 struct NumRange {
     using iterator = NumIterator<T>;
     using const_iterator = NumIterator<T>;

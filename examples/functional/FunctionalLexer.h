@@ -2,8 +2,8 @@
 
 #include "FunctionalGrammar.h"
 #include "Regex/Regex.h"
-#include <sstream>
 #include "Regex/token_stream.h"
+#include <sstream>
 #include <vector>
 
 namespace Functional {
@@ -25,7 +25,8 @@ struct myLexer : TokenStream<std::unique_ptr<Functional::Token>> {
     static DFA_t getDFA();
 
     myLexer()
-        : lexer(getDFA(), {nullptr, 0, static_cast<Functional::type>(T::EOI) + 1},
+        : lexer(getDFA(),
+                {nullptr, 0, static_cast<Functional::type>(T::EOI) + 1},
                 static_cast<Functional::type>(T::WS) + 1) {}
 
     // Token* eofToken() const override {

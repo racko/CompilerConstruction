@@ -1,7 +1,7 @@
 #pragma once
 
-#include "jsonLLGrammar.h" // for Grammar
-#include "Regex/llParser.h"      // for LLParser
+#include "Regex/llParser.h" // for LLParser
+#include "jsonLLGrammar.h"  // for Grammar
 
 namespace json {
 struct value;

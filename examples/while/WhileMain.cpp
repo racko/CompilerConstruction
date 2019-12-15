@@ -1,24 +1,24 @@
-#include "Regex/Grammar.h"      // for kind, kind::EOI, kind::EPS, kind::NONTERMINAL
-#include "Regex/NFA.h"          // for NFA
-#include "Regex/NFA_to_DFA.h"   // for toDFA
-#include "Regex/DFA_minimization.h"   // for minimize
-#include "Regex/Regex.h"        // for Lexer, Lexer::Token, Lexer::DFA_t, Lexer::...
-#include "While.h"        // for Token, T, Grammar, operator<<, GrammarElement
-#include "Regex/lrParser.h"     // for LRParser
-#include "Regex/nfaBuilder.h"   // for nfaBuilder, istream
-#include "Regex/token_stream.h" // for TokenStream
-#include <cassert>        // for assert
-#include <cstdint>        // for uint32_t, uint64_t
-#include <cstdio>         // for size_t, EOF
-#include <functional>     // for function
-#include <iostream>       // for operator<<, stringstream, basic_ostream
-#include <map>            // for map
-#include <memory>         // for make_unique, unique_ptr, allocator, operat...
-#include <sstream>        // for basic_stringstream<>::__stringbuf_type
-#include <stdexcept>      // for logic_error, runtime_error
-#include <string>         // for string, operator<<
-#include <unordered_map>  // for unordered_map
-#include <utility>        // for move, forward, pair
+#include "Regex/DFA_minimization.h" // for minimize
+#include "Regex/Grammar.h"          // for kind, kind::EOI, kind::EPS, kind::NONTERMINAL
+#include "Regex/NFA.h"              // for NFA
+#include "Regex/NFA_to_DFA.h"       // for toDFA
+#include "Regex/Regex.h"            // for Lexer, Lexer::Token, Lexer::DFA_t, Lexer::...
+#include "Regex/lrParser.h"         // for LRParser
+#include "Regex/nfaBuilder.h"       // for nfaBuilder, istream
+#include "Regex/token_stream.h"     // for TokenStream
+#include "While.h"                  // for Token, T, Grammar, operator<<, GrammarElement
+#include <cassert>                  // for assert
+#include <cstdint>                  // for uint32_t, uint64_t
+#include <cstdio>                   // for size_t, EOF
+#include <functional>               // for function
+#include <iostream>                 // for operator<<, stringstream, basic_ostream
+#include <map>                      // for map
+#include <memory>                   // for make_unique, unique_ptr, allocator, operat...
+#include <sstream>                  // for basic_stringstream<>::__stringbuf_type
+#include <stdexcept>                // for logic_error, runtime_error
+#include <string>                   // for string, operator<<
+#include <unordered_map>            // for unordered_map
+#include <utility>                  // for move, forward, pair
 
 namespace While {
 struct LambdaExpr {
@@ -599,4 +599,3 @@ int main() {
 
     return 0;
 }
-

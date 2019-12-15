@@ -5,8 +5,8 @@
 #include "Regex/HashSet_constexpr.h" // for HashSet
 #include "Regex/constexpr.h"         // for vector, back_inserter, generate_n
 #include "Regex/partition.h"         // for partition
-#include <cstdint>             // for int64_t
-#include <stdexcept>           // for runtime_error
+#include <cstdint>                   // for int64_t
+#include <stdexcept>                 // for runtime_error
 
 template <typename T>
 constexpr void assign(T& lhs, const T& rhs) {
@@ -95,15 +95,16 @@ splitterSet(const PositionRange& t1, Symbol a, Set& tmp, const Partition& part, 
 }
 
 template <int64_t MaxNodes, int64_t MaxSymbols, typename Symbol, typename State, int64_t Size>
-constexpr auto inverseTransitionTable(const const_expr::vector<State, Size>& T, int64_t stateCount, int64_t symbolCount) {
+constexpr auto
+inverseTransitionTable(const const_expr::vector<State, Size>& T, int64_t stateCount, int64_t symbolCount) {
     // using TSet = HashSet<MaxNodes>;
     using TSet = BitSet<MaxNodes>;
     if (stateCount > MaxNodes)
         throw std::runtime_error("stateCount > MaxNodes");
     if (symbolCount > MaxSymbols)
         throw std::runtime_error("symbolCount > MaxSymbols");
-    const_expr::vector<const_expr::vector<TSet, MaxNodes>, MaxSymbols> tI(symbolCount,
-                                                  const_expr::vector<TSet, MaxNodes>(stateCount, TSet(stateCount, false)));
+    const_expr::vector<const_expr::vector<TSet, MaxNodes>, MaxSymbols> tI(
+        symbolCount, const_expr::vector<TSet, MaxNodes>(stateCount, TSet(stateCount, false)));
     auto tIptr = tI.data();
 
     for (State i = 0; i < stateCount; i++) {

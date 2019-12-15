@@ -1,7 +1,7 @@
 #include "jsonLLGrammar.h"
 
-#include "Regex/Grammar.h"           // for allFirsts, allFollows
-#include "json_token.h"        // for T, NT, NT::VALUE, T::EPS, NonterminalID
+#include "Regex/Grammar.h" // for allFirsts, allFollows
+#include "json_token.h"    // for T, NT, NT::VALUE, T::EPS, NonterminalID
 
 namespace jsonLL {
 using namespace json;

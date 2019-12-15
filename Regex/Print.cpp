@@ -37,7 +37,10 @@ std::ostream& showImpl<std::vector<char>>::Show(std::ostream& s, const std::vect
 std::ostream& operator<<(std::ostream& s, const showChar sc) {
     const auto c = sc.c_;
     // TODO: Put all 256 values into an array?
-    static const char* const controlChars[] = { "EOF", "NUL", "SOH", "STX", "ETX", "EOT", "ENQ", "ACK", "BEL", "BS", "HT", "LF", "VT", "FF", "CR", "SO", "SI", "DLE", "DC1", "DC2", "DC3", "DC4", "NAK", "SYN", "ETB", "CAN", "EM", "SUB", "ESC", "FS", "GS", "RS", "US", "SPACE" };
+    static const char* const controlChars[] = {"EOF", "NUL", "SOH", "STX", "ETX", "EOT", "ENQ",  "ACK", "BEL",
+                                               "BS",  "HT",  "LF",  "VT",  "FF",  "CR",  "SO",   "SI",  "DLE",
+                                               "DC1", "DC2", "DC3", "DC4", "NAK", "SYN", "ETB",  "CAN", "EM",
+                                               "SUB", "ESC", "FS",  "GS",  "RS",  "US",  "SPACE"};
     if (c < -1 || c > 127)
         return s << c;
     else if (c < 33)
@@ -57,7 +60,10 @@ std::string print(int c) {
 std::ostream& operator<<(std::ostream& s, const showCharEscaped sc) {
     const auto c = sc.c_;
     // TODO: Put all 256 values into an array?
-    static const char* const controlChars[] = { "EOF", "NUL", "SOH", "STX", "ETX", "EOT", "ENQ", "ACK", "BEL", "BS", "HT", "LF", "VT", "FF", "CR", "SO", "SI", "DLE", "DC1", "DC2", "DC3", "DC4", "NAK", "SYN", "ETB", "CAN", "EM", "SUB", "ESC", "FS", "GS", "RS", "US", "SPACE" };
+    static const char* const controlChars[] = {"EOF", "NUL", "SOH", "STX", "ETX", "EOT", "ENQ",  "ACK", "BEL",
+                                               "BS",  "HT",  "LF",  "VT",  "FF",  "CR",  "SO",   "SI",  "DLE",
+                                               "DC1", "DC2", "DC3", "DC4", "NAK", "SYN", "ETB",  "CAN", "EM",
+                                               "SUB", "ESC", "FS",  "GS",  "RS",  "US",  "SPACE"};
     if (c < -1 || c > 127)
         return s << c;
     else if (c < 33)

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Regex/constexpr.h" // for pair, make_pair, vector, swap, fill_n
-#include <cstdint>     // for int64_t
-#include <stdexcept>   // for runtime_error
+#include <cstdint>           // for int64_t
+#include <stdexcept>         // for runtime_error
 
 template <typename State, typename Class, int64_t MaxNodes>
 struct partition {
@@ -182,4 +182,3 @@ constexpr void partition<State, Class, MaxNodes>::split(const Set& tmp) {
         update(l, h, s, b);
     }
 }
-

@@ -3,9 +3,9 @@
 #include "Regex/NumRange.h"  // for NumRange
 #include "Regex/Print.h"     // for showCharEscaped
 #include "Regex/constexpr.h" // for vector, all_of, find_if, pair
-#include <cstdint>     // for int64_t
-#include <ostream>     // for operator<<, ostream, basic_ostream, basic_ost...
-#include <stdexcept>   // for runtime_error
+#include <cstdint>           // for int64_t
+#include <ostream>           // for operator<<, ostream, basic_ostream, basic_ost...
+#include <stdexcept>         // for runtime_error
 
 using Position = int64_t;
 using PositionRange = const_expr::pair<Position, Position>;
@@ -86,14 +86,15 @@ struct DFA {
 //}
 
 template <typename Symbol, typename State, typename TokenId, int64_t MaxNodes, int64_t MaxSymbols>
-constexpr DFA<Symbol, State, TokenId, MaxNodes, MaxSymbols>::DFA(int64_t stateCount_,
-                                                                 int64_t symbolCount_,
-                                                                 State start_,
-                                                                 State deadState_,
-                                                                 const const_expr::vector<TokenId, MaxNodes>& finals_,
-                                                                 const const_expr::vector<State, MaxNodes * MaxSymbols>& T_,
-                                                                 const const_expr::vector<int64_t, MaxSymbols>& symbolToId_,
-                                                                 const const_expr::vector<Symbol, MaxSymbols>& idToSymbol_)
+constexpr DFA<Symbol, State, TokenId, MaxNodes, MaxSymbols>::DFA(
+    int64_t stateCount_,
+    int64_t symbolCount_,
+    State start_,
+    State deadState_,
+    const const_expr::vector<TokenId, MaxNodes>& finals_,
+    const const_expr::vector<State, MaxNodes * MaxSymbols>& T_,
+    const const_expr::vector<int64_t, MaxSymbols>& symbolToId_,
+    const const_expr::vector<Symbol, MaxSymbols>& idToSymbol_)
     : stateCount(stateCount_),
       symbolCount(symbolCount_),
       start(start_),
