@@ -1,6 +1,6 @@
 #pragma once
 
-#include "nfaBuilder.h"
+#include "Regex/nfaBuilder.h"
 #include "types.h"
 #include <algorithm>
 #include <cassert>

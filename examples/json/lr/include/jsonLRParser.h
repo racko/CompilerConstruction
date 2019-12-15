@@ -7,7 +7,7 @@
 #include <cstddef>         // for size_t
 #include <cstdint>         // for uint32_t
 #include <list>            // for list
-#include <lrParser.h>      // for LRParser
+#include "Regex/lrParser.h"      // for LRParser
 
 namespace jsonLR {
 struct Parser : public lr_parser::LRParser<Grammar, json::value*> {

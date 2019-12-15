@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Grammar2.h"            // for operator==, NonterminalID, TerminalID
+#include "Regex/Grammar2.h"            // for operator==, NonterminalID, TerminalID
 #include <array>                 // for array
-#include <attributed_lrparser.h> // for AttributedLRParser
+#include "Regex/attributed_lrparser.h" // for AttributedLRParser
 #include <cstddef>               // for size_t
 #include <cstdint>               // for uint32_t
 #include <jsonLRGrammar2.h>      // for grammar

@@ -2,37 +2,37 @@ cc_library(
     name = "json",
     srcs = [
         "json.cpp",
-        "jsonLexer.cpp",
         "json.h",
+        "jsonLexer.cpp",
         "jsonLexer.h",
     ],
     deps = [
+        "//Regex:util",
         "//examples/json/common",
         "//examples/json/lr",
-        "//:util",
     ],
 )
 
 cc_binary(
     name = "json.exe",
     srcs = ["jsonMain.cpp"],
+    linkopts = ["-ljsoncpp"],
     deps = [
         ":json",
         "//examples/json/ll",
         "@boost//:filesystem",
     ],
-    linkopts = ["-ljsoncpp"],
 )
 
 cc_test(
     name = "json_test.exe",
     srcs = ["json_test.cpp"],
     deps = [
-        "@catch2",
         ":json",
+        "//Regex:catch_main",
         "//examples/json/ll",
         "//examples/json/lr",
         "//examples/json/lr2",
-        "//:catch_main",
+        "@catch2",
     ],
 )

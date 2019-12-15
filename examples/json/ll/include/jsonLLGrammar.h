@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Grammar.h>     // for kind
+#include "Regex/Grammar.h"     // for kind
 #include <cstddef>       // for size_t
 #include <json_token.h>  // for kindOf, GrammarElement, NT, NT::VALUES, Non...
 #include <limits>        // for numeric_limits

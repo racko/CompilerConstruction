@@ -1,6 +1,6 @@
 #include "poker_dfa_serialization.h"
 
-#include "DFA.h"
+#include "Regex/DFA.h"
 #include "poker_dfa.h"
 #include "terminals.h"
 #include "types.h"

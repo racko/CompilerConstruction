@@ -1,8 +1,8 @@
 #ifndef _LEXER_H_
 #define _LEXER_H_
 
-#include "Regex.h"
-#include "nfaBuilder.h"
+#include "Regex/Regex.h"
+#include "Regex/nfaBuilder.h"
 #include <iostream>
 using std::ostream;
 using std::cerr;

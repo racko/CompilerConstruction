@@ -1,6 +1,6 @@
 #include "straight.h"
 
-#include "Print.h"
+#include "Regex/Print.h"
 #include "ranges.h"
 #include "rank_set.h"
 #include <algorithm>

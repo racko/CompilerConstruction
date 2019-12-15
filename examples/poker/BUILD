@@ -1,8 +1,8 @@
 cc_library(
     name = "ranges",
     srcs = ["ranges.h"],
-    visibility = ["//visibility:public"],
     includes = ["."],
+    visibility = ["//visibility:public"],
 )
 
 cc_library(
@@ -42,7 +42,7 @@ cc_library(
     ],
     hdrs = ["poker.h"],
     deps = [
-        "//:util",
+        "//Regex:util",
         "@boost//:filesystem",
         #"@boost//:iterator",
         "@boost//:serialization",
@@ -56,7 +56,7 @@ cc_test(
     linkopts = ["-ltcmalloc"],
     deps = [
         ":poker",
-        "//:catch_main",
+        "//Regex:catch_main",
         "@catch2",
     ],
 )

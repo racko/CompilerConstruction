@@ -1,15 +1,15 @@
 #include "jsonLexer.h"
 
 #include "num_view.h"    // for num_view
-#include "variant.h"     // for null
-#include <NFA.h>         // for NFA
-#include <NFA_to_DFA.h>  // for toDFA
-#include <DFA_minimization.h>  // for minimize
-#include <Regex.h>       // for Lexer, Lexer::Token, Lexer::TokenId, Lexer:...
+#include "Regex/variant.h"     // for null
+#include "Regex/NFA.h"         // for NFA
+#include "Regex/NFA_to_DFA.h"  // for toDFA
+#include "Regex/DFA_minimization.h"  // for minimize
+#include "Regex/Regex.h"       // for Lexer, Lexer::Token, Lexer::TokenId, Lexer:...
 #include <cstddef>       // for size_t
 #include <iostream>      // for operator<<, stringstream, basic_ostream
 #include <json_token.h>  // for Token, TerminalID, T, type
-#include <nfaBuilder.h>  // for nfaBuilder
+#include "Regex/nfaBuilder.h"  // for nfaBuilder
 #include <sstream>       // for basic_stringstream<>::__stringbuf_type
 #include <stdexcept>     // for runtime_error
 #include <string_view>   // for string_view

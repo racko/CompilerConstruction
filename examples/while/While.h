@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Grammar.h"     // for kind
+#include "Regex/Grammar.h"     // for kind
 #include <cassert>       // for assert
 #include <cstddef>       // for size_t
 #include <cstdint>       // for uint32_t, uint64_t

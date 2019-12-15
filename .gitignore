@@ -1,9 +1,3 @@
-*.o
-*.exe
-*.swp
-*.swo
-*.dd
-build/
 compile_commands.json
 bazel-Regex
 bazel-bin

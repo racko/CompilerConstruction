@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DFA.h"
+#include "Regex/DFA.h"
 #include "types.h"
 #include "terminals.h"
 #include <utility>

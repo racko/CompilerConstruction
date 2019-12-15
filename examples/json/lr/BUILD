@@ -9,7 +9,7 @@ cc_library(
     includes = ["include"],
     deps = [
         "//examples/json/common",
-        "//:util",
+        "//Regex:util",
     ],
     visibility = [
         "//examples/json:__subpackages__",

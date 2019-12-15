@@ -1,6 +1,6 @@
 #include "poker.h"
 
-#include "Print.h"
+#include "Regex/Print.h"
 #include "determine_hand_rank.h"
 #include "hand_rank.h"
 #include "poker_dfa_serialization.h"

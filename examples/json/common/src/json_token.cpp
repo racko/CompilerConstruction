@@ -1,6 +1,6 @@
 #include <json_token.h>
 
-#include "Grammar.h" // for kind, kind::EOI, kind::EPS, kind::NONTERMINAL
+#include "Regex/Grammar.h" // for kind, kind::EOI, kind::EPS, kind::NONTERMINAL
 #include <algorithm> // for copy
 #include <iterator>  // for ostream_iterator
 #include <ostream>   // for operator<<

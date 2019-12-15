@@ -8,7 +8,7 @@ cc_library(
         "include/num_view.h",
     ],
     includes = ["include"],
-    deps = ["//:util"],
+    deps = ["//Regex:util"],
     visibility = [
         "//examples/json:__subpackages__",
     ],

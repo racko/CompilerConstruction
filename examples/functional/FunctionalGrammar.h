@@ -1,7 +1,7 @@
 #ifndef FUNCTIONAL_H_
 #define FUNCTIONAL_H_
 
-#include "Grammar.h"
+#include "Regex/Grammar.h"
 #include <cstdint>
 #include <iostream>
 #include <list>

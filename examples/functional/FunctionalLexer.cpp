@@ -1,8 +1,8 @@
 #include "FunctionalLexer.h"
-#include "NFA.h"
-#include "NFA_to_DFA.h"
-#include "DFA_minimization.h"
-#include "nfaBuilder.h"
+#include "Regex/NFA.h"
+#include "Regex/NFA_to_DFA.h"
+#include "Regex/DFA_minimization.h"
+#include "Regex/nfaBuilder.h"
 #include <fstream>
 
 namespace Functional {

@@ -5,5 +5,5 @@ cc_binary(
         "While.cpp",
         "While.h",
     ],
-    deps = ["//:util"],
+    deps = ["//Regex:util"],
 )

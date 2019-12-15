@@ -1,6 +1,6 @@
 #include "jsonLRGrammar2.h"
 
-#include "Grammar2.h" // for Grammar::Productions, GrammarElement
+#include "Regex/Grammar2.h" // for Grammar::Productions, GrammarElement
 #include "json_token.h"
 #include <cstdint>  // for uint8_t
 #include <iterator> // for begin, end

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Grammar.h>                 // for kind
+#include "Regex/Grammar.h"                 // for kind
 #include <assert.h>                  // for assert
 #include <boost/variant/variant.hpp> // for variant
 #include <cstdint>                   // for uint8_t
@@ -11,7 +11,7 @@
 #include <string_view>   // for string_view
 #include <unordered_set> // for unordered_set
 #include <utility>       // for pair, pair<>::first, pair<>::pair
-#include <variant.h>     // for null
+#include "Regex/variant.h"     // for null
 #include <vector>        // for vector
 
 namespace json {

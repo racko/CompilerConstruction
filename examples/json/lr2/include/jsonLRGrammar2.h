@@ -1,4 +1,4 @@
-#include <Grammar2.h>
+#include "Regex/Grammar2.h"
 
 namespace jsonLR2 {
 extern const grammar2::Grammar grammar;

@@ -2,7 +2,7 @@
 
 #include "json_token.h"   // for Token
 #include <memory>         // for unique_ptr
-#include <token_stream.h> // for TokenStream
+#include "Regex/token_stream.h" // for TokenStream
 
 namespace json {
 struct myLexer : public TokenStream<Token> {

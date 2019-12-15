@@ -1,9 +1,9 @@
 #pragma once
 
 #include "FunctionalGrammar.h"
-#include "Regex.h"
+#include "Regex/Regex.h"
 #include <sstream>
-#include <token_stream.h>
+#include "Regex/token_stream.h"
 #include <vector>
 
 namespace Functional {

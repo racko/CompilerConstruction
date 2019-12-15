@@ -1,12 +1,12 @@
-#include "Grammar.h"      // for kind, kind::EOI, kind::EPS, kind::NONTERMINAL
-#include "NFA.h"          // for NFA
-#include "NFA_to_DFA.h"   // for toDFA
-#include "DFA_minimization.h"   // for minimize
-#include "Regex.h"        // for Lexer, Lexer::Token, Lexer::DFA_t, Lexer::...
+#include "Regex/Grammar.h"      // for kind, kind::EOI, kind::EPS, kind::NONTERMINAL
+#include "Regex/NFA.h"          // for NFA
+#include "Regex/NFA_to_DFA.h"   // for toDFA
+#include "Regex/DFA_minimization.h"   // for minimize
+#include "Regex/Regex.h"        // for Lexer, Lexer::Token, Lexer::DFA_t, Lexer::...
 #include "While.h"        // for Token, T, Grammar, operator<<, GrammarElement
-#include "lrParser.h"     // for LRParser
-#include "nfaBuilder.h"   // for nfaBuilder, istream
-#include "token_stream.h" // for TokenStream
+#include "Regex/lrParser.h"     // for LRParser
+#include "Regex/nfaBuilder.h"   // for nfaBuilder, istream
+#include "Regex/token_stream.h" // for TokenStream
 #include <cassert>        // for assert
 #include <cstdint>        // for uint32_t, uint64_t
 #include <cstdio>         // for size_t, EOF

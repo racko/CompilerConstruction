@@ -3,7 +3,7 @@
 #include "FunctionalAttribute.h"      // for toExpr, Supercombinator, toVar
 #include "FunctionalGrammar.h"        // for Grammar, string, operator<<
 #include "TokenAttributeConversion.h" // for toAttribute
-#include "lrParser.h"                 // for LRParser
+#include "Regex/lrParser.h"                 // for LRParser
 #include <cstddef>                    // for size_t
 #include <cstdint>                    // for uint32_t
 #include <stdexcept>                  // for runtime_error
